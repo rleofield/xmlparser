@@ -34,14 +34,14 @@ Diese Key Strings werden von Hand angelegt, können aber auch automatisch aus ei
 Namen der Knoten werden in der Hierarchie durch Punkt getrennt.
 
 
-''"CutControl.SW.DebugMode"'' \\
+''"domain.devices"'' \\
 
-Dieser Key String findet den Knoten, der unter dem Root 'CutControl', den ersten Unterknoten 'SW' liegt und den Namen 'DebugMode hat.
+Dieser Key String findet den Knoten, der unter dem Root 'domain' liegt und den Namen 'devices' hat.
 
 
 Attribute am Knoten werden durch einen Doppelpunkt vom Knoten getrennt
 
-''"CutControl.SW.DebugMode:type"'' \\
+''"domain.devices.disk.driver:name"'' \\
 
 Dieser Key String findet an den oben genannten Knoten das Attribut 'type'.
 
@@ -58,7 +58,7 @@ Das Erzeugen eines XML Files erfolgt in 3 Schritten.
   * mit einer Funktion in der Demo kann danach der neue XML File generiert werden.
 
 
-Beispiel für CutControl (dto. auch für OGL):
+Beispiel für ubuntu32:
 
 Die Demo Funktionen:
 
