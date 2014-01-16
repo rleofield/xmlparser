@@ -1,0 +1,283 @@
+File is used in Dokuwiki:
+https://www.dokuwiki.org/dokuwiki
+
+
+====== Mini XML Parser ======
+
+
+===== Struktur =====
+
+
+Die Solution besteht aus 2 Projekten.
+
+''libtxml'', eine statisch linkbare Bibliothek mit der Implementierung.
+
+''xmldemo2'', einige Demos zur Benutzung der Bibliothek.
+
+
+===== Funktionsumfang =====
+
+
+Parsen eines XML-files und Änderungen der Werte und Attribute.
+
+Einfügen von neuen Knoten und Attributen mit einer einfachen Syntax. 
+
+
+Format der Suchstrings oder Key Strings
+
+Knoten im XML werden mit einem Key String gefunden, der sich an die Syntax von X-Path anlehnt.
+
+Diese Key Strings werden von Hand angelegt, können aber auch automatisch aus einem XML File erzeugt werden.
+
+//Beispiel://
+
+Namen der Knoten werden in der Hierarchie durch Punkt getrennt.
+
+
+''"CutControl.SW.DebugMode"'' \\
+
+Dieser Key String findet den Knoten, der unter dem Root 'CutControl', den ersten Unterknoten 'SW' liegt und den Namen 'DebugMode hat.
+
+
+Attribute am Knoten werden durch einen Doppelpunkt vom Knoten getrennt
+
+''"CutControl.SW.DebugMode:type"'' \\
+
+Dieser Key String findet an den oben genannten Knoten das Attribut 'type'.
+
+
+
+Demo zum Erzeugen von XML Files.
+
+Das Erzeugen eines XML Files erfolgt in 3 Schritten.
+
+  * man benötigt ein Muster des neuen XML Files, darin müssen nicht alle Knoten enthalten sein.
+  * dieses Muster wird mit dem Parser in eine Liste von Key Strings zerlegt.
+  * es kann der komplette Sourcecode zum generieren des neuen XML Files erzeugt werden.
+  * dieser so generierten Source wird den Wünschen entsprechend angepasst (neuen Knoten, neue Werte usw.)
+  * mit einer Funktion in der Demo kann danach der neue XML File generiert werden.
+
+
+Beispiel für CutControl (dto. auch für OGL):
+
+Die Demo Funktionen:
+
+<code cpp>
+      ubuntu32_creator_generate() ;
+      ubuntu32_create_test();
+</code>
+
+Die Namen der in der Demo verwendeten Files: \\
+Nur **''xmlTest''** muss vor der Demo existieren.
+
+<code cpp>
+   const std::string xmlTest = "ubuntu32.xml";
+   const std::string xmlPrintOut = "ubuntu32_print.xml";
+   const std::string xmlTestOut = "ubuntu32_out.xml";
+   const std::string xmlKeysOut = "ubuntu32_keys.txt";
+</code>
+
+
+In **''main.cpp''** kann man die beiden Demos durch Kommentare auswählen. 
+
+Im ersten Schritt mit einem Breakpoint in ''ubuntu32_xml_demo()'' nach ''ubuntu32_creator_generate()'' die Liste mit dem neuen Sourcecode erzeugen. Dieser ist im File **''xmlKeysOut.txt''**
+
+Der Inhalt diese Files wird in die Methode **''ubuntu32_create_test()''** kopiert.
+
+Nach den erneuten Compilieren und einem Programmlauf ist im File ''**xmlTestOut.xml**'' der neue XML File.
+
+
+Dieser kann mit den Methoden unte  weiter editiert werden.
+
+
+===== allgemeiner Ablauf des Parsers =====
+
+  * Erzeugen einer Instanz ''xmlinterface::tXmlInterface t;''
+  * parsen des XML Files mit dem Filenamen ''t.parse( xmlTest );''
+  * mit der Instanz können nun alle weiteren Methoden verwendet werden
+  * am Ende mit eine ''t.save( xmlTestOut );'' den geänderten File wieder sichern
+
+
+===== weitere Demos mit einzelnen Methoden, editieren von XML=====
+
+Files: **''demo.cpp''** und  **''other_demo.cpp''**
+
+
+
+===== Interface =====
+
+
+File: **''xml_interface.h''**\\
+Namespace: **''xmlinterface''** 
+
+
+Im Interface sind noch diese Files, die hier nicht weiter dokumentiert werden.
+
+File: **''logger.h''**\\
+File: **''XmlException.h''**\\
+
+
+Alle 3 Header Files müssen in das Projekt eingebunden werden
+
+Es muss immer als erster Schritt eine Instanz des Parsers erzeugt werden und der XML File geparst werden,
+
+
+Alle Methoden werfen eine ''XmlException'', wenn ein Fehler auftritt.
+
+Intern werden keine Logzeilen geschrieben.
+
+Logging wird nur innerhalb der Demos verwendet
+----
+
+
+Erzeugen eines leeren XML Files mit einem Root Element.
+
+<code cpp>
+      void create_root( std::string const& name, std::string const& root );
+</code>
+
+
+Lese den Wert des Elementes als String an der durch den Key lokalisierten Stelle im XML.\\
+Wird der Knoten nicht gefunden, wird eine Exception geworfen.
+
+<code cpp>
+      std::string get_string( std::string const& key )const ;
+</code>
+
+dto. liefert aber einen int Wert zurück.\\
+Der Wert des Elementes muss sich in einen int Wert konvertieren lassen
+
+<code cpp>
+      int get_int( std::string const& key )const ;
+</code>
+
+dto. liefert aber einen double Wert zurück.\\
+Der Wert des Elementes muss sich in einen double Wert konvertieren lassen.\\
+Es wird die eingestellte Locale verwendet.
+
+Zeigt der Key String auf eine Attribute, wird der Wert des Attributes gelesen
+
+<code cpp>
+      double get_double( std::string const& key )const ;
+
+</code>
+
+dto. aber der Knoten wird mit dem default angelegt wenn dieser nicht existiert.
+dto. für Attribute
+
+<code cpp>
+      std::string get_string( std::string const& key, std::string default_ ) ;
+</code>
+<code cpp>
+      int get_int( std::string const& key, int default_ ) ;
+</code>
+<code cpp>
+      double get_double( std::string const& key, double default_ ) ;
+</code>
+
+
+dto. setzen eines Wertes, als string, int und double
+
+<code cpp>
+      void set_string( std::string const& key, std::string const& value );
+</code>
+<code cpp>
+      void set_int( std::string const& key, int value );
+<code cpp>
+      void set_double( std::string const& key, double value );
+</code>
+
+
+dto. für Attribute\\
+Der Key string muss auf ein Attribute zeigen, s.o.
+
+<code cpp>
+      void set_attribute( std::string const& key, std::string const& value );
+</code>
+<code cpp>
+      void set_int_attribute( std::string const& key, int value );
+</code>
+<code cpp>
+      void set_double_attribute( std::string const& key, double value );
+</code>
+
+Setzen eines XML Comment vor den Element auf das der Key zeigt.
+
+<code cpp>
+      void setComment( std::string const& key, std::string const& comment );
+</code>
+
+Aufruf des Parsers
+<code cpp>
+      void parse( std::string const& fn );
+</code>
+
+Nur Intern
+<code cpp>
+      void parse( txml::XmlDocument const& doc );
+</code>
+
+Nur Intern
+<code cpp>
+      void parse();
+</code>
+
+Schreibe den XML File mit neuem Namen
+<code cpp>
+      void save( std::string const& fn );
+</code>
+
+Schreibe den XML File mit dem vorhanden Namen, der vorherige XML File wird ohne Warnung überschrieben.
+<code cpp>
+      void save();
+</code>
+
+
+Erzeuge ein Liste aller Keys
+<code cpp>
+      void print_keys( std::string const& fn )const;
+</code>
+
+Liste der Keys als Vector
+<code cpp>
+      std::vector<std::string> Keys()const;
+</code>
+
+Liste der Keys mit den Werten 
+<code cpp>
+      void print_keys_and_values( std::string const& fn, size_t w = 60 )const;
+</code>
+
+Liste als C++ Sourcecode mit ''const string'' und den notwendigen ''create'' Methoden zum generieren eines neuen XML Files.
+
+Dieser Code kann 1:1 verwendet werden.
+
+<code cpp>
+      void print_creator( string const& fn_keys, string const& fn_out )const;
+</code>
+
+Erzeuge einen neuen Knoten, einfaches forward auf ''set_string()'' mit Default
+<code cpp>
+      void create( std::string const& key, std::string const& value );
+</code>
+
+
+
+
+
+
+===== String Converter =====
+
+<code cpp>
+      string siabc = xmlinterface::int_to_string( -127777 );
+      string sdabc = xmlinterface::double_to_string( -127.777 );
+      LOGT_A_INFO( "t.IntToString( -127777 ) = " + siabc );
+      LOGT_A_INFO( "t.DoubleToString( -127.777 ); = " + sdabc );
+
+      // from string
+
+      int iabc = xmlinterface::str_to_int( "-127777" );
+      double dabc = xmlinterface::str_to_double( "-127777.888 " );
+
+</code>
+
