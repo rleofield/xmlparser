@@ -62,10 +62,12 @@ SOURCES += src/main.cpp \
     src/parser/src/strings.cpp \
     src/parser/src/raw_position.cpp \
     src/parser/src/keyentries.cpp \
-    src/parser/src/ascii_rw.cpp \
     src/parser/src/alloccheck.cpp \
-    src/parser/src/log/tLogImpl.cpp \
-    src/parser/src/log/tLog.cpp
+    src/filefn/t_filename.cpp \
+    src/hstring/stringhelper.cpp \
+    src/hstring/gettokens.cpp \
+    src/log/tLogImpl.cpp \
+    src/log/tLog.cpp
 
 
 HEADERS += \
@@ -96,12 +98,27 @@ HEADERS += \
     src/parser/src/xml_fs.h \
     src/parser/src/xml_builder.h \
     src/parser/src/win32.h \
-    src/parser/src/strings.h \
     src/parser/src/rawxml_position.h \
     src/parser/src/keyentries.h \
-    src/parser/src/ascii_rw.h \
     src/parser/src/alloccheck.h \
-    src/parser/src/log/tLfm.h
+    src/filefn/t_filename.h \
+    src/filefn/boost_cstdint.h \
+    src/hstring/stringhelper.h \
+    src/hstring/gettokens.h \
+    src/log/tLogImpl.h \
+    src/log/tLogEnum.h \
+    src/log/tLogCategories.h \
+    src/log/tLog.h \
+    src/log/tLog_Category_default.h \
+    src/log/tLog_Category_D.h \
+    src/log/tLog_Category_C.h \
+    src/log/tLog_Category_B.h \
+    src/log/tLog_Category_A.h \
+    src/log/tLfmCL.h \
+    src/log/tLfm.h \
+    src/txtrw/wList.h \
+    src/txtrw/rList.h \
+    src/parser/src/XmlStrings_.h
 
 
 
@@ -110,8 +127,28 @@ LIBS += -lboost_system #-lboost_system-mt
 LIBS += -lboost_filesystem #-lboost_filesystem-mt
 
 
+
 INCLUDEPATH += $$PWD/src
+INCLUDEPATH += $$PWD/src/filefn
+INCLUDEPATH += $$PWD/src/hstring
+INCLUDEPATH += $$PWD/src/log
+INCLUDEPATH += $$PWD/src/parser
 INCLUDEPATH += $$PWD/src/parser/interface
+INCLUDEPATH += $$PWD/src/txtrw
+
+#LIBS += -L$$PWD/../libtxml/ -ltxml
+#LIBS += /usr/lib/libboost_system-mt.a
+#LIBS += /usr/lib/libboost_filesystem-mt.a
+
+LIBS = -lboost_system -lboost_filesystem
+
+#INCLUDEPATH += $$PWD/../libtxml
+#DEPENDPATH += $$PWD/../libtxml
+
+#PRE_TARGETDEPS += $$PWD/../libtxml/libtxml.a
+
+OTHER_FILES += \
+    appsettings.xml
 
 
 

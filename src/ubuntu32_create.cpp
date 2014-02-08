@@ -1,5 +1,6 @@
 
 /*
+  test SVS Vistek
 
 */
 
@@ -79,7 +80,7 @@ namespace examples {
 
    void ubuntu32_create_test() {
 
-      // hier den generierten Code aus ls_keys.txt einfügen
+      // hier den generierten Code aus ubuntu32_keys.txt einfügen
 
 
       LOGT_A_INFO( "" );

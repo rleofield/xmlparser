@@ -56,50 +56,23 @@ www.lug-ottobrunn.de
 #include "xml_utl.h"
 #include "xml_fs.h"
 #include "XmlException.h"
-#include "strings.h"
+#include "XmlStrings_.h"
 #include "win32.h"
+#include "stringhelper.h"
+
 
 using namespace std;
 
-namespace strings {
+namespace txml_strings {
 
 
-   string fillup( string const& in, char ch, size_t n ) {
-      string s = in;
 
-      if( s.size() < n ) {
-         s += string( n - s.size(), ch ) ;
-      }
-
-      return s;
-   }
-
-
-   vector<string> tokenize( string const& str, const string& delimiters ) {
-      string::size_type pos_not_delimiter = str.find_first_not_of( delimiters, 0 );
-      string::size_type pos_delimiter     = str.find_first_of( delimiters, pos_not_delimiter );
-      vector<string> tokens;
-
-      while( string::npos != pos_delimiter || string::npos != pos_not_delimiter ) {
-         string::size_type length = pos_delimiter - pos_not_delimiter;
-         tokens.push_back( str.substr( pos_not_delimiter, length ) );
-         pos_not_delimiter = str.find_first_not_of( delimiters, pos_delimiter );
-         pos_delimiter = str.find_first_of( delimiters, pos_not_delimiter );
-      }
-
-      return tokens;
-   }
-
-   vector<string> split( string const& l, string const& pat ) {
-      vector<string> v = tokenize( l, pat );
-      return v;
-   }
 
 
    size_t index( string const& s, string const& pattern, size_t pos ) {
-      int inLength = pattern.length();
-      int posInLength = pos + pattern.length();
-      int l = s.length() + 1;
+      int inLength = static_cast<int>(pattern.length());
+      int posInLength = static_cast<int>(pos + pattern.length());
+      int l = static_cast<int>(s.length() + 1);
 
       if( s.length() > 0 && inLength > 0 && posInLength < l ) {
          size_t si = s.find( pattern, pos );
@@ -109,50 +82,15 @@ namespace strings {
       return string::npos;
    }
 
-   string replace_all( string const& ins, const string& pattern, const string& replace ) {
-      string s = ins;
-      size_t pos = index( s, pattern, 0 );
 
-      while( pos != std::string::npos ) {
-         s.erase( pos, pattern.size() );
-         s.insert( pos, replace );
-         pos = index( s, pattern, 0 );
-      }
 
-      return s;
-   }
-
-   string trim( string const& str, char ch ) {
-      if( str.size() == 0 ) {
-         return str;
-      }
-
-      string::const_iterator begin = str.begin();
-      string::const_iterator end = str.end();
-
-      while( begin < end && *begin == ch ) {
-         ++begin;
-      }
-
-      if( begin == end ) {
-         return string();
-      }
-
-      end = str.end() - 1;
-
-      while( end > begin && *end == ch ) {
-         --end;
-      }
-
-      return  string( begin, end + 1 );
-   }
    std::string to_string( size_t val ) {
       return to_string( ( int )val );
    }
 
    std::string to_string( int val ) {
       try {
-         return strings::trim( boost::lexical_cast<string>( val ) );
+         return rlf_hstring::trim( boost::lexical_cast<string>( val ) );
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();
          throw txml::XmlException( txml::t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
@@ -163,7 +101,7 @@ namespace strings {
 
    std::string to_string( double val )  {
       try {
-         return strings::trim( boost::lexical_cast<string>( val ) );
+         return rlf_hstring::trim( boost::lexical_cast<string>( val ) );
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();
          throw txml::XmlException( txml::t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
@@ -185,7 +123,7 @@ namespace strings {
 
    double to_double( std::string const& s )  {
       try {
-         double b = boost::lexical_cast<double>( strings::trim( s ) );
+         double b = boost::lexical_cast<double>( rlf_hstring::trim( s ) );
          return b;
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();

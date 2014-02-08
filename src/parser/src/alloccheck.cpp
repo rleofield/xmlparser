@@ -61,7 +61,7 @@ www.lug-ottobrunn.de
 #include "xml_utl.h"
 #include "xml_fs.h"
 
-#include "strings.h"
+#include "stringhelper.h"
 #include "alloccheck.h"
 
 #include "win32.h"
@@ -146,7 +146,7 @@ namespace alloccheck {
 
    //////////////////////////////////////////////////////////////////////////////////////
    // wird von new() aufgerufen, protokolliert Zeile, Name der Methode, Name der Klasse
-   void* LocalAlloc( int2type<false>, size_t size, t_alloc_line_file_method const&  )  {
+   void* LocalAlloc( int2type<false>, size_t size, t_alloc_line_file_method const& )  {
       char* p = ::new char[size];
       return p;
    }
@@ -186,10 +186,10 @@ namespace alloccheck {
 
 
       // build info message for logging
-      string info = "size: " + strings::to_string( ( int )size ) + "/" + strings::to_string( ( int )check.totalalloc )
+      string info = "size: " + rlf_hstring::toString( ( int )size ) + "/" + rlf_hstring::toString( ( int )check.totalalloc )
                     + ", file: " +  file
                     + ", method: " +  method
-                    + ", line: " + strings::to_string( ( int )line );
+                    + ", line: " + rlf_hstring::toString( ( int )line );
 
       // clip info
       if( info.length() > maxallocinfo - 1 ) {
@@ -217,14 +217,14 @@ namespace alloccheck {
          allocIterator it = allocList.find( key );
 
          if( it != allocList.end() ) {
-            string ll = grepMarker + " 'allocs map has used key':  " + strings::to_string( ( int )key ) + ", info: " + info + "'";
+            string ll = grepMarker + " 'allocs map has used key':  " + rlf_hstring::toString( ( int )key ) + ", info: " + info + "'";
             LOGT_A_INFO( ll );
             exit( 0 );
          }
 
          allocList[key] = info;
       }
-      string logLine = grepMarker + " Alloc: count:  " + strings::to_string( ( float )check.alloccount ) + ", info: " + info;
+      string logLine = grepMarker + " Alloc: count:  " + rlf_hstring::toString( ( float )check.alloccount ) + ", info: " + info;
       //LOGT_INFO( logLine );
       return ( void* )( p_start );
 
@@ -283,9 +283,9 @@ namespace alloccheck {
 
       string infolog = grepMarker
                        + " delete: count: "
-                       + strings::to_string( ( int )check.alloccount )
+                       + rlf_hstring::toString( ( int )check.alloccount )
                        + ", mem left: "
-                       + strings::to_string( check.totalalloc )
+                       + rlf_hstring::toString( check.totalalloc )
                        + ", info: '" + info + "'";
       //logger_.info( lfm_, infolog );
 
@@ -300,7 +300,7 @@ namespace alloccheck {
 
       if( check.alloccount != allocList2.size() ) {
          int diff = static_cast<int>( check.alloccount ) - static_cast<int>( lastalloccount );
-         LOGT_A_INFO( grepMarker + " Error in 'delete': missingcount: " + strings::to_string( diff ) );
+         LOGT_A_INFO( grepMarker + " Error in 'delete': missingcount: " + rlf_hstring::toString( diff ) );
       }
 
 

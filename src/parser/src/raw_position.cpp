@@ -46,7 +46,7 @@ www.lug-ottobrunn.de
 
 #include "rawxml_position.h"
 #include "XmlException.h"
-#include "strings.h"
+#include "stringhelper.h"
 
 
 using namespace std;
@@ -151,7 +151,7 @@ namespace txml {
          int64_t pos = it - _running;
          throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_iterator_underflow,
-                             "Position: nextX(it), iterator underflow: " + strings::to_string( static_cast<size_t>( pos ) ) );
+                             "Position: nextX(it), iterator underflow: " + rlf_hstring::toString( static_cast<size_t>( pos ) ) );
       }
 
       if( it > _rawxml.end() ) {
@@ -162,7 +162,7 @@ namespace txml {
          int64_t pos1 = it - _running;
          throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_iterator_underflow,
-                             "Position: nextX(it), iterator overflow: " + strings::to_string( static_cast<size_t>( pos1 ) ) );
+                             "Position: nextX(it), iterator overflow: " + rlf_hstring::toString( static_cast<size_t>( pos1 ) ) );
       }
 
       return std::string( _running,  it );

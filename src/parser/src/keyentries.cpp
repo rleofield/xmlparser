@@ -59,9 +59,9 @@ www.lug-ottobrunn.de
 #include "XmlNode.h"
 #include "xml_fs.h"
 #include "XmlException.h"
+#include "xml_interface.h"
 
-
-#include "strings.h"
+#include "stringhelper.h"
 
 using namespace std;
 
@@ -114,12 +114,12 @@ namespace txml {
          element = val.substr( 0, bracket_left );
       }
 
-      vector<string> v = strings::split( val, double_colon );
+      vector<string> v = rlf_hstring::split( val, double_colon );
 
       if( !v.empty() ) {
          if( bracket_left != string::npos ) {
             _element =  element;
-            _childcount = strings::to_int( index );
+            _childcount = xmlinterface::to_int( index );
          } else {
             _element =  v[0];
          }
@@ -130,7 +130,7 @@ namespace txml {
             bool b1 = hasnumbersonly( v1 );
 
             if( b1 ) {
-               _childcount = strings::to_int( v1 );
+               _childcount = xmlinterface::to_int( v1 );
             } else {
                _attr = v1;
             }
@@ -141,7 +141,7 @@ namespace txml {
                bool b2 = hasnumbersonly( v2 );
 
                if( b2 ) {
-                  _childcount = strings::to_int( v2 );
+                  _childcount = xmlinterface::to_int( v2 );
                } else {
                   _attr = v2;
                }
@@ -230,7 +230,7 @@ namespace txml {
 
    string keyentry::to_string()const {
       if( _childcount > 0 ) {
-         string chcount = strings::trim( strings::to_string( _childcount ) );
+         string chcount = rlf_hstring::trim( rlf_hstring::toString( _childcount ) );
 
          if( _attr.empty() ) {
             return _element + left_bracket + chcount + right_bracket;
@@ -248,7 +248,7 @@ namespace txml {
 
    keyentries::keyentries( std::string const& key ): _keyentries() {
 
-      vector<string> v0 = strings::split( key, "." );
+      vector<string> v0 = rlf_hstring::split( key, "." );
 
       for( size_t i = 0; i < v0.size(); i++ ) {
          keyentry ke( v0[i] );
@@ -260,7 +260,7 @@ namespace txml {
 
    keyentries& keyentries::operator=( std::string const& key ) {
       _keyentries.clear();
-      vector<string> v0 = strings::split( key, "." );
+      vector<string> v0 = rlf_hstring::split( key, "." );
 
       for( size_t i = 0; i < v0.size(); i++ ) {
          keyentry ke( v0[i] );
@@ -463,7 +463,7 @@ namespace txml {
 
 
    void keyentries::toPatterns( string const& key ) {
-      vector<string> vs = strings::split( key, "." );
+      vector<string> vs = rlf_hstring::split( key, "." );
       _keyentries = for_each( vs.begin(), vs.end(), string_to_keyentry() ).v;
 
    }

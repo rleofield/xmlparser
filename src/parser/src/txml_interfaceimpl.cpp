@@ -10,13 +10,15 @@
 #include <algorithm>
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <locale>
 
 #include "tLog_Category_A.h"
 
 #include "xml_interface.h"
-#include "ascii_rw.h"
+#include "rList.h"
+#include "wList.h"
 
 #include "XmlDocument.h"
 #include "XmlText.h"
@@ -27,13 +29,15 @@
 #include "XmlException.h"
 #include "xml_utl.h"
 
-#include "strings.h"
+#include "stringhelper.h"
 #include "alloccheck.h"
 
 
 using namespace std;
 
 namespace txml {
+
+
 
 
    class tXmlInterfaceImpl {
@@ -146,8 +150,8 @@ namespace txml {
    namespace {
       void loadFile( std::list<string>  &l, string const& name ) {
          try {
-            ascii::tReadText()( l, name );
-         } catch( ascii::BadAsciiRead& ex ) {
+            rlf_txtrw::t_text_read()( name, l );
+         } catch( rlf_txtrw::bad_text_read& ex ) {
             string msg = string( "error reading XML file: " ) + ex.what();
             throw txml::XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                                       enum_reading_file, msg );
@@ -162,7 +166,8 @@ namespace txml {
       text.push_back( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" );
       text.push_back( "<"  + root + ">" );
       text.push_back( "</" + root + ">" );
-      ascii::tWriteText()( text, name );
+      bool overwrite = true;
+      rlf_txtrw::t_write_ascii()( name, text, overwrite );
    }
 
    void tXmlInterfaceImpl::parse( string const& fn ) {
@@ -351,11 +356,11 @@ namespace txml {
 
    int tXmlInterfaceImpl::get_int( string const& key )const {
       string s = getAt( key );
-      return strings::to_int( s );
+      return xmlinterface::to_int( s );
    }
    double tXmlInterfaceImpl::getDouble( string const& key )const {
       string s = getAt( key );
-      double a = strings::to_double( s );
+      double a = xmlinterface::to_double( s );
       return a;
    }
    // with defaults
@@ -367,16 +372,16 @@ namespace txml {
 
 
    int tXmlInterfaceImpl::get_int( string const& key, int default_ ) {
-      string sdefault_ = strings::to_string( default_ );
+      string sdefault_ = std::to_string( default_ );
       string sf = get_string( key, sdefault_ );
-      return strings::to_int( sf );
+      return xmlinterface::to_int( sf );
    }
 
 
    double tXmlInterfaceImpl::getDoubleAt( string const& key, double default_ ) {
-      string sdefault_ = strings::to_string( default_ );
+      string sdefault_ = std::to_string( default_ );
       string sd = get_string( key, sdefault_ );
-      double a = strings::to_double( sd );
+      double a = xmlinterface::to_double( sd );
       return a;
    }
 
@@ -414,12 +419,12 @@ namespace txml {
    }
 
    void tXmlInterfaceImpl::setIntAt( string const& key, int value ) {  // key points to an element
-      string s = strings::to_string( value );
+      string s = rlf_hstring::toString( value );
       setStringAt( key, s );
    }
 
    void tXmlInterfaceImpl::setDoubleAt( string const& key, double value ) { // key points to an element
-      string s = strings::to_string( value );
+      string s = rlf_hstring::toString( value );
       setStringAt( key, s );
    }
 
@@ -452,11 +457,11 @@ namespace txml {
    }
 
    void tXmlInterfaceImpl::setIntAttributeAt( string const& key, int value ) {  // key points to an attribute
-      setAttributeAt( key, strings::to_string( value ) );
+      setAttributeAt( key, rlf_hstring::toString( value ) );
    }
 
    void tXmlInterfaceImpl::setDoubleAttributeAt( string const& key, double value ) {  // key points to an attribute
-      setAttributeAt( key, strings::to_string( value ) );
+      setAttributeAt( key, rlf_hstring::toString( value ) );
    }
 
 
@@ -558,7 +563,8 @@ namespace txml {
    void tXmlInterfaceImpl::printKeys( string const& fn )const {
       std::vector<std::string> v = Keys();
       std::list<std::string> l( v.begin(), v.end() );
-      ascii::tWriteText()( l, fn );
+      bool overwrite = true;
+      rlf_txtrw::t_write_ascii()( fn, l, overwrite );
    }
 
 
@@ -608,7 +614,8 @@ namespace txml {
          ++begin;
       }
 
-      ascii::tWriteText()( l, fn );
+      bool overwrite = true;
+      rlf_txtrw::t_write_ascii()( fn, l, true );
    }
 
    namespace {
@@ -640,11 +647,11 @@ namespace txml {
       }
       string cleanup_string_const( string const& n ) {
          string line = n;
-         line = strings::replace_all( line, ".", "_" );
-         line = strings::replace_all( line, "-", "_" );
-         line = strings::replace_all( line, ":", "__" );
-         line = strings::replace_all( line, "[", "__" );
-         line = strings::replace_all( line, "]", "" );
+         line = rlf_hstring::replace_all( line, ".", "_" );
+         line = rlf_hstring::replace_all( line, "-", "_" );
+         line = rlf_hstring::replace_all( line, ":", "__" );
+         line = rlf_hstring::replace_all( line, "[", "__" );
+         line = rlf_hstring::replace_all( line, "]", "" );
          return line;
 
       }
@@ -675,7 +682,7 @@ namespace txml {
 
          if( line.find( root + ":" ) != string::npos ) {
             string attr = lineValue;
-            attr = strings::replace_all( attr, root + ":", "" ) ;
+            attr = rlf_hstring::replace_all( attr, root + ":", "" ) ;
             attr += "=";
             attr += "\"" + val + "\"";
             root_attr.push_back( attr );
@@ -717,7 +724,8 @@ namespace txml {
       text.push_back( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" );
       text.push_back( "<" + root + " " + attr2 + "/>" );
 
-      ascii::tWriteText()( text, fn_out );
+      bool overwrite = true;
+      rlf_txtrw::t_write_ascii()( fn_out, text, overwrite );
 
 
       l.push_back( "xmlinterface::tXmlInterface instance;" );
@@ -758,7 +766,7 @@ namespace txml {
       }
 
       l.push_back( "instance.save();" );
-      ascii::tWriteText()( l, fn_keys );
+      rlf_txtrw::t_write_ascii()( fn_keys, l, overwrite );
    }
 
    void tXmlInterfaceImpl::create( string const& key, string const& value ) {
@@ -783,61 +791,61 @@ namespace txml {
          }
       }
 
-      LOGT_A_INFO( " end of program, number of not deleted pointers: " + strings::to_string( ( int )allocList.size() ) );
+      LOGT_A_INFO( " end of program, number of not deleted pointers: " + rlf_hstring::toString( ( int )allocList.size() ) );
 
    }
 
 
 
    int str_to_int( std::string const& s )  {
-      return strings::to_int( s ) ;
+      return xmlinterface::to_int( s ) ;
    }
    double str_to_double( std::string const& s )  {
-      return strings::to_double( s );
+      return xmlinterface::to_double( s );
    }
 
    std::string int_to_string( int val )  {
-      return strings::to_string( val );
+      return rlf_hstring::toString( val );
    }
 
 
    std::string double_to_string( double val )  {
-      return strings::trim( strings::to_string( val ) );
+      return rlf_hstring::trim( rlf_hstring::toString( val ) );
    }
 
 
    std::vector<std::string> split( std::string const& l, std::string const& pat ) {
-      return strings::split( l, pat );
+      return rlf_hstring::split( l, pat );
    }
    std::string replace_all( std::string const& ins, const std::string& pattern, const std::string& replace ) {
-      return strings::replace_all( ins, pattern, replace );
+      return rlf_hstring::replace_all( ins, pattern, replace );
    }
    size_t index( std::string const& s, std::string const& pattern, size_t pos ) {
-      return strings::index( s, pattern, pos );
+      return rlf_hstring::index( s, pattern, pos );
    }
    std::string trim( std::string const& str, char ch ) {
-      return strings::trim( str, ch );
+      return rlf_hstring::trim( str, ch );
    }
 
 
    std::string fillup( std::string const& in, char ch, size_t n ) {
-      return strings::fillup( in, ch, n );
+      return rlf_hstring::fillup( in, ch, n );
    }
    std::string to_string( double val ) {
-      return strings::to_string( val );
+      return rlf_hstring::toString( val );
    }
    std::string to_string( int val ) {
-      return strings::to_string( val );
+      return rlf_hstring::toString( val );
    }
-   int to_int( std::string const& s ) {
-      return strings::to_int( s );
-   }
-   // double to_double( std::string const& s, std::locale l ) {
-   // return strings::to_double( s, l );
-   //}
-   double to_double( std::string const& s ) {
-      return strings::to_double( s );
-   }
+//   int to_int( std::string const& s ) {
+//      return rlf_hstring::to_int( s );
+//   }
+//   // double to_double( std::string const& s, std::locale l ) {
+//   // return strings::to_double( s, l );
+//   //}
+//   double to_double( std::string const& s ) {
+//      return rlf_hstring::to_double( s );
+//   }
 
 }
 
@@ -846,6 +854,27 @@ namespace txml {
 
 namespace xmlinterface {
 
+   int to_int( std::string const& s )  {
+      try {
+         return boost::lexical_cast<int>( s );
+      } catch( boost::bad_lexical_cast& e ) {
+         string msg = e.what();
+         throw txml::XmlException( txml::t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+                                   txml::enum_bad_lexical_cast, "msg: " + msg );
+      }
+
+   }
+
+   double to_double( std::string const& s )  {
+      try {
+         double b = boost::lexical_cast<double>( rlf_hstring::trim( s ) );
+         return b;
+      } catch( boost::bad_lexical_cast& e ) {
+         string msg = e.what();
+         throw txml::XmlException( txml::t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+                                   txml::enum_bad_lexical_cast, "string : " + s + ", msg: " + msg );
+      }
+   }
 
 
 
@@ -999,28 +1028,28 @@ namespace xmlinterface {
       return txml::index( s, pattern, pos );
    }
    std::string trim( std::string const& str, char ch ) {
-      return strings::trim( str, ch );
+      return rlf_hstring::trim( str, ch );
    }
 
 
    std::string fillup( std::string const& in, char ch, size_t n ) {
-      return strings::fillup( in, ch, n );
+      return rlf_hstring::fillup( in, ch, n );
    }
    std::string to_string( double val ) {
-      return strings::to_string( val );
+      return rlf_hstring::toString( val );
    }
    std::string to_string( int val ) {
-      return strings::to_string( val );
+      return rlf_hstring::toString( val );
    }
-   int to_int( std::string const& s ) {
-      return strings::to_int( s );
-   }
-   // double to_double( std::string const& s, std::locale l ) {
-   // return strings::to_double( s, l );
-   //}
-   double to_double( std::string const& s ) {
-      return strings::to_double( s );
-   }
+//   int to_int( std::string const& s ) {
+//      return rlf_hstring::to_int( s );
+//   }
+//   // double to_double( std::string const& s, std::locale l ) {
+//   // return strings::to_double( s, l );
+//   //}
+//   double to_double( std::string const& s ) {
+//      return rlf_hstring::to_double( s );
+//   }
 
 }
 

@@ -42,7 +42,7 @@ www.lug-ottobrunn.de
 #include <iostream>
 
 
-#include "tLog_Category_A.h"
+#include <tLog_Category_A.h>
 
 // demos
 #include "xml_interface.h"
@@ -94,6 +94,8 @@ int main() {
    try {
 
       examples::ubuntu32_xml_demo();
+      // demo create xml file, please comment out unwanted tests
+
 
       // other demos, in demo.cpp
 

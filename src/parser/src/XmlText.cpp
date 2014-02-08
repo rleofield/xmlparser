@@ -47,9 +47,10 @@ www.lug-ottobrunn.de
 #include "XmlDocument.h"
 
 #include "rawxml_position.h"
-#include "strings.h"
+#include "stringhelper.h"
 
 #include "XmlException.h"
+#include "xml_interface.h"
 #include "xml_utl.h"
 #include "alloccheck.h"
 
@@ -93,7 +94,7 @@ namespace txml {
 
    string replace_first( string const& in, string const& pattern, string const& replace ) {
       string s = in;
-      size_t pos = strings::index( s, pattern, 0 );
+      size_t pos = rlf_hstring::index( s, pattern, 0 );
 
       if( pos != std::string::npos ) {
          s.erase( pos, pattern.size() );
@@ -293,10 +294,10 @@ namespace txml {
             // Hexadecimal
             ++pp; // skip 'x'
             string s( pp.running(), pp.end() );
-            unicode = strings::hex_to_size_t( s );
+            unicode = rlf_hstring::hex_to_size_t( s );
          } else {
             string s( pp.running(), pp.end() );
-            unicode = strings::to_int( s );
+            unicode = xmlinterface::to_int( s );
          }
 
          if( encoding == ENCODING_UTF8 ) {

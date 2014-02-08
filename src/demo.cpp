@@ -277,7 +277,7 @@ namespace examples {
          t.print_keys( xml_ubuntu32_KeysOut );
 
          const string domain_clock__offset = "domain.clock:offset";
-         string newValue = "new test clock, seond try";
+         string newValue = "set_element_attribute_values(), test, new test clock, seond try";
          t.set_attribute( domain_clock__offset, newValue );
 
          // save to disk

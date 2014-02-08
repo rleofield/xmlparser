@@ -53,7 +53,7 @@ www.lug-ottobrunn.de
 #include "XmlException.h"
 #include "rawxml_position.h"
 
-#include "strings.h"
+#include "stringhelper.h"
 #include "alloccheck.h"
 #include "XmlLocator.h"
 
@@ -360,7 +360,7 @@ namespace txml {
             txt = string( txt.begin() + _node_value.size() , txt.end() );
          }
 
-         txt = strings::trim( txt );
+         txt = rlf_hstring::trim( txt );
          string::const_iterator begin = txt.begin();
          string::const_iterator end   = txt.end();
 
@@ -380,7 +380,7 @@ namespace txml {
                // txt contains _node_value or attributes
                vector8_t vectorattributes( begin, end );
                rawattributes = vectorattributes;
-               txt = strings::trim( getAttributes( vectorattributes ) );
+               txt = rlf_hstring::trim( getAttributes( vectorattributes ) );
             }
          } else {
             pos.skip();

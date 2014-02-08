@@ -48,7 +48,8 @@ www.lug-ottobrunn.de
 
 #include "xml_utl.h"
 #include "XmlException.h"
-#include "ascii_rw.h"
+#include "rList.h"
+#include "wList.h"
 #include "alloccheck.h"
 
 #include "win32.h"
@@ -224,7 +225,8 @@ namespace txml {
       this->accept( &p );
       std::list<std::string> text;
       p.Buffer( text );
-      ascii::tWriteText()( text, filename );
+      bool overwrite = true;
+      rlf_txtrw::t_write_ascii()( filename, text, overwrite );
       return false;
    }
 

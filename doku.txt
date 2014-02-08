@@ -1,5 +1,3 @@
-File is used in Dokuwiki:
-https://www.dokuwiki.org/dokuwiki
 
 
 ====== Mini XML Parser ======
@@ -34,14 +32,14 @@ Diese Key Strings werden von Hand angelegt, können aber auch automatisch aus ei
 Namen der Knoten werden in der Hierarchie durch Punkt getrennt.
 
 
-''"domain.devices"'' \\
+''"CutControl.SW.DebugMode"'' \\
 
-Dieser Key String findet den Knoten, der unter dem Root 'domain' liegt und den Namen 'devices' hat.
+Dieser Key String findet den Knoten, der unter dem Root 'CutControl', den ersten Unterknoten 'SW' liegt und den Namen 'DebugMode hat.
 
 
 Attribute am Knoten werden durch einen Doppelpunkt vom Knoten getrennt
 
-''"domain.devices.disk.driver:name"'' \\
+''"CutControl.SW.DebugMode:type"'' \\
 
 Dieser Key String findet an den oben genannten Knoten das Attribut 'type'.
 
@@ -58,31 +56,31 @@ Das Erzeugen eines XML Files erfolgt in 3 Schritten.
   * mit einer Funktion in der Demo kann danach der neue XML File generiert werden.
 
 
-Beispiel für ubuntu32:
+Beispiel für CutControl (dto. auch für OGL):
 
 Die Demo Funktionen:
 
 <code cpp>
-      ubuntu32_creator_generate() ;
-      ubuntu32_create_test();
+   void CC_creator_generate() ;
+   void CC_create_test();
 </code>
 
 Die Namen der in der Demo verwendeten Files: \\
 Nur **''xmlTest''** muss vor der Demo existieren.
 
 <code cpp>
-   const std::string xmlTest = "ubuntu32.xml";
-   const std::string xmlPrintOut = "ubuntu32_print.xml";
-   const std::string xmlTestOut = "ubuntu32_out.xml";
-   const std::string xmlKeysOut = "ubuntu32_keys.txt";
+   const std::string xmlTest = "CC.xml";
+   const std::string xmlTestPrint = "CC_print.xml";
+   const std::string xmlTestOut = "CC_out.xml";
+   const std::string xmlKeysOut = "CC_keys.txt";
 </code>
 
 
 In **''main.cpp''** kann man die beiden Demos durch Kommentare auswählen. 
 
-Im ersten Schritt mit einem Breakpoint in ''ubuntu32_xml_demo()'' nach ''ubuntu32_creator_generate()'' die Liste mit dem neuen Sourcecode erzeugen. Dieser ist im File **''xmlKeysOut.txt''**
+Im ersten Schritt mit einem Breakpoint in ''CC_xml_demo()'' nach ''CC_creator_generate()'' die Liste mit dem neuen Sourcecode erzeugen. Dieser ist im File **''xmlKeysOut.txt''**
 
-Der Inhalt diese Files wird in die Methode **''ubuntu32_create_test()''** kopiert.
+Der Inhalt diese Files wird in die Methode **''CC_create_test()''** kopiert.
 
 Nach den erneuten Compilieren und einem Programmlauf ist im File ''**xmlTestOut.xml**'' der neue XML File.
 

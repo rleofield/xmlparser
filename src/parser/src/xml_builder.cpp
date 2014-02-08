@@ -53,7 +53,7 @@ www.lug-ottobrunn.de
 #include "XmlDeclaration.h"
 #include "XmlComment.h"
 
-#include "strings.h"
+#include "stringhelper.h"
 //#include "logger.h"
 #include "alloccheck.h"
 
@@ -72,7 +72,7 @@ namespace demo {
 
       string getIndent( unsigned int numIndents ) {
          unsigned int n = numIndents * NUM_INDENTS_PER_SPACE;
-         string temp = strings::fillup( " ", ' ', n );
+         string temp = rlf_hstring::fillup( " ", ' ', n );
          temp += '+';
          return temp;
       }
@@ -87,16 +87,16 @@ namespace demo {
          vector<txml::XmlAttribute>::const_iterator begin = v.begin();
          vector<txml::XmlAttribute>::const_iterator end = v.end();
 
-         int count = end - begin;
+         int count = static_cast<int>(end - begin);
          string pIndent = getIndent( indent );
          cout << endl;
 
          while( begin != end ) {
             cout << pIndent << begin->name() << ": value=[" <<  begin->value() << "]";
-            cout << " int=" << strings::to_int( begin->value() );
+            cout << " int=" << xmlinterface::to_int( begin->value() );
             cout << " d=";
             cout << fixed;
-            cout << setprecision( 1 ) << strings::to_double( begin->value() ) << endl;
+            cout << setprecision( 1 ) << xmlinterface::to_double( begin->value() ) << endl;
             cout << endl;
             ++begin;
          }
@@ -119,7 +119,7 @@ namespace demo {
       txml::XmlText* pText;
       string v;
       size_t n = indent * NUM_INDENTS_PER_SPACE;
-      string temp = strings::fillup( " ", ' ', n );
+      string temp = rlf_hstring::fillup( " ", ' ', n );
 
       switch( t ) {
       case txml::XmlNode::RL_XML_DOCUMENT:

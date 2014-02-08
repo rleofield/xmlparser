@@ -83,7 +83,9 @@ namespace xmlinterface {
       void create_root( std::string const& name, std::string const& root );
 
       // read Element/attribute valuue nach dem Parsen
-      // excepion, if not found
+      // excepio   double to_double( std::string const& s, std::locale l ) ;
+      double to_double( std::string const& s ) ;
+
       std::string get_string( std::string const& key )const ;
       int get_int( std::string const& key )const ;
       double get_double( std::string const& key )const ;

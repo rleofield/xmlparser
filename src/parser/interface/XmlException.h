@@ -23,11 +23,8 @@
 
 #include <string>
 #include <stdexcept>
+//#include "stringhelper.h"
 
-// forward to avoid
-namespace strings {
-   std::string to_string( size_t val ) ;
-}
 
 namespace txml {
 
@@ -90,7 +87,7 @@ namespace txml {
          return _method;
       }
       std::string to_string()const {
-         return "File: " + file() + ", Line: " + strings::to_string( line() ) + ",Method: " + method();
+         return "File: " + file() + ", Line: " + std::to_string( line() ) + ",Method: " + method();
       }
       ~t_exception_line_file_method() {}
    };

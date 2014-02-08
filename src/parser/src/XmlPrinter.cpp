@@ -48,7 +48,7 @@ www.lug-ottobrunn.de
 #include "XmlAttribute.h"
 #include "XmlElement.h"
 #include "XmlException.h"
-#include "strings.h"
+#include "stringhelper.h"
 
 #include "win32.h"
 
@@ -60,7 +60,7 @@ namespace txml {
 
 
    void XmlPrinter::Buffer( list<std::string> &l )const {
-      vector<string>  v = strings::split( _buffer, _lineBreak );
+      vector<string>  v = rlf_hstring::split( _buffer, _lineBreak );
       l.assign( v.begin(), v.end() );
    }
 

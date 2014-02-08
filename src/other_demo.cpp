@@ -44,7 +44,7 @@ www.lug-ottobrunn.de
 
 // demos
 #include "xml_interface.h"
-#include "logger.h"
+#include "tLog_Category_default.h"
 #include "XmlException.h"
 
 
@@ -87,7 +87,7 @@ namespace examples {
       // write the list as string consts for direct use in Sourcecode
       //  t.PrintKeysAsConstStdStrings( outcode );
 
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
 
    }
 
