@@ -148,7 +148,9 @@ LIBS = -lboost_system -lboost_filesystem
 #PRE_TARGETDEPS += $$PWD/../libtxml/libtxml.a
 
 OTHER_FILES += \
-    appsettings.xml
+    appsettings.xml \
+    README.md \
+    lgpl-3.0.txt
 
 
 

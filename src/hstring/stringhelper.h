@@ -93,6 +93,11 @@ namespace rlf_hstring {
       o << std::setw( w ) << std::fixed << std::setprecision( prec ) << std::right << std::setfill( ' ' ) << val ;
       return  o.str();
    }
+   inline std::string toString( int val, size_t w = 3 ) {
+      std::ostringstream o;
+      o << std::setw( w ) << std::fixed << std::right << std::setfill( ' ' ) << val ;
+      return  o.str();
+   }
 
 
 
