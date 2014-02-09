@@ -116,6 +116,7 @@ namespace rlf_filefn {
 
    };
 
+
    t_filename splitpath( string const& in ) ;
 
    inline void operator+= ( std::vector<t_filename> &v, t_filename const& s ) {

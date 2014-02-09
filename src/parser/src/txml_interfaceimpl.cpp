@@ -615,7 +615,7 @@ namespace txml {
       }
 
       bool overwrite = true;
-      rlf_txtrw::t_write_ascii()( fn, l, true );
+      rlf_txtrw::t_write_ascii()( fn, l, overwrite );
    }
 
    namespace {

@@ -35,7 +35,7 @@ namespace rlf_filefn {
 
    // http://www.boost.org/doc/libs/1_55_0/libs/filesystem/doc/reference.html#Path-decomposition-table
 
-   namespace fs {
+   namespace fn_intern {
 
       const string dot = ".";
 
@@ -71,8 +71,13 @@ namespace rlf_filefn {
       }
       std::string correct_slash_at_end( std::string const& path ) {
          std::string temp = path;
+
+         if( temp.size() == 0 ) {
+            return string();
+         }
+
          // correct slash at end
-         string s = fs::slash();
+         string s = fn_intern::slash();
 
          if( last_char( temp ) != char_slash() ) {
             temp +=  s;
@@ -119,8 +124,80 @@ namespace rlf_filefn {
          return boost::filesystem::is_directory( p );
       }
 
+      struct t_bfe {
+         t_bfe(): path(), base(), ext() {}
+         string path;
+         string base;
+         string ext;
+      };
+      void splitpath( string const& in, t_bfe& bfe_ ) {
+         string temp = in; // + "abc.t";
+         string cb;
+         string ce;
+         string cp;
+         boost::filesystem::path p( temp );
 
-   } // end of ns h
+         if( boost::filesystem::exists( p ) ) {
+            if( boost::filesystem::is_regular_file( p ) ) {
+               cb = p.filename().string();
+               ce = p.extension().string();
+               cp = p.parent_path().string();
+
+               if( cb == fn_intern::dot ) {
+                  cb = string();
+               }
+
+               if( ce.size() > 0 ) {
+                  size_t pos = cb.rfind( ce );
+
+                  if( pos != string::npos ) {
+                     cb = rlf_hstring::clip_at_pos( cb, pos );
+                  }
+
+                  ce = fn_intern::remove_dot_at_front( ce );
+               }
+            }
+
+            if( boost::filesystem::is_directory( p ) ) {
+               cp = in;
+            }
+
+            cp = fn_intern::correct_slash_at_end( cp );
+            bfe_.base = cb;
+            bfe_.ext = ce;
+            bfe_.path = cp;
+            return;
+         }
+
+         // doesn't exist
+         cb = p.filename().string();
+         ce = p.extension().string();
+         cp = p.parent_path().string();
+
+         if( cb == fn_intern::dot ) {
+            cb = string();
+         }
+
+         if( ce.size() > 0 ) {
+            size_t pos = cb.rfind( ce );
+
+            if( pos != string::npos ) {
+               cb = rlf_hstring::clip_at_pos( cb, pos );
+            }
+
+            ce = fn_intern::remove_dot_at_front( ce );
+         }
+
+         cp = fn_intern::correct_slash_at_end( cp );
+         bfe_.base = cb;
+         bfe_.ext = ce;
+         bfe_.path = cp;
+
+
+      }
+
+   } // end of ns fn_intern
+
 
 
    class fnimpl {
@@ -135,21 +212,12 @@ namespace rlf_filefn {
       }
       //   fnimpl( boost::filesystem::path const& p_ ):p(p_){}
 
-      fnimpl& operator=( const fnimpl& s ) {
-         if( this != &s ) {
-            path = s.path;
-            base = s.base;
-            ext = s.ext;
-         }
-
-         return *this;
-      }
+      fnimpl& operator=( const fnimpl& s );
 
       bool operator==( const fnimpl& s )const {
          return ( path == s.path && base == s.base && ext == s.ext );
       }
 
-      // boost::filesystem::path p;
       string path;
       string base;
       string ext;
@@ -158,12 +226,25 @@ namespace rlf_filefn {
 
    };
 
+   fnimpl& fnimpl::operator=( const fnimpl& s ) {
+      if( this != &s ) {
+         path = s.path;
+         base = s.base;
+         ext = s.ext;
+      }
+
+      return *this;
+   }
+
+
    t_filename::t_filename(): impl( new fnimpl() ) {}
+
    t_filename::t_filename( string const& f ): impl( new fnimpl() ) {
-      t_filename f1 =  splitpath( f );
-      impl->path = f1.path();
-      impl->base = f1.base();
-      impl->ext = f1.extension();
+      fn_intern::t_bfe bfe;
+      fn_intern::splitpath( f, bfe );
+      impl->path = bfe.path;
+      impl->base = bfe.base;
+      impl->ext = bfe.ext;
    }
 
    t_filename::t_filename(
@@ -196,7 +277,7 @@ namespace rlf_filefn {
 
 
    void t_filename::path( string const& path_ ) {
-      string temp = fs::correct_slash_at_end( path_ );
+      string temp = fn_intern::correct_slash_at_end( path_ );
       impl->path = temp;
    }
 
@@ -209,7 +290,7 @@ namespace rlf_filefn {
    }
 
    string t_filename::path()const {
-      return fs::correct_slash_at_end( impl->path );
+      return fn_intern::correct_slash_at_end( impl->path );
    }
 
    string t_filename::extension()const {
@@ -228,7 +309,7 @@ namespace rlf_filefn {
       string ext = extension();
 
       if( ext.length() > 0 ) {
-         return base() + fs::dot + ext;
+         return base() + fn_intern::dot + ext;
       }
 
       return base();
@@ -245,17 +326,17 @@ namespace rlf_filefn {
 
    bool t_filename::file_exists()const {
       string fn = fullname();
-      bool temp =  fs::file_exists( fn );
+      bool temp =  fn_intern::file_exists( fn );
       return temp;
    }
    bool t_filename::path_exists()const {
       string fn = path();
-      bool temp =  fs::path_exists( fn );
+      bool temp =  fn_intern::path_exists( fn );
       return temp;
    }
    bool t_filename::is_folder()const {
       string fn = path();
-      bool b = fs::is_folder( fn );
+      bool b = fn_intern::is_folder( fn );
 
       if( b && extension().size() == 0 &&  base().size() == 0 ) {
          return true;
@@ -264,41 +345,14 @@ namespace rlf_filefn {
       return false;
    }
 
+
+
+
    t_filename splitpath( string const& in ) {
-      string temp = in; // + "abc.t";
-      string cb;
-      string ce;
-      string cp;
-      boost::filesystem::path p( temp );
-
-      if( boost::filesystem::is_regular_file( p ) ) {
-         cb = p.filename().string();
-         ce = p.extension().string();
-         cp = p.parent_path().string();
-
-         if( cb == fs::dot ) {
-            cb = string();
-         }
-
-         if( ce.size() > 0 ) {
-            size_t pos = cb.rfind( ce );
-
-            if( pos != string::npos ) {
-               cb = rlf_hstring::clip_at_pos( cb, pos );
-            }
-
-            ce = fs::remove_dot_at_front( ce );
-         }
-      }
-
-      if( boost::filesystem::is_directory( p ) ) {
-         cp = in;
-      }
-
-      cp = fs::correct_slash_at_end( cp );
-      return t_filename( cp, cb, ce );
+      fn_intern::t_bfe bfe;
+      fn_intern::splitpath( in, bfe );
+      return t_filename( bfe.path, bfe.base, bfe.ext );
    }
-
 
 
 

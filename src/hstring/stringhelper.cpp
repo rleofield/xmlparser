@@ -243,7 +243,6 @@ namespace rlf_hstring {
 
    size_t index_right( string const& s, const string& pattern ) {
       size_t p = s.rfind( pattern );
-			size_t sz = s.size();
       return p;
    }
 
