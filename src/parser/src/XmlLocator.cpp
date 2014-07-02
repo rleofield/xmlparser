@@ -45,7 +45,7 @@ www.lug-ottobrunn.de
 #include "xml_utl.h"
 #include "XmlLocator.h"
 
-#include "strings.h"
+#include "stringhelper.h"
 
 using namespace std;
 
@@ -62,7 +62,7 @@ namespace txml {
    {}
 
 
-   bool XmlLocator::visitEnter( const XmlElement& element ) {
+   bool XmlLocator::enter( const XmlElement& element ) {
       if( accepted() ) {
          return false;
       }

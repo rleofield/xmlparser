@@ -17,9 +17,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------
 */
+// t_filename.h
+
 
 #ifndef ti_tFilename_H
 #define ti_tFilename_H
+
 
 #include <string>
 #include <sstream>

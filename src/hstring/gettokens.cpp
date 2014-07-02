@@ -36,9 +36,6 @@ using namespace std;
 
 namespace rlf_hstring {
 
-
-
-
    tTokens::tTokens( const string& s, string const& delims ): _buffer() {
       string temp = s;
       size_t pos = temp.find_first_of( delims );

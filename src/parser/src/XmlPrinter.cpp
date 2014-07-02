@@ -66,7 +66,7 @@ namespace txml {
 
 
 
-   bool XmlPrinter::visitEnter( const XmlElement& element ) {
+   bool XmlPrinter::enter( const XmlElement& element ) {
       indent();
       _buffer += "<";
       _buffer += element.value();

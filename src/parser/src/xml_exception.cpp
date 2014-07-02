@@ -64,7 +64,7 @@ www.lug-ottobrunn.de
 #include "rawxml_position.h"
 #include "xml_fs.h"
 
-#include "strings.h"
+#include "stringhelper.h"
 
 using namespace std;
 

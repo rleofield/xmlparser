@@ -93,12 +93,12 @@ namespace rlf_hstring {
       o << std::setw( w ) << std::fixed << std::setprecision( prec ) << std::right << std::setfill( ' ' ) << val ;
       return  o.str();
    }
+
    inline std::string toString( int val, size_t w = 3 ) {
       std::ostringstream o;
       o << std::setw( w ) << std::fixed << std::right << std::setfill( ' ' ) << val ;
       return  o.str();
    }
-
 
 
 
@@ -288,7 +288,7 @@ namespace rlf_hstring {
    std::string remove_after( std::string const& in , std::string const& pattern ) ;
    std::string remove_last( std::string const& in );
    void remove_last_in_place( std::string& s );
-   std::string remove_quotes( std::string const& in, char quote ='\"' );
+   std::string remove_quotes( std::string const& in, char quote = '\"' );
 
    ////////
    // einfuegen

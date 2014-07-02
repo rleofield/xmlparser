@@ -222,6 +222,7 @@ namespace rlf_tlog {
 
    namespace {
       tCat def = tCat( eCategory::_default, "" );
+      tCat rimg = tCat( eCategory::Cat_rimg, "" );
       tCat A = tCat( eCategory::Cat_A, "a" );
       tCat B = tCat( eCategory::Cat_B, "b" );
       tCat C = tCat( eCategory::Cat_C, "c" );
@@ -235,7 +236,7 @@ namespace rlf_tlog {
       tLev NONE = tLev( eLevel::NONE, "" );
    }
 
-   std::vector<tCat> tLogImpl::_cats = list_of( def )( A )( B )( C )( D );
+   std::vector<tCat> tLogImpl::_cats = list_of( def )( rimg )( A )( B )( C )( D );
    std::vector<tLev> tLogImpl::_levs = list_of( DEBUG )( INFO )( WARN )( ERROR_ )( FATAL )( NONE );
 
    std::string tLogImpl::to_string( eLevel lev_ )const {

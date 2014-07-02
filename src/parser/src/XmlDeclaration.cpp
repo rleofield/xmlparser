@@ -41,6 +41,8 @@ www.lug-ottobrunn.de
 
 #include <boost/algorithm/string.hpp>
 
+//#define _CRT_SECURE_NO_WARNINGS 
+//#define _SCL_SECURE_NO_WARNINGS
 
 #include "XmlDeclaration.h"\
  

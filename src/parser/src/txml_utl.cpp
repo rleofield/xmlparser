@@ -46,7 +46,7 @@ www.lug-ottobrunn.de
 #include <iomanip>
 
 
-#include "strings.h"
+#include "stringhelper.h"
 
 using namespace std;
 

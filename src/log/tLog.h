@@ -80,6 +80,7 @@ namespace rlf_tlog {
 
 #ifdef TLOG_WITH_CATEGORY_DEBUG
 // enable categories A B C D
+#define L_RIMG_DEBUG
 #define L_A_DEBUG
 #define L_B_DEBUG
 #define L_C_DEBUG

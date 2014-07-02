@@ -118,7 +118,8 @@ HEADERS += \
     src/log/tLfm.h \
     src/txtrw/wList.h \
     src/txtrw/rList.h \
-    src/parser/src/XmlStrings_.h
+    src/parser/src/XmlStrings_.h \
+    src/boost/boost_cstdint.h
 
 
 
@@ -135,6 +136,7 @@ INCLUDEPATH += $$PWD/src/log
 INCLUDEPATH += $$PWD/src/parser
 INCLUDEPATH += $$PWD/src/parser/interface
 INCLUDEPATH += $$PWD/src/txtrw
+INCLUDEPATH += $$PWD/src/boost
 
 #LIBS += -L$$PWD/../libtxml/ -ltxml
 #LIBS += /usr/lib/libboost_system-mt.a

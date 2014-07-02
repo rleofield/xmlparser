@@ -38,21 +38,68 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 #include <boost/filesystem.hpp>
 
-#include "helper.h"
-
-using namespace helper_read_write_file;
 
 namespace rlf_txtrw {
+
+
+
+   namespace rhelper {
+      const std::string marker = "%s";
+      inline std::string FindAndReplace( const std::string& source,
+                                         const std::string& find,
+                                         const std::string& replace ) {
+         size_t i;
+         size_t start = 0;
+         std::string ret = source;
+
+         for( ; ( i = ret.find( find, start ) ) != std::string::npos; ) {
+            ret.replace( i, find.length(), replace );
+            start = i + replace.length();
+         }
+
+         return ret;
+      }
+
+      inline std::string replace( std::string const& msg, std::string const& s0 = "" ) {
+
+         if( s0.size() > 0 ) {
+            return FindAndReplace( msg, rhelper::marker, s0 );
+         }
+
+         return msg;
+
+      }
+
+
+
+
+
+   }
+
    namespace err {
-      const std::string msg_file_not_exists = "File doesn't exist: '" + marker + "'";
-      const std::string msg_read_file = " Couldn't read file '" + marker + "'";
+      const std::string msg_file_not_exists = "File doesn't exist: '" + rhelper::marker + "'";
+      const std::string msg_read_file = " Couldn't read file '" + rhelper::marker + "'";
 
       inline std::string read_file( std::string const& s0 ) {
-         return replace( msg_read_file, s0 );
+         return rhelper::replace( msg_read_file, s0 );
       }
       inline std::string file_not_exists( std::string const& s0 ) {
-         return replace( msg_file_not_exists, s0 );
+         return rhelper::replace( msg_file_not_exists, s0 );
       }
+      inline bool file_exists_r( boost::filesystem::path const& p ) {
+         if( !boost::filesystem::is_regular_file( p ) ) {
+            return false;
+         }
+
+         boost::filesystem::file_status s = status( p );
+
+         if( boost::filesystem::exists( s ) ) {
+            return true;
+         }
+
+         return false;
+      }
+
    } // end of ns err
 
 
@@ -60,9 +107,9 @@ namespace rlf_txtrw {
    \param [in] msg  Message
    */
    class bad_text_read: public std::runtime_error {
-      public:
-         bad_text_read( const std::string& msg )
-            : std::runtime_error( msg ) { }
+   public:
+      bad_text_read( const std::string& msg )
+         : std::runtime_error( msg ) { }
    };
 
 
@@ -73,78 +120,79 @@ namespace rlf_txtrw {
    * a text file is stored in a <b>string</b> list<br>
    */
    class t_text_read  {
-         t_text_read& operator= ( const t_text_read& in );
-         t_text_read( const t_text_read& in );
+      t_text_read& operator= ( const t_text_read& in );
+      t_text_read( const t_text_read& in );
 
 
-      public:
+   public:
 
-         t_text_read() {}
-         ~t_text_read() {}
+      t_text_read() {}
+      ~t_text_read() {}
 
-         void operator()( const std::string& filename, std::list<std::string> & lines )  {
+      void operator()( const std::string& filename, std::list<std::string> & lines )  {
 
-            if( !file_exists( filename ) ) {
-               std::string s = err::file_not_exists( filename );
-               throw bad_text_read( s );
-            }
+         if( !err::file_exists_r( filename ) ) {
+            std::string s = err::file_not_exists( filename );
+            throw bad_text_read( s );
+         }
 
-            std::ifstream fp( filename.c_str() );
+         std::ifstream fp( filename.c_str() );
 
-            if( fp.bad() ) {
-               std::string s = err::read_file( filename );
-               throw bad_text_read( s );
-            }
+         if( !fp.is_open() ) {
+            std::string s = err::read_file( filename );
+            throw bad_text_read( s );
+         }
 
-            while( !fp.eof() ) {
-               std::string temp;
-               getline( fp, temp );
+         while( !fp.eof() ) {
+            std::string temp;
+            getline( fp, temp );
 
-               if( !fp.fail() ) {
-                  lines.push_back( temp );
-               } else {
-                  if( !fp.eof() ) {
-                     std::string s = err::read_file( filename );
-                     throw bad_text_read( s );
-                  }
+            if( !fp.fail() ) {
+               lines.push_back( temp );
+            } else {
+               if( !fp.eof() ) {
+                  std::string s = err::read_file( filename );
+                  throw bad_text_read( s );
                }
             }
          }
-         void operator()( const std::string& filename, std::string& str )  {
+      }
+      void operator()( const std::string& filename, std::string& str )  {
 
-            if( !file_exists( filename ) ) {
-               std::string s = err::file_not_exists( filename );
-               throw bad_text_read( s );
-            }
+         if( !err::file_exists_r( filename ) ) {
+            std::string s = err::file_not_exists( filename );
+            throw bad_text_read( s );
+         }
 
-            std::ifstream fp( filename.c_str() );
+         std::ifstream fp( filename.c_str() );
 
-            if( fp.bad() ) {
-               std::string s = err::read_file( filename );
-               throw bad_text_read( s );
-            }
+         if( !fp.is_open() ) {
+            std::string s = err::read_file( filename );
+            throw bad_text_read( s );
+         }
 
-            while( !fp.eof() ) {
-               std::string temp;
-               getline( fp, temp );
+         while( fp.good() ) {
+            std::string temp;
+            getline( fp, temp );
 
-               if( !fp.fail() ) {
-                  str.append( temp );
-               } else {
-                  if( !fp.eof() ) {
-                     std::string s = err::read_file( filename );
-                     throw bad_text_read( s );
-                  }
+            if( !fp.fail() ) {
+               str.append( temp );
+            } else {
+               if( !fp.eof() ) {
+                  std::string s = err::read_file( filename );
+                  throw bad_text_read( s );
                }
             }
          }
+      }
 
    };
    // converts the output list to one string, with linebreaks
    inline std::string toString( const std::list<std::string>& lines ) {
       const std::string sep = "\n";
       std::string s;
-      for (auto temp : lines ) {
+
+for( auto temp : lines ) {
          if( !s.empty() ) {
             s += sep;
             s += temp;
@@ -152,6 +200,7 @@ namespace rlf_txtrw {
             s += temp;
          }
       }
+
       return s;
    }
 

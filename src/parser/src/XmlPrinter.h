@@ -68,7 +68,7 @@ namespace txml {
          _buffer(), _indent( t ), _lineBreak( "\n" ) {}
 
 
-      virtual bool visitEnter( const XmlElement& element );
+      virtual bool enter( const XmlElement& element );
       virtual bool visitExit( const XmlElement& element );
 
       virtual bool visit( const XmlDeclaration& declaration );

@@ -60,7 +60,7 @@ namespace txml {
       'true' == recursive parsing
       'false' == no children of this node visited
       Accept() is called on the XmlDocument, although all nodes suppert Visiting.
-
+Visitor lets you define a new operation without changing the classes of the elements on which it operates.
       @sa XmlNode::Accept()
    */
    class XmlVisitor {
@@ -69,7 +69,7 @@ namespace txml {
       XmlVisitor() {}
       virtual ~XmlVisitor() {}
 
-      virtual bool visitEnter( const XmlDocument& )        {
+      virtual bool enter( const XmlDocument& )        {
          return true;
       }
       virtual bool visitExit( const XmlDocument& )         {

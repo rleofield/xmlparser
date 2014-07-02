@@ -280,7 +280,7 @@ namespace txml {
 
 
    bool XmlDocument::accept( XmlVisitor* visitor ) const {
-      bool notAccepted = visitor->visitEnter( *this );
+      bool notAccepted = visitor->enter( *this );
 
       if( notAccepted ) {
 

@@ -33,6 +33,7 @@ enum class eLevel: int {
 
 enum class eCategory: int {
       _default = 1,
+      Cat_rimg,
       Cat_A,
       Cat_B,
       Cat_C,

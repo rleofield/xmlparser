@@ -56,7 +56,7 @@ namespace txml {
    public:
       XmlLocator( std::string const& key );
 
-      virtual bool visitEnter( const XmlElement& );
+      virtual bool enter( const XmlElement& );
       virtual bool visitExit( const XmlElement& );
       virtual bool visit( const XmlText& text );
 
