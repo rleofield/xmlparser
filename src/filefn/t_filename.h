@@ -25,20 +25,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include <string>
-#include <sstream>
-#include <iomanip>
-#include <iostream>
 #include <vector>
-#include <cerrno>
 
-#include "boost_cstdint.h"
+//#include "boost_cstdint.h"
 #include "boost/filesystem/path.hpp"
-using std::string;
+
 
 namespace rlf_filefn {
 
 
-   //   path  root_name() const;
+   //    path  root_name() const;
    //    path  root_directory() const;
    //    path  root_path() const;
    //    path  relative_path() const;
@@ -64,14 +60,14 @@ namespace rlf_filefn {
    class fnimpl;
    class t_filename {
 
-      friend class fnimpl;
+      //friend class fnimpl;
 
       fnimpl* impl;
 
 
    public:
       t_filename();
-      t_filename( string const& f );
+      t_filename( std::string const& f );
       t_filename( const std::string& path_, const std::string& filebase_, const std::string& extension_ );
       virtual ~t_filename();
       t_filename( const t_filename& fn );
@@ -91,8 +87,6 @@ namespace rlf_filefn {
       // set file extension
       // chars after a last dot in filename
       void extension( const std::string& f );
-
-      //
       std::string extension()  const;
 
       // set filename from path, name, extension
@@ -120,7 +114,7 @@ namespace rlf_filefn {
    };
 
 
-   t_filename splitpath( string const& in ) ;
+   t_filename splitpath( std::string const& in ) ;
 
    inline void operator+= ( std::vector<t_filename> &v, t_filename const& s ) {
       v.push_back( s );

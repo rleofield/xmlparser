@@ -128,6 +128,7 @@ LIBS += -lboost_system #-lboost_system-mt
 LIBS += -lboost_filesystem #-lboost_filesystem-mt
 
 
+cache()
 
 INCLUDEPATH += $$PWD/src
 INCLUDEPATH += $$PWD/src/filefn

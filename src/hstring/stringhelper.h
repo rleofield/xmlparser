@@ -29,7 +29,8 @@
 #include <typeinfo>
 #include <stdexcept>
 #include <vector>
-
+#include <assert.h>
+#include <boost/tr1/regex.hpp>
 
 
 namespace rlf_hstring {
@@ -80,6 +81,8 @@ namespace rlf_hstring {
 
       return o.str();
    }
+
+   std::string stringify( size_t const& val ) ;
 
 
    /*! Konvertiert einen Wert in einen String, Spezialisierung mit 'double'.
@@ -135,7 +138,7 @@ namespace rlf_hstring {
 
       //insx >> x;
       if( !( insx >> x ) ) {
-         throw BadConversion( std::string( "toString(" ) + typeid( s ).name() + ")" );
+         throw BadConversion( "couldn't convert '"  + s + "'" );
       }
 
       return x;
@@ -306,10 +309,8 @@ namespace rlf_hstring {
    std::vector<std::string> split( std::string const& line, std::string const& delimiters = " " );
    std::vector<std::string> split( std::string const& l, char delim );
 
+
 } // end ns    namespace hstring {
-
-
-
 
 
 

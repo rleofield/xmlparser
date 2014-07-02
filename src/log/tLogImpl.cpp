@@ -31,6 +31,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tLogImpl.h"
 
+#ifdef _WIN32
+#pragma warning( disable:4996 4100 4101) // _CRT_SECURE_NO_WARNINGS
+#endif
+
 
 using std::stringstream;
 using std::string;
@@ -170,11 +174,11 @@ namespace rlf_tlog {
          o << ' ';
 
          if( method.size() > 0 ) {
-            o << std::setfill( ' ' ) << std::left << std::setw( 40 );
+            o << std::setfill( ' ' ) << std::left << std::setw( 20 );
             string m = method;
 
-            if( m.size() > 40 ) {
-               m  = m.substr( 0, 40 );
+            if( m.size() > 20 ) {
+               m  = m.substr( 0, 20 );
             }
 
             o << m;
@@ -221,23 +225,27 @@ namespace rlf_tlog {
 
 
    namespace {
-      tCat def = tCat( eCategory::_default, "" );
-      tCat rimg = tCat( eCategory::Cat_rimg, "" );
-      tCat A = tCat( eCategory::Cat_A, "a" );
-      tCat B = tCat( eCategory::Cat_B, "b" );
-      tCat C = tCat( eCategory::Cat_C, "c" );
-      tCat D = tCat( eCategory::Cat_D, "d" );
+      tCat _def = tCat( eCategory::_default, "" );
+      tCat _rimg = tCat( eCategory::Cat_rimg, "rimg" );
+      tCat _A = tCat( eCategory::Cat_A, "a" );
+      tCat _B = tCat( eCategory::Cat_B, "b" );
+      tCat _C = tCat( eCategory::Cat_C, "c" );
+      tCat _D = tCat( eCategory::Cat_D, "d" );
+      tCat _tif = tCat( eCategory::Cat_Tiff, "tif" );
 
-      tLev DEBUG = tLev( eLevel::LDEBUG, "DEBUG" );
-      tLev INFO  = tLev( eLevel::INFO, "INFO " );
-      tLev WARN  = tLev( eLevel::WARN, "WARN " );
-      tLev ERROR_ = tLev( eLevel::LERROR, "ERROR" );
-      tLev FATAL = tLev( eLevel::FATAL, "FATAL" );
-      tLev NONE = tLev( eLevel::NONE, "" );
+
+      tLev _DEBUG_ = tLev( eLevel::LDEBUG, "DEBUG" );
+      tLev _INFO  = tLev( eLevel::INFO, "INFO " );
+      tLev _WARN  = tLev( eLevel::WARN, "WARN " );
+      tLev _ERROR_ = tLev( eLevel::LERROR, "ERROR" );
+      tLev _FATAL = tLev( eLevel::FATAL, "FATAL" );
+      tLev _NONE = tLev( eLevel::NONE, "" );
    }
 
-   std::vector<tCat> tLogImpl::_cats = list_of( def )( rimg )( A )( B )( C )( D );
-   std::vector<tLev> tLogImpl::_levs = list_of( DEBUG )( INFO )( WARN )( ERROR_ )( FATAL )( NONE );
+   tCat cats[8] = { _def, _rimg, _A, _B, _C, _D, _tif };
+	 std::vector<tCat> tLogImpl::_cats(cats,cats + 8);
+	 tLev levs[6] = { _DEBUG_, _INFO, _WARN, _ERROR_, _FATAL, _NONE };
+	 std::vector<tLev> tLogImpl::_levs( levs, levs + 6 );
 
    std::string tLogImpl::to_string( eLevel lev_ )const {
       std::vector<tLev>::const_iterator f = find( _levs.begin(), _levs.end(), lev_ );
