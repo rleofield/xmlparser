@@ -32,7 +32,7 @@
 
 #include "tLogEnum.h"
 
-using std::string;
+//using std::string;
 
 namespace rlf_tlog {
 

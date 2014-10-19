@@ -24,7 +24,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -45,12 +45,12 @@ www.lug-ottobrunn.de
 #include "xml_utl.h"
 
 #include "rawxml_position.h"
-#include "XmlException.h"
+#include "xml_exception.h"
 #include "stringhelper.h"
 
 
 using namespace std;
-
+using std::string;
 
 namespace txml {
 
@@ -109,7 +109,6 @@ namespace txml {
 
    bool rawxml_position::starts_with( std::string const& s ) {
       std::string temp = next( s.size() );
-
       if( temp == s ) {
          return true;
       }
@@ -132,49 +131,36 @@ namespace txml {
    }
 
    string rawxml_position::next( ptrdiff_t n )const {
-      size_t temp = n;
+      ptrdiff_t temp = n;
       ptrdiff_t diff = _rawxml.end() - _running;
-
-      if( static_cast<ptrdiff_t>( temp ) > diff ) {
-         temp = _rawxml.end() - _running;
+      if( temp > diff ) {
+         temp = diff;
       }
-
-      if( temp == 0 ) {
-         return string();
-      }
-
       return std::string( _running,  _running + temp );
    }
 
+
    std::string rawxml_position::next( vector8_t::const_iterator it ) const {
       if( it < _running ) {
-         int64_t pos = it - _running;
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         vector8_t::difference_type pos = it - _running;
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_iterator_underflow,
-                             "Position: nextX(it), iterator underflow: " + rlf_hstring::toString( static_cast<size_t>( pos ) ) );
+                             "Position: next(it), iterator underflow: " + rlf_hstring::toString( pos ) );
       }
 
+      // check against end() = one char after end of string
       if( it > _rawxml.end() ) {
          return std::string();
       }
-
-      if( it > _rawxml.end() ) {
-         int64_t pos1 = it - _running;
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_iterator_underflow,
-                             "Position: nextX(it), iterator overflow: " + rlf_hstring::toString( static_cast<size_t>( pos1 ) ) );
-      }
-
-      return std::string( _running,  it );
+      string ret = std::string( _running,  it );
+      return ret;
    }
 
    std::string rawxml_position::next_until( std::string const& s )const {
       vector8_t::const_iterator vi = find( s );
-
       if( vi == end() ) {
          return std::string();
       }
-
       return next( vi + s.size() );
    }
 
@@ -186,12 +172,12 @@ namespace txml {
 
    void rawxml_position::operator+=( int offset ) {
       if( _rawxml.end() - _running < offset ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_operator_plus_at_or_after_end, "Position: operator += at or after end" );
       }
 
       if( _running >= _rawxml.end() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_operator_plus_at_or_after_end, "Position: operator += at or after end" );
       }
 
@@ -201,7 +187,7 @@ namespace txml {
    }
    void rawxml_position::operator-=( int i )const {
       if( i < _running - _rawxml.begin() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_operator_minus_at_or_after_end, "Position: operator -= at or after end" );
       }
 
@@ -239,11 +225,9 @@ namespace txml {
       if( _running == _rawxml.end() ) {
          return false;
       }
-
-      if( isspace( ( int8_t )( *_running ) ) > 0 ) {
+      if( isspace(  *_running ) > 0 ) {
          return true;
       }
-
       return false;
    }
 
@@ -251,7 +235,6 @@ namespace txml {
       if( _running == _rawxml.end() ) {
          return;
       }
-
       while(
          ( _running != _rawxml.end() )
          && ( ( *_running == ' ' )
@@ -261,15 +244,13 @@ namespace txml {
             ) ) {
          ++_running;
       }
-
       if( _running >= _rawxml.end() ) {
          _next.clear();
          return;
       }
-
       next100();
    }
-   size_t rawxml_position::remainder()const {
+   vector8_t::difference_type rawxml_position::remainder()const {
       return _rawxml.end() - _running ;
 
    }

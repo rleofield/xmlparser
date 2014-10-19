@@ -29,7 +29,7 @@
 
 namespace txml {
 
-   class XmlNode;
+   class xml_node;
 
    // keys for search in xml doc
    class keyentry {
@@ -53,9 +53,9 @@ namespace txml {
       std::string Element()const ;
       void Element( std::string element ) ;
       std::string to_string()const;
-      XmlNode const* node()const ;
-      XmlNode* node() ;
-      void node( XmlNode* n ) ;
+      xml_node const* node()const ;
+      xml_node* node() ;
+      void node( xml_node* n ) ;
       // for default inserter
       void removeAttr();
 
@@ -69,7 +69,7 @@ namespace txml {
       static std::string left_bracket;
       static std::string right_bracket;
       static std::string double_colon;
-      XmlNode* _node;
+      xml_node* _node;
 
 
    };
@@ -99,7 +99,7 @@ namespace txml {
       keyentry const& operator[]( size_t i )const;
       keyentry& operator[]( size_t i );
 
-      XmlNode const* parentOfLast()const;
+      xml_node const* parentOfLast()const;
 
       void remove_last() ;
 

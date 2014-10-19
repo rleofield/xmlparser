@@ -96,6 +96,11 @@ namespace rlf_hstring {
       o << std::setw( w ) << std::fixed << std::setprecision( prec ) << std::right << std::setfill( ' ' ) << val ;
       return  o.str();
    }
+   inline std::string toString( double val, size_t w, size_t prec, char fill ) {
+      std::ostringstream o;
+      o << std::setw( w ) << std::fixed << std::setprecision( prec ) << std::right << std::setfill( fill ) << val ;
+      return  o.str();
+   }
 
    inline std::string toString( int val, size_t w = 3 ) {
       std::ostringstream o;
@@ -176,7 +181,7 @@ namespace rlf_hstring {
         \param val Wert, der in einen Bin-String konvertiert werden soll
         \param w Feldbreite, default = 32
    */
-   std::string to_bin( size_t val, size_t  w = 32 );
+   std::string to_bin( size_t val, size_t w = 32 );
 
    /*! \brief konvertiert einen String nach Kleinbuchstaben.
                String wird geändert, es wird keine Kopie intern erzeugt.

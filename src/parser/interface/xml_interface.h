@@ -25,7 +25,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -46,10 +46,10 @@ www.lug-ottobrunn.de
 #include <string>
 
 
-#include "XmlException.h"
+#include "xml_exception.h"
 
 namespace txml {
-   class XmlDocument;
+   class xml_document;
 }
 
 /*
@@ -122,7 +122,7 @@ namespace xmlinterface {
 
       // lese Xml-Document, welches mit txml aufgebaut wurde
       // Parse() baut zusätzliche interne Strukturen auf
-      void parse( txml::XmlDocument const& doc );
+      void parse( txml::xml_document const& doc );
 
       // read internal Xml-Document and parses again (refresh of internal structures)
       void parse();

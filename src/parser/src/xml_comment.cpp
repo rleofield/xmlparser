@@ -52,7 +52,7 @@ www.lug-ottobrunn.de
 #include "alloccheck.h"
 
 
-#include "win32.h"
+
 
 
 namespace txml {

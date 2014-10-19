@@ -50,7 +50,7 @@ www.lug-ottobrunn.de
 #include "xml_exception.h"
 #include "stringhelper.h"
 
-#include "win32.h"
+
 
 using namespace std;
 

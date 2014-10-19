@@ -34,22 +34,20 @@ namespace txml {
 #ifdef _DEBUG
    const bool useNext100 = true;
 #else
-   const bool useNext100 = false;
+   const bool useNext100 = true;
 #endif
    class rawxml_position {
 
    public:
 
-      void next100()const;
-      std::string next25()const;
    private:
+      vector8_t _rawxml;
       std::string next25( int2type<false> )const;
       std::string next25( int2type<true> )const;
 
       void next100( int2type<false> )const;
       void next100( int2type<true> )const;
 
-      vector8_t _rawxml;
       mutable vector8_t::const_iterator _running;
       mutable std::string _next;
 
@@ -60,11 +58,17 @@ namespace txml {
       rawxml_position( vector8_t const& v );
       rawxml_position( std::string  const& v );
 
+      vector8_t::const_iterator end(){ return _rawxml.end(); }
+
+
+      // next bytes for the debugger, "" if release
+      void next100()const;
+      std::string next25()const;
+
       // compares until s.size()
       bool starts_with( std::string const& s );
 
       bool operator<( rawxml_position const& p )const;
-
 
       bool is_end()const;
       vector8_t::const_iterator end()const;
@@ -94,8 +98,9 @@ namespace txml {
 
       bool is_white_space()const;
 
+      // skip ' ', '\n', '\t'
       void skip()const;
-      size_t remainder()const;
+      vector8_t::difference_type remainder()const;
 
    };
 

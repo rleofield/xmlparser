@@ -18,8 +18,11 @@
 */
 
 #include <iomanip>
+#include <iostream>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <bitset>
 
 #include "stringhelper.h"
 
@@ -28,8 +31,40 @@
 
 using namespace std;
 
-
 namespace rlf_hstring {
+
+   namespace nsloc {
+
+#ifdef _WIN32
+      char const* const de = "German";
+#else
+      const char* const de = "de_DE.utf8";
+#endif
+
+#ifdef _WIN32
+      char const* const ch = "German_Switzerland";
+#else
+      const char* const ch = "de_CH.utf8";
+#endif
+
+   }
+   string getDE() {
+      return nsloc::de;
+   }
+   string getCH() {
+      return nsloc::ch;
+   }
+
+   const char*  get_de() {
+      return nsloc::de;
+   }
+   const char* get_ch() {
+      return nsloc::ch;
+   }
+
+
+
+
 
    string stringify( size_t const& val ) {
       return boost::lexical_cast<string>( val );
@@ -37,7 +72,7 @@ namespace rlf_hstring {
 
 
    // converts a hex string to size_t
-   size_t hex_to_size_t( std::string const& s )  {
+   size_t hex_to_size_t( string const& s )  {
       size_t x;
       std::istringstream insx( s );
       insx >> std::hex;
@@ -45,7 +80,7 @@ namespace rlf_hstring {
       return x;
    }
 
-   bool string2bool( std::string const& s )  {
+   bool string2bool( string const& s )  {
       if( s == s_true ) {
          return true;
       }
@@ -54,10 +89,7 @@ namespace rlf_hstring {
          return false;
       }
 
-      std::string temp = to_upper( s );
-
-      // was ist hier?
-      // nicht true, also false?, ist das gewollt?
+      string temp = to_upper( s );
       return false;
    }
 
@@ -73,52 +105,34 @@ namespace rlf_hstring {
       return o.str();
    }
 
-   string to_bin( size_t val, size_t l ) {
-      size_t i;
-      char str[65];
-
-      for( i = l; i > 0; i-- ) {
-         str[l - i] = '0' + ( ( val >> ( i - 1 ) ) & 0x1 );
-      }
-
-      str[l] = 0;
-      return string( str );
+   string to_bin( size_t val, size_t w ) {
+      static const size_t bits = 64;
+      //int sv = sizeof(val) * 8;
+      string result = std::bitset<bits>( val ).to_string();
+      return result.substr( bits - w ); // string(str);
    }
 
 
    void to_lower_in_place( string& s ) {
-      std::string::iterator start = s.begin();
-
-      while( start != s.end() ) {
-         *start = ( char )::tolower( *start );
-         ++start;
-      }
+      boost::algorithm::to_lower( s );
    }
    string to_lower( string const& s ) {
-      string temp = s;
-      to_lower_in_place( temp );
-      return temp;
+      return boost::algorithm::to_lower_copy( s );
    }
    void to_upper_in_place( string& s ) {
-      std::string::iterator start = s.begin();
-
-      while( start != s.end() ) {
-         *start = ( char )::toupper( *start );
-         ++start;
-      }
+      boost::algorithm::to_upper( s );
    }
 
    string to_upper( string const& s ) {
-      string temp = s;
-      to_upper_in_place( temp );
-      return temp;
+      return boost::algorithm::to_upper_copy( s );
    }
 
    string clip( string const& in, string const& pattern ) {
+
       if( in.size() > 0 ) {
          size_t i = index( in, pattern );
 
-         if( i != std::string::npos ) {
+         if( i != string::npos ) {
             return in.substr( 0, i ) ;
          }
       }
@@ -129,7 +143,7 @@ namespace rlf_hstring {
    string clip_after( string const& in , string const& pattern ) {
       size_t i = index( in, pattern );
 
-      if( i != std::string::npos ) {
+      if( i != string::npos ) {
          return in.substr( 0, i + pattern.size() );
       }
 
@@ -256,7 +270,7 @@ namespace rlf_hstring {
       string s = in;
       size_t pos = index( s, pattern );
 
-      if( pos != std::string::npos ) {
+      if( pos != string::npos ) {
          s.erase( pos, pattern.size() );
          s.insert( pos, replace );
       }
@@ -273,7 +287,7 @@ namespace rlf_hstring {
       size_t pos = index( s, pattern );
       size_t oldpos;
 
-      while( pos != std::string::npos ) {
+      while( pos != string::npos ) {
          s.erase( pos, pattern.size() );
          s.insert( pos, replace );
          oldpos = pos;
@@ -325,7 +339,7 @@ namespace rlf_hstring {
    string remove_first( string const& in, char ch ) {
       size_t i = index( in, ch );
 
-      if( i != std::string::npos ) {
+      if( i != string::npos ) {
          return erase( in, i, 1 );
       }
 
@@ -335,7 +349,7 @@ namespace rlf_hstring {
    string remove_first( string const& in, string const& pattern ) {
       size_t i = index( in, pattern );
 
-      if( i != std::string::npos ) {
+      if( i != string::npos ) {
          return erase( in, i, pattern.length() );
       }
 
@@ -365,7 +379,7 @@ namespace rlf_hstring {
       }
    }
 
-   std::string remove_quotes( std::string const& in, char quote ) {
+   string remove_quotes( string const& in, char quote ) {
       string temp = in;
       char ch = last_char( temp ) ;
 

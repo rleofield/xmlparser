@@ -24,7 +24,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -47,17 +47,17 @@ www.lug-ottobrunn.de
 #include "xml_interface.h"
 #include "xml_builder.h"
 #include "xml_utl.h"
-#include "XmlElement.h"
-#include "XmlText.h"
-#include "XmlDocument.h"
-#include "XmlDeclaration.h"
-#include "XmlComment.h"
+#include "xml_element.h"
+#include "xml_text.h"
+#include "xml_document.h"
+#include "xml_declaration.h"
+#include "xml_comment.h"
 
 #include "stringhelper.h"
 //#include "logger.h"
 #include "alloccheck.h"
 
-#include "win32.h"
+
 
 using namespace std;
 
@@ -78,14 +78,14 @@ namespace demo {
       }
 
 
-      int dump_attribs_to_stdout( txml::XmlElement const* pElement, unsigned int indent ) {
+      int dump_attribs_to_stdout( txml::xml_element const* pElement, unsigned int indent ) {
          if( !pElement ) {
             return 0;
          }
 
-         vector<txml::XmlAttribute> const& v = pElement->Attributes();
-         vector<txml::XmlAttribute>::const_iterator begin = v.begin();
-         vector<txml::XmlAttribute>::const_iterator end = v.end();
+         vector<txml::xml_attribute> const& v = pElement->Attributes();
+         vector<txml::xml_attribute>::const_iterator begin = v.begin();
+         vector<txml::xml_attribute>::const_iterator end = v.end();
 
          int count = static_cast<int>(end - begin);
          string pIndent = getIndent( indent );
@@ -108,7 +108,7 @@ namespace demo {
 
 
    // writes simple readable format of to cout (no xml)
-   void xml_dump_to_stdout( txml::XmlNode const* pParent, unsigned int indent ) {
+   void xml_dump_to_stdout( txml::xml_node const* pParent, unsigned int indent ) {
       if( !pParent ) {
          return;
       }
@@ -116,19 +116,19 @@ namespace demo {
       int t = pParent->type();
       cout << getIndent( indent );
       int num;
-      txml::XmlText* pText;
+      txml::xml_text* pText;
       string v;
       size_t n = indent * NUM_INDENTS_PER_SPACE;
       string temp = rlf_hstring::fillup( " ", ' ', n );
 
       switch( t ) {
-      case txml::XmlNode::RL_XML_DOCUMENT:
+      case txml::xml_node::RL_XML_DOCUMENT:
          cout << "Document";
          break;
 
-      case txml::XmlNode::RL_XML_ELEMENT:
+      case txml::xml_node::RL_XML_ELEMENT:
          cout << "Element [" <<  pParent->value() << "]";
-         num = dump_attribs_to_stdout( dynamic_cast<txml::XmlElement const*>( pParent ), indent + 1 );
+         num = dump_attribs_to_stdout( dynamic_cast<txml::xml_element const*>( pParent ), indent + 1 );
 
          switch( num ) {
          case 0:
@@ -144,18 +144,18 @@ namespace demo {
 
          break;
 
-      case txml::XmlNode::RL_XML_COMMENT:
+      case txml::xml_node::RL_XML_COMMENT:
          cout << "Comment: [" << pParent->value() << "]";
          break;
 
-      case txml::XmlNode::RL_XML_TEXT:
-         pText = dynamic_cast<txml::XmlText*>( const_cast<txml::XmlNode*>( pParent ) );
+      case txml::xml_node::RL_XML_TEXT:
+         pText = dynamic_cast<txml::xml_text*>( const_cast<txml::xml_node*>( pParent ) );
          v = pText->value();
          v = txml::decodeEntities( v );
          cout << "Text: [" << v << "]";
          break;
 
-      case txml::XmlNode::RL_XML_DECLARATION:
+      case txml::xml_node::RL_XML_DECLARATION:
          cout << "Declaration";
          break;
       default:
@@ -163,7 +163,7 @@ namespace demo {
       }
 
       cout << endl;
-      txml::XmlNode const* pChild;
+      txml::xml_node const* pChild;
 
       for( pChild = pParent->firstChild(); pChild != 0; pChild = pChild->next() ) {
          xml_dump_to_stdout( pChild, indent + 1 );
@@ -173,15 +173,15 @@ namespace demo {
 
    void build_simple_doc( ) {
       // Make xml: <?xml ..><Hello>World</Hello>
-      txml::XmlDocument doc;
-      txml::XmlNode* decl = txml::XmlDeclaration::create( );
-      txml::XmlElement* element = txml::XmlElement::create( "Hello" );
-      txml::XmlNode* text = txml::XmlText::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "World" );
+      txml::xml_document doc;
+      txml::xml_node* decl = txml::xml_declaration::create( );
+      txml::xml_element* element = txml::xml_element::create( "Hello" );
+      txml::xml_node* text = txml::xml_text::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "World" );
       element->linkEndChild( text );
       doc.linkEndChild( decl );
       doc.linkEndChild( element );
-      txml::XmlElement* element2 = txml::XmlElement::create( "ele2" );
-      txml::XmlNode* text2 = txml::XmlText::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "World2" );
+      txml::xml_element* element2 = txml::xml_element::create( "ele2" );
+      txml::xml_node* text2 = txml::xml_text::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "World2" );
       element2->linkEndChild( text2 );
       doc.linkEndChild( element2 );
 
@@ -195,14 +195,14 @@ namespace demo {
       // same as write_simple_doc1 but add each node
       // as early as possible into the tree.
 
-      txml::XmlDocument doc;
-      txml::XmlNode* decl = txml::XmlDeclaration::create( );
+      txml::xml_document doc;
+      txml::xml_node* decl = txml::xml_declaration::create( );
       doc.linkEndChild( decl );
 
-      txml::XmlElement* element = txml::XmlElement::create( "Hello" );
+      txml::xml_element* element = txml::xml_element::create( "Hello" );
       doc.linkEndChild( element );
 
-      txml::XmlNode* text = txml::XmlText::create( "World" );
+      txml::xml_node* text = txml::xml_text::create( "World" );
       element->linkEndChild( text );
       xmlinterface::tXmlInterface t;
       t.parse( doc );
@@ -213,32 +213,32 @@ namespace demo {
 
 
    void write_app_settings_doc() {
-      txml::XmlDocument doc;
-      txml::XmlNode* decl = txml::XmlDeclaration::create( );
+      txml::xml_document doc;
+      txml::xml_node* decl = txml::xml_declaration::create( );
       doc.linkEndChild( decl );
 
-      txml::XmlElement* root = txml::XmlElement::create( "MyApp" );
+      txml::xml_element* root = txml::xml_element::create( "MyApp" );
       doc.linkEndChild( root );
 
-      txml::XmlNode* comment = txml::XmlComment::create( );
+      txml::xml_node* comment = txml::xml_comment::create( );
       comment->value( " Settings for MyApp " );
       root->linkEndChild( comment );
 
-      txml::XmlElement* msgs = txml::XmlElement::create( "Messages" );
+      txml::xml_element* msgs = txml::xml_element::create( "Messages" );
       root->linkEndChild( msgs );
 
-      txml::XmlElement* msg = txml::XmlElement::create( "Welcome" );
-      msg->linkEndChild( txml::XmlText::create( "Welcome to MyApp" ) );
+      txml::xml_element* msg = txml::xml_element::create( "Welcome" );
+      msg->linkEndChild( txml::xml_text::create( "Welcome to MyApp" ) );
       msgs->linkEndChild( msg );
 
-      msg = txml::XmlElement::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "Farewell" );
-      msg->linkEndChild( txml::XmlText::create( "Thank you for using MyApp" ) );
+      msg = txml::xml_element::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "Farewell" );
+      msg->linkEndChild( txml::xml_text::create( "Thank you for using MyApp" ) );
       msgs->linkEndChild( msg );
 
-      txml::XmlElement* windows = txml::XmlElement::create( "Windows" );
+      txml::xml_element* windows = txml::xml_element::create( "Windows" );
       root->linkEndChild( windows );
 
-      txml::XmlElement* window = txml::XmlElement::create( "Window" );
+      txml::xml_element* window = txml::xml_element::create( "Window" );
       windows->linkEndChild( window );
       window->setAttribute( "name", "MainFrame" );
       window->setAttribute( "x", "5" );
@@ -246,7 +246,7 @@ namespace demo {
       window->setAttribute( "w", "400" );
       window->setAttribute( "h", "250" );
 
-      txml::XmlElement* cxn = txml::XmlElement::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "Connection" );
+      txml::xml_element* cxn = txml::xml_element::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), "Connection" );
       root->linkEndChild( cxn );
       cxn->setAttribute( "ip", "192.168.0.1" );
       cxn->setAttribute( "timäout", "123.456" ); // floating point attrib

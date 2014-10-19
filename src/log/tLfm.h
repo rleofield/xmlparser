@@ -35,12 +35,11 @@
 
 
 namespace rlf_tlfm {
-   using std::string;
 
    class tLfm {
       uint32_t _line;
-      string _file;
-      string _method;
+      std::string _file;
+      std::string _method;
 
    public:
       tLfm(): _line( 0 ), _file(), _method() {}
@@ -62,7 +61,7 @@ namespace rlf_tlfm {
    };
 
    // use of parameterobject for line, file, method
-   inline tLfm Lfm( uint32_t line_, string const& file_, string const& method_ ) {
+   inline tLfm Lfm( uint32_t line_, std::string const& file_, std::string const& method_ ) {
       return tLfm( line_, file_, method_ );
    }
 

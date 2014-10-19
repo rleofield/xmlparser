@@ -59,7 +59,7 @@ www.lug-ottobrunn.de
 
 #include "stringhelper.h"
 
-#include "win32.h"
+
 
 
 /*

@@ -25,7 +25,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -43,11 +43,11 @@ www.lug-ottobrunn.de
 #include <iostream>
 
 
-#include <tLog_Category_A.h>
+#include <tLog_Category_default.h>
 
 // demos
 #include "xml_interface.h"
-#include "XmlException.h"
+#include "xml_exception.h"
 
 
 
@@ -56,13 +56,13 @@ using namespace rlf_tlog;
 
 namespace examples {
 
-   const std::string xml_ubuntu32_Test = "ubuntu32.xml";
-   const std::string xml_ubuntu32_TestPrint = "ubuntu32_print.xml";
-   const std::string xml_ubuntu32_TestOut = "ubuntu32_test_out.xml";
-   const std::string xml_ubuntu32_KeysOut = "ubuntu32_keys.txt";
-   const std::string xml_ubuntu32_SourceOut = "ubuntu32_sourcecode.txt";
-   const std::string xml_ubuntu32_DemoIn = "ubuntu32.xml";
-   const std::string xml_ubuntu32_DemoOut = "ubuntu32_demo_out.xml";
+   const string xml_ubuntu32_Test = "ubuntu32.xml";
+   const string xml_ubuntu32_TestPrint = "ubuntu32_print.xml";
+   const string xml_ubuntu32_TestOut = "ubuntu32_test_out.xml";
+   const string xml_ubuntu32_KeysOut = "ubuntu32_keys.txt";
+   const string xml_ubuntu32_SourceOut = "ubuntu32_sourcecode.txt";
+   const string xml_ubuntu32_DemoIn = "ubuntu32.xml";
+   const string xml_ubuntu32_DemoOut = "ubuntu32_demo_out.xml";
 
 
 
@@ -83,15 +83,15 @@ namespace examples {
       // to string
       string siabc = xmlinterface::int_to_string( -127777 );
       string sdabc = xmlinterface::double_to_string( -127.777 );
-      LOGT_A_INFO( "t.IntToString( -127777 ) = " + siabc );
-      LOGT_A_INFO( "t.DoubleToString( -127.777 ); = " + sdabc );
+      LOGT_INFO( "t.IntToString( -127777 ) = " + siabc );
+      LOGT_INFO( "t.DoubleToString( -127.777 ); = " + sdabc );
 
       // from string
 
       int iabc = xmlinterface::str_to_int( "-127777" );
       double dabc = xmlinterface::str_to_double( "-127777.888 " );
-      LOGT_A_INFO( "t.str_to_int( \"  -127777 int variable as string\" ); = " + xmlinterface::to_string( iabc ) );
-      LOGT_A_INFO( "t.str_to_double( \" -127777.888 \" ); = " + xmlinterface::to_string( dabc ) );
+      LOGT_INFO( "t.str_to_int( \"  -127777 int variable as string\" ); = " + xmlinterface::to_string( iabc ) );
+      LOGT_INFO( "t.str_to_double( \" -127777.888 \" ); = " + xmlinterface::to_string( dabc ) );
 
 
 
@@ -118,7 +118,7 @@ namespace examples {
       t.save( xml_ubuntu32_DemoOut );
 
       // for the debugger break point
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
    }
 
 
@@ -143,7 +143,7 @@ namespace examples {
       // write the list as string consts for direct use in Sourcecode
       t.print_creator( xml_ubuntu32_KeysOut, xml_ubuntu32_DemoOut );
 
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
 
    }
 
@@ -163,7 +163,7 @@ namespace examples {
 
             // save to disk
             t.save( xml_ubuntu32_DemoOut );
-            LOGT_A_INFO( "" );
+            LOGT_INFO( "" );
          }
          // set second comment
          {
@@ -171,14 +171,14 @@ namespace examples {
             t.setComment( domain_devices_interface__1, "text at 2.position of element 'interface'" );
             t.save( xml_ubuntu32_DemoOut );
          }
-      } catch( txml::XmlException& ex ) {
-         std::string w = ex.What();
-         LOGT_A_INFO( ex.what() );
+      } catch( txml::xml_exception& ex ) {
+         string w = ex.What();
+         LOGT_INFO( ex.what() );
 
       }
 
       // save to disk
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
 
    }
 
@@ -195,13 +195,13 @@ namespace examples {
 
          t.parse( xml_ubuntu32_DemoIn );
 
-      } catch( txml::XmlException& ex ) {
-         std::string w = ex.What();
-         LOGT_A_INFO( ex.what() );
+      } catch( txml::xml_exception& ex ) {
+         string w = ex.What();
+         LOGT_INFO( ex.what() );
 
       }
 
-      std::string msg;
+      string msg;
       string element1;
 
       try {
@@ -209,13 +209,13 @@ namespace examples {
          const string domain_on_reboot = "domain.on_reboot";  //   element:    = 'restart'
          element1 = t.get_string( domain_on_reboot );
 
-      } catch( txml::XmlException& ex ) {
-         std::string w = ex.What();
-         LOGT_A_INFO( ex.what() );
+      } catch( txml::xml_exception& ex ) {
+         string w = ex.What();
+         LOGT_INFO( ex.what() );
 
       }
 
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
 
       try {
          // test reading an element, with default and unknown key
@@ -226,18 +226,18 @@ namespace examples {
          // save changes
          t.save( xml_ubuntu32_DemoOut );
 
-         LOGT_A_INFO( domain_on_reboot_new + ",  element: " + element1 );
+         LOGT_INFO( domain_on_reboot_new + ",  element: " + element1 );
 
 
       }
 
-      catch( txml::XmlException& ex ) {
-         std::string w = ex.What();
-         LOGT_A_INFO( ex.what() );
+      catch( txml::xml_exception& ex ) {
+         string w = ex.What();
+         LOGT_INFO( ex.what() );
 
       }
 
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
 
       // reading an attribute, notice the : in the key as separator
       string attribute;
@@ -248,14 +248,14 @@ namespace examples {
          attribute = t.get_string( domain_clock__offset );
 
          // value of attribute = 'utc'
-         LOGT_A_INFO( domain_clock__offset + ",  attr: " + attribute );
-      } catch( txml::XmlException& ex ) {
-         std::string w = ex.What();
-         LOGT_A_INFO( ex.what() );
+         LOGT_INFO( domain_clock__offset + ",  attr: " + attribute );
+      } catch( txml::xml_exception& ex ) {
+         string w = ex.What();
+         LOGT_INFO( ex.what() );
 
       }
 
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
    }
 
 
@@ -289,15 +289,15 @@ namespace examples {
          // get control attribute
          temp = t.get_string( domain_clock__offset );
 
-         LOGT_A_INFO( domain_clock__offset + " ,  " + temp );
+         LOGT_INFO( domain_clock__offset + " ,  " + temp );
 
-      } catch( txml::XmlException& ex ) {
-         std::string w = ex.What();
-         LOGT_A_INFO( ex.what() );
+      } catch( txml::xml_exception& ex ) {
+         string w = ex.What();
+         LOGT_INFO( ex.what() );
 
       }
 
-      LOGT_A_INFO( "" );
+      LOGT_INFO( "" );
 
 
    }

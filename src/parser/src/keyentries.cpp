@@ -24,7 +24,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -56,9 +56,9 @@ www.lug-ottobrunn.de
 
 #include "xml_utl.h"
 #include "keyentries.h"
-#include "XmlNode.h"
+#include "xml_node.h"
 #include "xml_fs.h"
-#include "XmlException.h"
+#include "xml_exception.h"
 #include "xml_interface.h"
 
 #include "stringhelper.h"
@@ -193,34 +193,34 @@ namespace txml {
       _childcount = chc;
    }
 
-   std::string keyentry::Attr()const {
+   string keyentry::Attr()const {
       return _attr;
    }
-   void keyentry::attr( std::string const& a ) {
+   void keyentry::attr( string const& a ) {
       _attr = a;
    }
    bool keyentry::is_attr()const {
       return !_attr.empty();
    }
-   std::string keyentry::Value()const {
+   string keyentry::Value()const {
       return _value;
    }
-   void keyentry::Value( std::string const& v ) {
+   void keyentry::Value( string const& v ) {
       _value = v;
    }
-   std::string keyentry::Element()const {
+   string keyentry::Element()const {
       return _element;
    }
-   void keyentry::Element( std::string element ) {
+   void keyentry::Element( string element ) {
       _element = element;
    }
-   XmlNode const* keyentry::node()const {
+   xml_node const* keyentry::node()const {
       return _node;
    }
-   XmlNode* keyentry::node() {
+   xml_node* keyentry::node() {
       return _node;
    }
-   void keyentry::node( XmlNode* n ) {
+   void keyentry::node( xml_node* n ) {
       _node = n;
    }
    // for default inserter
@@ -246,7 +246,7 @@ namespace txml {
       return _element + double_colon + _attr;
    }
 
-   keyentries::keyentries( std::string const& key ): _keyentries() {
+   keyentries::keyentries( string const& key ): _keyentries() {
 
       vector<string> v0 = rlf_hstring::split( key, "." );
 
@@ -258,7 +258,7 @@ namespace txml {
 
    }
 
-   keyentries& keyentries::operator=( std::string const& key ) {
+   keyentries& keyentries::operator=( string const& key ) {
       _keyentries.clear();
       vector<string> v0 = rlf_hstring::split( key, "." );
 
@@ -294,7 +294,7 @@ namespace txml {
    bool keyentries::empty()const {
       return _keyentries.empty();
    }
-   //   void keyentries::add( std::string const& s ) {
+   //   void keyentries::add( string const& s ) {
    //      _keyentries.push_back( keyentry( s ) );
    //   }
    void keyentries::addEmpty() {
@@ -413,7 +413,7 @@ namespace txml {
 
    keyentry const& keyentries::operator[]( size_t i )const {
       if( _keyentries.empty() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_list_is_empty, msg_list_is_empty );
       }
 
@@ -422,7 +422,7 @@ namespace txml {
 
    keyentry& keyentries::operator[]( size_t i ) {
       if( _keyentries.empty() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_list_is_empty, msg_list_is_empty );
       }
 
@@ -431,7 +431,7 @@ namespace txml {
 
    keyentry const& keyentries::last()const {
       if( _keyentries.empty() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_list_is_empty, msg_list_is_empty );
       }
 
@@ -439,21 +439,21 @@ namespace txml {
    }
    keyentry& keyentries::last() {
       if( _keyentries.empty() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_list_is_empty, msg_list_is_empty );
       }
 
       return _keyentries[_keyentries.size() - 1];
    }
-   XmlNode const* keyentries::parentOfLast()const {
+   xml_node const* keyentries::parentOfLast()const {
       if( _keyentries.empty() ) {
-         throw XmlException( t_exception_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
+         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
                              enum_keylist_in_visitor_has_length_zero, msg_keylist_in_visitor_has_length_zero );
       }
 
       // parent is document
       if( _keyentries.size() == 1 ) {
-         XmlNode const*  n = _keyentries.begin()->node();
+         xml_node const*  n = _keyentries.begin()->node();
          return n->parent();
       }
 

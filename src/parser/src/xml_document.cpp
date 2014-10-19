@@ -52,7 +52,7 @@ www.lug-ottobrunn.de
 #include "wList.h"
 #include "alloccheck.h"
 
-#include "win32.h"
+
 
 using namespace std;
 

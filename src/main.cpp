@@ -24,7 +24,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -41,12 +41,12 @@ www.lug-ottobrunn.de
 
 #include <iostream>
 
-
-#include <tLog_Category_A.h>
+#include "tLog_Category_default.h"
 
 // demos
 #include "xml_interface.h"
-#include "XmlException.h"
+#include "xml_exception.h"
+
 
 
 #include "examples.h"
@@ -66,18 +66,9 @@ int main() {
 
 
 
-   //  int16_t a1 = 0;
-   //  int32_t b1 = 0;
-   //  blub( static_cast<tLayerID>(b1));
-   //tLayerID lid =  static_cast<tLayerID>(b1);
-
-   //size_t st = static_cast<int16_t>(lid);
-
-
-
    cout << "started" << endl;
 
-   string logfile = "test2";
+   string logfile = "xmltest";
    bool b = logger().setLogfile( logfile );
 
    if( b == false ) {
@@ -89,7 +80,7 @@ int main() {
 
 
 
-   LOGT_A_INFO( " Start1  " );
+   LOGT_INFO( " Start1  " );
 
    try {
 
@@ -115,7 +106,7 @@ int main() {
       examples::set_element_attribute_values();
 
    } catch( std::runtime_error& rt ) {
-      LOGT_A_FATAL( string( "Ex rt: " ) + rt.what() );
+      LOGT_FATAL( string( "Ex rt: " ) + rt.what() );
 
    }
 

@@ -13,7 +13,7 @@ QMAKE_CXXFLAGS_DEBUG += -Wshadow
 QMAKE_CXXFLAGS_DEBUG += -Wextra
 QMAKE_CXXFLAGS_DEBUG += -Wunused-parameter
 QMAKE_CXXFLAGS_DEBUG -= -Wwrite-strings
-QMAKE_CXXFLAGS_DEBUG -= -Wunused-variable
+QMAKE_CXXFLAGS_DEBUG += -Wno-unused-variable
 QMAKE_CXXFLAGS_DEBUG += -Weffc++
 
 QMAKE_CXXFLAGS_RELEASE += -O2
@@ -24,7 +24,7 @@ QMAKE_CXXFLAGS_RELEASE += -Wshadow
 QMAKE_CXXFLAGS_RELEASE += -Wextra
 QMAKE_CXXFLAGS_RELEASE += -Wunused-parameter
 QMAKE_CXXFLAGS_RELEASE -= -Wwrite-strings
-QMAKE_CXXFLAGS_RELEASE -= -Wunused-variable
+QMAKE_CXXFLAGS_RELEASE += -Wno-unused-variable
 QMAKE_CXXFLAGS_RELEASE += -Weffc++
 QMAKE_CXXFLAGS_RELEASE += -msse
 
@@ -44,22 +44,11 @@ message("qmake xmlparser1")
 SOURCES += src/main.cpp \
     src/demo.cpp \
     src/ubuntu32_create.cpp \
-    src/parser/src/XmlText.cpp \
-    src/parser/src/XmlReadText.cpp \
-    src/parser/src/XmlPrinter.cpp \
-    src/parser/src/XmlNode.cpp \
-    src/parser/src/XmlLocator.cpp \
-    src/parser/src/XmlElement.cpp \
-    src/parser/src/XmlDocument.cpp \
-    src/parser/src/XmlDeclaration.cpp \
-    src/parser/src/XmlComment.cpp \
-    src/parser/src/XmlAttribute.cpp \
     src/parser/src/xml_exception.cpp \
     src/parser/src/xml_builder.cpp \
     src/parser/src/txml_utl.cpp \
     src/parser/src/txml_interfaceimpl.cpp \
     src/parser/src/txml_fs.cpp \
-    src/parser/src/strings.cpp \
     src/parser/src/raw_position.cpp \
     src/parser/src/keyentries.cpp \
     src/parser/src/alloccheck.cpp \
@@ -67,12 +56,21 @@ SOURCES += src/main.cpp \
     src/hstring/stringhelper.cpp \
     src/hstring/gettokens.cpp \
     src/log/tLogImpl.cpp \
-    src/log/tLog.cpp
+    src/log/tLog.cpp \
+    src/parser/src/xml_element.cpp \
+    src/parser/src/xml_comment.cpp \
+    src/parser/src/xml_declaration.cpp \
+    src/parser/src/xml_document.cpp \
+    src/parser/src/xml_locator.cpp \
+    src/parser/src/xml_attribute.cpp \
+    src/parser/src/xml_node.cpp \
+    src/parser/src/xml_printer.cpp \
+    src/parser/src/xml_text.cpp \
+    src/parser/src/xml_read_text.cpp
 
 
 HEADERS += \
     src/examples.h \
-    src/parser/interface/XmlException.h \
     src/parser/interface/xml_interface.h \
     src/parser/interface/tLogImpl.h \
     src/parser/interface/tLogEnum.h \
@@ -84,20 +82,9 @@ HEADERS += \
     src/parser/interface/tLog_Category_B.h \
     src/parser/interface/tLog_Category_A.h \
     src/parser/interface/tLfmCL.h \
-    src/parser/src/XmlVisitor.h \
-    src/parser/src/XmlText.h \
-    src/parser/src/XmlPrinter.h \
-    src/parser/src/XmlNode.h \
-    src/parser/src/XmlLocator.h \
-    src/parser/src/XmlElement.h \
-    src/parser/src/XmlDocument.h \
-    src/parser/src/XmlDeclaration.h \
-    src/parser/src/XmlComment.h \
-    src/parser/src/XmlAttribute.h \
     src/parser/src/xml_utl.h \
     src/parser/src/xml_fs.h \
     src/parser/src/xml_builder.h \
-    src/parser/src/win32.h \
     src/parser/src/rawxml_position.h \
     src/parser/src/keyentries.h \
     src/parser/src/alloccheck.h \
@@ -113,20 +100,30 @@ HEADERS += \
     src/log/tLog_Category_D.h \
     src/log/tLog_Category_C.h \
     src/log/tLog_Category_B.h \
-    src/log/tLog_Category_A.h \
     src/log/tLfmCL.h \
     src/log/tLfm.h \
     src/txtrw/wList.h \
     src/txtrw/rList.h \
-    src/parser/src/XmlStrings_.h \
-    src/boost/boost_cstdint.h
+    src/boost/boost_cstdint.h \
+    src/parser/src/xml_element.h \
+    src/parser/src/xml_attribute.h \
+    src/parser/src/xml_comment.h \
+    src/parser/src/xml_declaration.h \
+    src/parser/src/xml_document.h \
+    src/parser/src/xml_locator.h \
+    src/parser/src/xml_node.h \
+    src/parser/src/xml_printer.h \
+    src/parser/src/xml_text.h \
+    src/parser/src/xml_visitor.h \
+    src/parser/interface/xml_exception.h \
+    src/boost/boost_cstdint.h \
+    src/log/tLogCategories.h
 
 
 
 LIBS += -lpthread
 LIBS += -lboost_system #-lboost_system-mt
 LIBS += -lboost_filesystem #-lboost_filesystem-mt
-
 
 cache()
 

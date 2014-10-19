@@ -24,7 +24,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -56,7 +56,7 @@ www.lug-ottobrunn.de
 #include <boost/thread/mutex.hpp>
 
 
-#include "tLog_Category_A.h"
+#include "tLog_Category_default.h"
 
 #include "xml_utl.h"
 #include "xml_fs.h"
@@ -64,7 +64,7 @@ www.lug-ottobrunn.de
 #include "stringhelper.h"
 #include "alloccheck.h"
 
-#include "win32.h"
+
 using namespace std;
 
 
@@ -218,7 +218,7 @@ namespace alloccheck {
 
          if( it != allocList.end() ) {
             string ll = grepMarker + " 'allocs map has used key':  " + rlf_hstring::toString( ( int )key ) + ", info: " + info + "'";
-            LOGT_A_INFO( ll );
+            LOGT_INFO( ll );
             exit( 0 );
          }
 
@@ -255,7 +255,7 @@ namespace alloccheck {
       size_t magic_at_end = *( ( size_t* )p_magicend );
 
       if( magic != magic_at_end ) {
-         LOGT_A_INFO( grepMarker + " buffer overflow at: " + string( info ) );
+         LOGT_INFO( grepMarker + " buffer overflow at: " + string( info ) );
          exit( 0 );
       }
 
@@ -274,7 +274,7 @@ namespace alloccheck {
          if( it != allocList.end() ) {
             allocList.erase( key );
          } else {
-            LOGT_A_INFO( grepMarker + " delete nicht in map gefunden: " + string( info ) );
+            LOGT_INFO( grepMarker + " delete nicht in map gefunden: " + string( info ) );
             exit( 0 );
          }
 
@@ -300,7 +300,7 @@ namespace alloccheck {
 
       if( check.alloccount != allocList2.size() ) {
          int diff = static_cast<int>( check.alloccount ) - static_cast<int>( lastalloccount );
-         LOGT_A_INFO( grepMarker + " Error in 'delete': missingcount: " + rlf_hstring::toString( diff ) );
+         LOGT_INFO( grepMarker + " Error in 'delete': missingcount: " + rlf_hstring::toString( diff ) );
       }
 
 

@@ -27,7 +27,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -42,12 +42,12 @@ www.lug-ottobrunn.de
 */
 
 namespace txml {
-   class XmlNode;
+   class xml_node;
 }
 
 namespace demo {
 
-   void xml_dump_to_stdout( txml::XmlNode* pParent, unsigned int indent );
+   void xml_dump_to_stdout( txml::xml_node* pParent, unsigned int indent );
    void build_simple_doc( );
    void write_simple_doc2( );
    void write_app_settings_doc( );

@@ -54,7 +54,7 @@ www.lug-ottobrunn.de
 #include "xml_utl.h"
 #include "alloccheck.h"
 
-#include "win32.h"
+
 
 
 

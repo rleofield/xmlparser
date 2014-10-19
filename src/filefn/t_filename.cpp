@@ -56,7 +56,7 @@ namespace rlf_filefn {
          return  sl[0];
       }
 
-      std::string remove_dot_at_front( std::string const& file ) {
+      string remove_dot_at_front( string const& file ) {
          if( file.size() == 0 ) {
             return string();
          }
@@ -69,8 +69,8 @@ namespace rlf_filefn {
 
          return file;
       }
-      std::string correct_slash_at_end( std::string const& path ) {
-         std::string temp = path;
+      string correct_slash_at_end( string const& path ) {
+         string temp = path;
 
          if( temp.size() == 0 ) {
             return string();
@@ -205,7 +205,7 @@ namespace rlf_filefn {
    public:
       fnimpl(): path(), base(), ext() {}
       fnimpl( fnimpl const& fi ): path( fi.path ), base( fi.base ), ext( fi.ext ) {}
-      fnimpl( const std::string& path_, const std::string& base_, const std::string& extension_ )
+      fnimpl( const string& path_, const string& base_, const string& extension_ )
          : path( path_ ), base( base_ ), ext( extension_ ) {
 
 
@@ -248,7 +248,7 @@ namespace rlf_filefn {
    }
 
    t_filename::t_filename(
-      const std::string& path_, const std::string& base_, const std::string& extension_ )
+      const string& path_, const string& base_, const string& extension_ )
       : impl( new fnimpl( path_, base_, extension_ ) ) {}
 
    t_filename::t_filename( const t_filename& fn )

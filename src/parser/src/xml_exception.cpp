@@ -24,7 +24,7 @@ distribution.
 
 Modified by Richard Albrecht:
 - adapted, using more C++
-- locator 'XmlLocator' for simple searching/changing the xml document
+- locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
 - class 'rawxml_position' for moving through a vector<char>,
 - logger (can be used separately)
@@ -58,9 +58,9 @@ www.lug-ottobrunn.de
 #include <typeinfo>
 
 
-#include "XmlException.h"
+#include "xml_exception.h"
 #include "xml_utl.h"
-#include "XmlDocument.h"
+#include "xml_document.h"
 #include "rawxml_position.h"
 #include "xml_fs.h"
 
@@ -72,7 +72,7 @@ using namespace std;
 namespace txml {
 
 
-   std::string to_string( exception_enum e ) {
+   string to_string( exception_enum e ) {
       if( e == enum_none ) {
          return msg_none;
       }
@@ -200,17 +200,17 @@ namespace txml {
       return "unknown enum";
    }
 
-   XmlException::XmlException( t_exception_line_file_method const& lfmIn, exception_enum e, std::string const& in )
+   xml_exception::xml_exception( t_line_file_method const& lfmIn, exception_enum e, string const& in )
       : runtime_error( in.c_str() ), _enum( e ), _what( in ), lfm( lfmIn )   {}
 
-   size_t XmlException::line()const {
+   size_t xml_exception::line()const {
       return lfm.line();
    }
-   std::string const& XmlException::file()const {
+   string const& xml_exception::file()const {
       return lfm.file();
    }
 
-   std::string const& XmlException::method()const {
+   string const& xml_exception::method()const {
       return lfm.method();
    }
 
