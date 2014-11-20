@@ -39,11 +39,13 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_DECLARATION_H
-#define RL_XML_DECLARATION_H
+#ifndef RLF_XML_DECLARATION_H
+#define RLF_XML_DECLARATION_H
 
 
 #include "xml_node.h"
+
+
 
 namespace txml {
 
@@ -54,7 +56,7 @@ namespace txml {
    class xml_declaration : public xml_node {
 
       xml_declaration()   :
-         xml_node( xml_node::RL_XML_DECLARATION ),
+         xml_node( xml_node::eNodeType::DECLARATION ),
          _version( "1.0" ),
          _encoding(),
          _standalone() {
@@ -63,7 +65,7 @@ namespace txml {
       xml_declaration( const xml_declaration& copy );
       xml_declaration& operator=( const xml_declaration& copy );
 
-      static void* operator new( size_t size, t_alloc_line_file_method const& lfm );
+      static void* operator new( size_t size, t_lfm const& lfm );
       static void operator delete( void* );
 
       std::string _version;
@@ -72,8 +74,8 @@ namespace txml {
 
 
    public:
-      static xml_node* create( t_alloc_line_file_method const& lfmcIn ) ;
-      static xml_node* create() ;
+      static xml_node* create( t_lfm const& lfmcIn ) ;
+      //static xml_node* create() ;
 
       virtual ~xml_declaration()   {}
 

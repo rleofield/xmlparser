@@ -40,10 +40,6 @@ www.lug-ottobrunn.de
 
 
 #include <vector>
-#include <boost/assign.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <string>
 #include <iostream>
@@ -413,8 +409,8 @@ namespace txml {
 
    keyentry const& keyentries::operator[]( size_t i )const {
       if( _keyentries.empty() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_list_is_empty, msg_list_is_empty );
+         throw xml_exception( tlog_lfm_,
+                              eException::list_is_empty, msg_list_is_empty );
       }
 
       return _keyentries[i];
@@ -422,8 +418,8 @@ namespace txml {
 
    keyentry& keyentries::operator[]( size_t i ) {
       if( _keyentries.empty() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_list_is_empty, msg_list_is_empty );
+         throw xml_exception( tlog_lfm_,
+                              eException::list_is_empty, msg_list_is_empty );
       }
 
       return _keyentries[i];
@@ -431,24 +427,24 @@ namespace txml {
 
    keyentry const& keyentries::last()const {
       if( _keyentries.empty() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_list_is_empty, msg_list_is_empty );
+         throw xml_exception( tlog_lfm_,
+                              eException::list_is_empty, msg_list_is_empty );
       }
 
       return _keyentries[_keyentries.size() - 1];
    }
    keyentry& keyentries::last() {
       if( _keyentries.empty() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_list_is_empty, msg_list_is_empty );
+         throw xml_exception( tlog_lfm_,
+                              eException::list_is_empty, msg_list_is_empty );
       }
 
       return _keyentries[_keyentries.size() - 1];
    }
    xml_node const* keyentries::parentOfLast()const {
       if( _keyentries.empty() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_keylist_in_visitor_has_length_zero, msg_keylist_in_visitor_has_length_zero );
+         throw xml_exception( tlog_lfm_,
+                              eException::keylist_in_visitor_has_length_zero, msg_keylist_in_visitor_has_length_zero );
       }
 
       // parent is document

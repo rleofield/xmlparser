@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_PRINTER_H
-#define RL_XML_PRINTER_H
+#ifndef RLF_PRINTER_H
+#define RLF_PRINTER_H
 
 #include <string>
 #include <list>
@@ -96,10 +96,10 @@ namespace txml {
          return _buffer.size();
       }
 
-      const std::string& Buffer()                  {
+      const std::string& string_buffer()                  {
          return _buffer;
       }
-      void Buffer( std::list<std::string> &l )const;
+
 
    private:
       void indent()   {

@@ -109,6 +109,7 @@ namespace rlf_hstring {
    }
 
 
+   void string_to_list( std::string const& s, std::list<std::string>& l ) ;
 
 
    namespace {
@@ -306,6 +307,12 @@ namespace rlf_hstring {
    std::string insert_at( std::string const& str, const std::string& insert, size_t pos ) ;
 
 
+   // merge with delimiter
+   std::string merge( std::vector<std::string>  const& v, std::string const& sep ) ;
+
+
+
+
    ////////
    // zerlegen in Tokens
    ////////
@@ -315,7 +322,7 @@ namespace rlf_hstring {
    std::vector<std::string> split( std::string const& l, char delim );
 
 
-} // end ns    namespace hstring {
+} // end ns
 
 
 

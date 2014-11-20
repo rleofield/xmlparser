@@ -41,8 +41,6 @@ www.lug-ottobrunn.de
 
 #include <boost/algorithm/string.hpp>
 
-//#define _CRT_SECURE_NO_WARNINGS 
-//#define _SCL_SECURE_NO_WARNINGS
 
 #include "xml_declaration.h"\
  
@@ -53,35 +51,27 @@ www.lug-ottobrunn.de
 #include "alloccheck.h"
 
 
-
-
-using alloccheck::t_alloc_line_file_method;
-
 namespace txml {
    using std::string;
    using std::vector;
 
-   void* xml_declaration::operator new( size_t size, t_alloc_line_file_method const& lfm ) {
-      void* p = alloccheck::LocalAlloc( size, lfm );
+   void* xml_declaration::operator new( size_t size, t_lfm const& lfm ) {
+      void* p = alloccheck::checked_alloc( size, lfm );
       return p;
    }
 
 
    void xml_declaration::operator delete( void* p ) {
       xml_node* n = reinterpret_cast<xml_node*>( p );
-      alloccheck::LocalDelete( n );
+      alloccheck::checked_delete( n );
    }
 
-   xml_node* xml_declaration::create( t_alloc_line_file_method const& lfmcIn ) {
+   xml_node* xml_declaration::create( t_lfm const& lfmcIn ) {
       xml_declaration* p = new( lfmcIn ) xml_declaration();
       //p->setStandalone("yes");
       return p;
    }
 
-
-   xml_node* xml_declaration::create() {
-      return create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) );
-   }
 
    void xml_declaration::getAttributes( string const& temp ) {
 
@@ -130,10 +120,10 @@ namespace txml {
       pos.skip();
 
       if( !pos.starts_with( declaration_start ) ) { //"<?xml"
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_parsing_declaration,
-                             msg_parsing_declaration  + ": '" +
-                             pos.next25() + "'" );
+         throw xml_exception( tlog_lfm_,
+                              eException::parsing_declaration,
+                              msg_parsing_declaration  + ": '" +
+                              pos.next25() + "'" );
       }
 
       string temp = pos.next_until( declaration_end ); // "?>"
@@ -144,7 +134,7 @@ namespace txml {
    }
 
    xml_declaration::xml_declaration( const xml_declaration& copy_ )
-      : xml_node( xml_node::RL_XML_DECLARATION ), _version( copy_._version ), _encoding( copy_._encoding ), _standalone( copy_._standalone ) {
+      : xml_node( xml_node::eNodeType::DECLARATION ), _version( copy_._version ), _encoding( copy_._encoding ), _standalone( copy_._standalone ) {
       copy_.copy( *this );
    }
 
@@ -192,7 +182,7 @@ namespace txml {
 
 
    xml_node* xml_declaration::clone() const {
-      xml_declaration* pclone = new( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) ) xml_declaration();
+      xml_declaration* pclone = new( tlog_lfm_ ) xml_declaration();
       copy( *pclone );
       return pclone;
    }

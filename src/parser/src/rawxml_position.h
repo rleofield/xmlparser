@@ -18,8 +18,8 @@
  ------------------------------------------------------------------------------
 */
 
-#ifndef RL_XML_RAWXMLPOSITION_H
-#define RL_XML_RAWXMLPOSITION_H
+#ifndef RLF_RAWXMLPOSITION_H
+#define RLF_RAWXMLPOSITION_H
 
 
 #include <vector>
@@ -31,11 +31,9 @@
 namespace txml {
 
    typedef std::vector<int8_t> vector8_t;
-#ifdef _DEBUG
+
    const bool useNext100 = true;
-#else
-   const bool useNext100 = true;
-#endif
+
    class rawxml_position {
 
    public:
@@ -58,7 +56,9 @@ namespace txml {
       rawxml_position( vector8_t const& v );
       rawxml_position( std::string  const& v );
 
-      vector8_t::const_iterator end(){ return _rawxml.end(); }
+      vector8_t::const_iterator end() {
+         return _rawxml.end();
+      }
 
 
       // next bytes for the debugger, "" if release

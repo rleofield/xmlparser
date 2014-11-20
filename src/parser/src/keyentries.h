@@ -19,8 +19,8 @@
 */
 
 
-#ifndef RL_XML_KEYENTRIES_H
-#define RL_XML_KEYENTRIES_H
+#ifndef RLF_KEYENTRIES_H
+#define RLF_KEYENTRIES_H
 
 #include <string>
 #include <vector>

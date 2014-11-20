@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_ATTRIBUTE_H
-#define RL_XML_ATTRIBUTE_H
+#ifndef RLF_ATTRIBUTE_H
+#define RLF_ATTRIBUTE_H
 
 
 #include "keyentries.h"

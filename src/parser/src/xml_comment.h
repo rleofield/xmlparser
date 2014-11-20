@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_COMMENT_H
-#define RL_XML_COMMENT_H
+#ifndef RLF_COMMENT_H
+#define RLF_COMMENT_H
 
 
 #include "xml_node.h"
@@ -55,14 +55,14 @@ namespace txml {
    class xml_comment : public xml_node {
 
 
-      xml_comment() : xml_node( xml_node::RL_XML_COMMENT ) {}
+      xml_comment() : xml_node( xml_node::eNodeType::COMMENT ) {}
       xml_comment( const xml_comment& );
       xml_comment& operator=( const xml_comment& base );
-      static void* operator new( size_t, t_alloc_line_file_method const& lfm );
+      static void* operator new( size_t, t_lfm const& lfm );
 
    public:
       static void operator delete( void* );
-      static xml_node* create( t_alloc_line_file_method const& lfm );
+      static xml_node* create( t_lfm const& lfm );
       static xml_node* create();
 
       virtual ~xml_comment() {}

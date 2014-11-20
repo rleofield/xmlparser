@@ -57,9 +57,8 @@ www.lug-ottobrunn.de
 
 
 
-
 using namespace std;
-using alloccheck::t_alloc_line_file_method;
+
 
 namespace txml {
 
@@ -187,14 +186,17 @@ namespace txml {
          --p;
          *p = ( char )( ( input | BYTE_MARK ) & BYTE_MASK );
          input >>= 6;
+
       case 3:
          --p;
          *p = ( char )( ( input | BYTE_MARK ) & BYTE_MASK );
          input >>= 6;
+
       case 2:
          --p;
          *p = ( char )( ( input | BYTE_MARK ) & BYTE_MASK );
          input >>= 6;
+
       case 1:
          --p;
          *p = ( char )( input | FIRST_BYTE_MARK[length] );
@@ -300,7 +302,7 @@ namespace txml {
             unicode = xmlinterface::to_int( s );
          }
 
-         if( encoding == ENCODING_UTF8 ) {
+         if( encoding == Encoding::UTF8 ) {
             return utf32_to_utf8( static_cast<unsigned long>( unicode ) );
          }
 
@@ -323,8 +325,8 @@ namespace txml {
    string next_char( rawxml_position& pos, Encoding encoding ) {
       int length = 1;
 
-      if( encoding == ENCODING_UTF8 ) {
-         length = utf8ByteTable[ (uint8_t)*pos ];
+      if( encoding == Encoding::UTF8 ) {
+         length = utf8ByteTable[( uint8_t ) * pos ];
       }
 
       if( length == 1 ) {
@@ -411,20 +413,20 @@ namespace txml {
       return notPreserveWhiteSpace( text );
    }
 
-   void* xml_text::operator new( size_t size, t_alloc_line_file_method const& lfm ) {
-      return LocalAlloc( size, lfm );
+   void* xml_text::operator new( size_t size, t_lfm const& lfm ) {
+      return alloccheck::checked_alloc( size, lfm );
    }
    void xml_text::operator delete( void* p ) {
-      alloccheck::LocalDelete( p );
+      alloccheck::checked_delete( p );
    }
 
-   xml_text* xml_text::create( t_alloc_line_file_method const& lfmcIn, const string& value_ ) {
+   xml_text* xml_text::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_text* p = new( lfmcIn ) xml_text( value_ );
       return p;
    }
 
    xml_text* xml_text::create( const string& value_ ) {
-      return create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), value_ );
+      return create( tlog_lfm_, value_ );
    }
 
 
@@ -434,8 +436,8 @@ namespace txml {
    }
 
    void xml_text::parse( rawxml_position& ) {
-      throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                          enum_parse_text, msg_parse_text );
+      throw xml_exception( tlog_lfm_,
+                           eException::parse_text, msg_parse_text );
    }
 
    const string xml_text::value() const {
@@ -458,7 +460,7 @@ namespace txml {
    }
 
    xml_node* xml_text::clone() const {
-      xml_text* pclone = new( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) ) xml_text( "" );
+      xml_text* pclone = new( tlog_lfm_ ) xml_text( "" );
       copy( *pclone );
       return pclone;
    }

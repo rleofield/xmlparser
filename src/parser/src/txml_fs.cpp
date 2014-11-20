@@ -38,19 +38,9 @@ www.rleofield.de
 Linux User Group Ottobrunn / M�nchen S�dost (LOMSO)
 www.lug-ottobrunn.de
 */
-#ifdef _WIN32
-#pragma warning( disable : 4291 ) // Warning   no matching operator delete found; memory will not be freed if initialization throws an exception
-#pragma warning( disable : 4800 ) //
-#pragma warning( disable : 4996 ) // Warning   This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning( disable : 4804 ) // Warning   unsafe use of type 'bool' in operation
-#pragma warning( disable:4996 4100) // _CRT_SECURE_NO_WARNINGS
-#endif
+
 
 #include <vector>
-#include <boost/assign.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <string>
 #include <iostream>

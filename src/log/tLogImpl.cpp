@@ -31,9 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tLogImpl.h"
 
-#ifdef _WIN32
-#pragma warning( disable:4996 4100 4101) // _CRT_SECURE_NO_WARNINGS
-#endif
+
 
 
 using std::stringstream;
@@ -118,7 +116,8 @@ namespace rlf_tlog {
          size_t i = file.rfind( pathSlash );
 
          if( i  != string::npos ) {
-            return file.substr( 0, i + 1 );
+            string temp = file.substr( 0, i + 1 );
+            return temp;
          }
 
          string temp = working_directory();
@@ -129,7 +128,8 @@ namespace rlf_tlog {
          size_t i = file.rfind( slash );
 
          if( i  != string::npos ) {
-            return file.substr( i + 1 );
+            string temp = file.substr( i + 1 );
+            return temp;
          }
 
          return file;
@@ -243,9 +243,9 @@ namespace rlf_tlog {
    }
 
    tCat cats[8] = { _def, _rimg, _A, _B, _C, _D, _tif };
-	 std::vector<tCat> tLogImpl::_cats(cats,cats + 8);
-	 tLev levs[6] = { _DEBUG_, _INFO, _WARN, _ERROR_, _FATAL, _NONE };
-	 std::vector<tLev> tLogImpl::_levs( levs, levs + 6 );
+   std::vector<tCat> tLogImpl::_cats( cats, cats + 8 );
+   tLev levs[6] = { _DEBUG_, _INFO, _WARN, _ERROR_, _FATAL, _NONE };
+   std::vector<tLev> tLogImpl::_levs( levs, levs + 6 );
 
    string tLogImpl::to_string( eLevel lev_ )const {
       std::vector<tLev>::const_iterator f = find( _levs.begin(), _levs.end(), lev_ );

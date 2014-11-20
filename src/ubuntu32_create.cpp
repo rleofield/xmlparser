@@ -55,10 +55,10 @@ namespace examples {
 
       string w;
       // make an instance of the Xml interface
-      xmlinterface::tXmlInterface t;
+
 
       try {
-
+         xmlinterface::tXmlInterface t;
          // parse first
          t.parse( xmlTest );
 
@@ -71,7 +71,7 @@ namespace examples {
       } catch( txml::xml_exception& ex ) {
          w = ex.What();
          LOGT_INFO( ex.what() );
-         LOGT_INFO( ex.file_line_method() );
+         LOGT_INFO( static_cast<std::string>( ex ) );
       }
 
       LOGT_INFO( "" );
@@ -82,7 +82,6 @@ namespace examples {
 
       // hier den generierten Code aus ubuntu32_keys.txt einfügen
 
-      const string domain_acpi = "domain.acpi";  //   element:    = ''
       const string domain_name = "domain.name";  //   element:    = 'ubuntu32'
       const string domain_uuid = "domain.uuid";  //   element:    = '8aa438a7-07da-f904-6c53-96adf2c6188b'
       const string domain_memory = "domain.memory";  //   element:    = '4194304'
@@ -99,7 +98,7 @@ namespace examples {
       const string domain_features_apic = "domain.features.apic";  //   element:    = ''
       const string domain_features_pae = "domain.features.pae";  //   element:    = ''
       const string domain_clock = "domain.clock";  //   element:    = ''
-      const string domain_clock__offset = "domain.clock:offset";  //   attribute:  = 'set_element_attribute_values(), test, new test clock, seond try'
+      const string domain_clock__offset = "domain.clock:offset";  //   attribute:  = 'utc'
       const string domain_on_poweroff = "domain.on_poweroff";  //   element:    = 'destroy'
       const string domain_on_reboot = "domain.on_reboot";  //   element:    = 'restart'
       const string domain_on_crash = "domain.on_crash";  //   element:    = 'restart'
@@ -204,7 +203,6 @@ namespace examples {
 
       xmlinterface::tXmlInterface instance;
       instance.parse( xmlTestOut );
-      instance.create( domain_acpi, "" );
       instance.create( domain_name, "ubuntu32" );
       instance.create( domain_uuid, "8aa438a7-07da-f904-6c53-96adf2c6188b" );
       instance.create( domain_memory, "4194304" );
@@ -221,7 +219,7 @@ namespace examples {
       instance.create( domain_features_apic, "" );
       instance.create( domain_features_pae, "" );
       instance.create( domain_clock, "" );
-      instance.create( domain_clock__offset, "set_element_attribute_values(), test, new test clock, seond try" );
+      instance.create( domain_clock__offset, "utc" );
       instance.create( domain_on_poweroff, "destroy" );
       instance.create( domain_on_reboot, "restart" );
       instance.create( domain_on_crash, "restart" );

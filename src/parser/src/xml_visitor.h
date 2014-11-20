@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_VISITOR_H
-#define RL_XML_VISITOR_H
+#ifndef RLF_VISITOR_H
+#define RLF_VISITOR_H
 
 
 namespace txml {
@@ -60,7 +60,7 @@ namespace txml {
       'true' == recursive parsing
       'false' == no children of this node visited
       Accept() is called on the xml_document, although all nodes suppert Visiting.
-Visitor lets you define a new operation without changing the classes of the elements on which it operates.
+   Visitor lets you define a new operation without changing the classes of the elements on which it operates.
       @sa xml_node::Accept()
    */
    class xml_visitor {

@@ -26,7 +26,7 @@ Modified by Richard Albrecht:
 - adapted, using more C++
 - locator 'xml_locator' for simple searching/changing the xml document
 - code simplified, most of the comments removed, code is self explaning
-- class 'rawxml_position' for moving through a vector<char>,
+- class 'rawbuffer_pos' for moving through a vector<char>,
 - logger (can be used separately)
 - some help methods for strings (can be used separately)
 - check of new/delete (code is a small howto overload new/delete example)
@@ -41,33 +41,17 @@ www.lug-ottobrunn.de
 
 #include <vector>
 
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <typeinfo>
-
-
-#include <boost/assign.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/lexical_cast.hpp>
 
+//#include "stringhelper.h"
+#include "tLog_Category_A.h"
+#include "tLfm.h"
+using rlf_tlfm::t_lfm;
 
-#include "tLog_Category_default.h"
-
-#include "xml_utl.h"
-#include "xml_fs.h"
-
-#include "stringhelper.h"
 #include "alloccheck.h"
 
-
 using namespace std;
-
-
 
 
 /**
@@ -82,6 +66,13 @@ using namespace std;
      */
 
 namespace alloccheck {
+
+   inline std::string to_str( int val ) {
+      std::ostringstream o;
+      o << std::fixed << val ;
+      return  o.str();
+   }
+
 
    template<bool v>
    struct int2type {
@@ -102,18 +93,18 @@ namespace alloccheck {
    }
 
 
-   tAlloccheck& alloccheckInstance() {
-      static tAlloccheck _alloccheckInstance;
+   t_alloccheck& alloccheckInstance() {
+      static t_alloccheck _alloccheckInstance;
       return  _alloccheckInstance;
    }
 
    const char pathSlash = '/';
 
-   string getFilennameFromPath( string const&  path_file ) {
+   string extractFile( string const&  path_file ) {
       size_t i = path_file.rfind( pathSlash );
 
       if( i  != string::npos ) {
-         return path_file.substr( i );
+         return "'" + path_file.substr( i + 1 ) + "'";
       }
 
       //slash not found
@@ -140,56 +131,56 @@ namespace alloccheck {
 
 
 
-   // statische Marker im Logfile,
-   //   damit können mit grep die wichtigen Logzeilen gefiltert werden
-   string grepMarker = "xmldemotest";
+   // marker string in log,
+   //   useful for searching with grep in logs
+   string grepMarker = "shp";
 
    //////////////////////////////////////////////////////////////////////////////////////
-   // wird von new() aufgerufen, protokolliert Zeile, Name der Methode, Name der Klasse
-   void* LocalAlloc( int2type<false>, size_t size, t_alloc_line_file_method const& )  {
+   // called by new(), logs line, method name, class name
+   void* checked_alloc( int2type<false>, size_t size, rlf_tlfm::t_lfm const& )  {
       char* p = ::new char[size];
       return p;
    }
 
 
-   void* LocalAlloc( int2type<true>, size_t size, t_alloc_line_file_method const& lfmcIn )  {
+   void* checked_alloc( int2type<true>, size_t size, rlf_tlfm::t_lfm const& lfm )  {
 
 
-      // es wird Speicher mit new angefordert, + sizeof(AllocHeader) mehr + 64 bit for magic number at end
+      // request raw memory, size += sizeof(AllocHeader) + magic number at begin and end of memory ( 2 x 32/64bit)
       char* p = ::new( nothrow ) char[sizeof( alloc_header ) + size + sizeof( size_t )];
 
-      if( NULL == p ) {
-         throw "allocation fails : no free memory";
+      if( nullptr == p ) {
+         throw "allocation fails : no free memory available";
       }
 
-      char* p_start = p + sizeof( alloc_header );
-      char* p_magicend = p + sizeof( alloc_header ) + size;
+      auto p_start = p + sizeof( alloc_header );
+      auto p_magicend = p + sizeof( alloc_header ) + size;
 
-      size_t line = lfmcIn.line();
-      string file = lfmcIn.file();
-      string method = lfmcIn.method();
+      auto line = lfm.line();
+      auto file = lfm.file();
+      auto method = lfm.method();
 
       // strip path from file
-      file = getFilennameFromPath( file );
+      file = extractFile( file );
 
       // clip file, method and class names
       file = clip_at_pos( file, maxalloc - 1 );
       method = clip_at_pos( method, maxalloc - 1 );
 
-      alloc_header* pHeader = ( alloc_header* )p;
+      auto pHeader = reinterpret_cast<alloc_header*>(p);
 
       if( file.size() > maxalloc - 1 ) {
          file = file.substr( 0, maxalloc - 1 );
       }
 
-      tAlloccheck& check = alloccheckInstance();
+      auto & check = alloccheckInstance();
 
 
       // build info message for logging
-      string info = "size: " + rlf_hstring::toString( ( int )size ) + "/" + rlf_hstring::toString( ( int )check.totalalloc )
-                    + ", file: " +  file
-                    + ", method: " +  method
-                    + ", line: " + rlf_hstring::toString( ( int )line );
+      auto info = "alloc/sum: " + to_str( ( int )size ) + "/" + to_str( check.totalalloc() )
+                    + ", fn: " +  file
+                    + ", m: " +  method
+                    + ", l: " + to_str( line );
 
       // clip info
       if( info.length() > maxallocinfo - 1 ) {
@@ -203,118 +194,142 @@ namespace alloccheck {
       pHeader->file[0] = 0;
       pHeader->info[0] = 0;
 
+      // use low level string functions
       ::strncat( pHeader->file, file.c_str(), file.size() );
       ::strncat( pHeader->info, info.c_str(), info.size() );
 
-      *( ( size_t* )p_magicend ) = pHeader->magic;
+      *( reinterpret_cast<size_t*>(p_magicend) ) = pHeader->magic;
 
-      size_t key = ( size_t )pHeader;
+      auto key = reinterpret_cast< size_t>(pHeader);
       {
          //nsl::tLock l(m);
-         check.alloccount++;
-         check.totalalloc += static_cast<int>( size );
-         tAllocMap& allocList = check.getMutableAlloclist();
-         allocIterator it = allocList.find( key );
+         check.incr_alloccount();
+         check.totalalloc_add( static_cast<int>( size ) );
+         auto & allocList = check.getMutableAlloclist();
+         auto it = allocList.find( key );
 
          if( it != allocList.end() ) {
-            string ll = grepMarker + " 'allocs map has used key':  " + rlf_hstring::toString( ( int )key ) + ", info: " + info + "'";
-            LOGT_INFO( ll );
+            string ll = grepMarker + " 'allocs map has used key':  " + to_str( key ) + ", info: " + info + "'";
+            LOGT_A_INFO( ll );
             exit( 0 );
          }
 
          allocList[key] = info;
       }
-      string logLine = grepMarker + " Alloc: count:  " + rlf_hstring::toString( ( float )check.alloccount ) + ", info: " + info;
-      //LOGT_INFO( logLine );
-      return ( void* )( p_start );
+      auto logLine = grepMarker + ", alloc, cnt: " + to_str( check.alloccount() ) + ", info: " + info;
+      LOGT_A_INFO( logLine );
+      return p_start;
 
    }
    ////////////////////////////////////////////////////////////////////////////////////////////
    // wird von delete() aufgerufen
-   void LocalDelete( int2type<false>, void* p )  {
+   void checked_delete( int2type<false>, void* p )  {
       delete []( ( char* )p );
       return;
    }
-   void LocalDelete( int2type<true>, void* p )  {
+   void checked_delete( int2type<true>, void* p )  {
 
+      auto p_start = (reinterpret_cast<char*>( p ) - sizeof( alloc_header ) );
 
-      //logger::tLog const& logger_ = logger::logger();
-      char* p_start = ( ( char* )p - sizeof( alloc_header ) );
-
-      alloc_header* pHeader = ( alloc_header* )( p_start );
+      auto* pHeader = reinterpret_cast<alloc_header*>( p_start );
       pHeader->file[maxalloc - 1] = 0;
       pHeader->info[maxallocinfo - 1] = 0;
       pHeader->_class[maxalloc - 1] = 0;
 
-      string file = pHeader->file;
-      string info = pHeader->info;
-      size_t size = pHeader->size;
-      size_t magic = pHeader->magic;
+      auto file = pHeader->file;
+      auto info = pHeader->info;
+      auto size = pHeader->size;
+      auto magic = pHeader->magic;
 
       char* p_magicend = ( char* )p + size;
-      size_t magic_at_end = *( ( size_t* )p_magicend );
+      auto magic_at_end = *( reinterpret_cast<size_t*>(p_magicend) );
 
       if( magic != magic_at_end ) {
-         LOGT_INFO( grepMarker + " buffer overflow at: " + string( info ) );
+         LOGT_A_ERROR( grepMarker + " buffer overflow at: " + string( info ) );
          exit( 0 );
       }
 
-      size_t key = ( size_t )pHeader;
+      auto key = reinterpret_cast<size_t>(pHeader);
 
-      tAlloccheck& check = alloccheckInstance();
+      auto & check = alloccheckInstance();
 
       size_t lastalloccount = 0;
       {
          //nsl::tLock l(m);
-         tAllocMap& allocList = check.getMutableAlloclist();
-         allocIterator it = allocList.find( key );
+         auto & allocList = check.getMutableAlloclist();
+         auto it = allocList.find( key );
          lastalloccount = allocList.size();
-         check.alloccount--;
+         check.decr_alloccount();
 
          if( it != allocList.end() ) {
             allocList.erase( key );
          } else {
-            LOGT_INFO( grepMarker + " delete nicht in map gefunden: " + string( info ) );
+            LOGT_A_ERROR( grepMarker + " delete nicht in map gefunden: " + string( info ) );
             exit( 0 );
          }
 
-         check.totalalloc -= static_cast<int>( size );
+         check.totalalloc_subtract( static_cast<int>( size ) );
       }
 
-      string infolog = grepMarker
-                       + " delete: count: "
-                       + rlf_hstring::toString( ( int )check.alloccount )
-                       + ", mem left: "
-                       + rlf_hstring::toString( check.totalalloc )
+      auto infolog = grepMarker
+                       + ", del, cnt: "
+                       + to_str( check.alloccount() )
+                       + ", left: "
+                       + to_str( check.totalalloc() )
                        + ", info: '" + info + "'";
-      //logger_.info( lfm_, infolog );
+      LOGT_A_INFO( infolog );
 
       // final delete of allocated memory
-      // done in   AllocatedPtrList
-
       delete []( p_start );
 
+      auto const& allocList2 = check.alloclist();
 
-
-      tAllocMap const& allocList2 = check.getAlloclist();
-
-      if( check.alloccount != allocList2.size() ) {
-         int diff = static_cast<int>( check.alloccount ) - static_cast<int>( lastalloccount );
-         LOGT_INFO( grepMarker + " Error in 'delete': missingcount: " + rlf_hstring::toString( diff ) );
+      if( check.alloccount() != allocList2.size() ) {
+         int diff = static_cast<int>( check.alloccount() ) - static_cast<int>( lastalloccount );
+         LOGT_A_INFO( grepMarker + " Error in 'delete': missingcount: " + to_str( diff ) );
       }
 
-
-
-
-
-
    }
 
-   void* LocalAlloc( size_t size, t_alloc_line_file_method const& lfmcIn )  {
-      return LocalAlloc( int2type<useAllocCheck>(),  size, lfmcIn ) ;
+   void* checked_alloc( size_t size, rlf_tlfm::t_lfm const& lfmcIn )  {
+      return checked_alloc( int2type<use_alloc_check>(),  size, lfmcIn ) ;
    }
-   void LocalDelete( void* p )  {
-      LocalDelete( int2type<useAllocCheck>(),  p );
+   void checked_delete( void* p )  {
+      checked_delete( int2type<use_alloc_check>(),  p );
+   }
+
+   string stringify( size_t const& val ) {
+      return boost::lexical_cast<string>( val );
+   }
+
+   string alloc_list_message() {
+      return " end of program, number of not deleted pointers: " + stringify( alloc_list_size() ) ;
+   }
+   size_t alloc_list_size() {
+      return alloccheck::alloccheckInstance().alloclist().size();
+   }
+
+   string alloclist() {
+      auto const& allocList = alloccheck::alloccheckInstance().alloclist();
+
+      string sum;
+      if( allocList.size() > 0 ) {
+         auto itstart = allocList.begin();
+         auto itend = allocList.end();
+
+         while( itstart != itend ) {
+            pair<size_t, string> pa = *itstart;
+            auto info = pa.second;
+            if( sum.size() > 0 ){
+               sum += ", " + info;
+            }
+            else{
+               sum = info;
+            }
+            ++itstart;
+         }
+      }
+      return sum;
    }
 
 

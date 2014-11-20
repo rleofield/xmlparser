@@ -12,12 +12,12 @@ namespace rlf_ftw {
 
    class tExcludeFolders  {
    public:
-         std::string contains;
-       tExcludeFolders(std::string const& s) :contains(s){}
-       tExcludeFolders& operator=(std::string const& s){
-			 contains = s;
-          return *this;
-		 }
+      std::string contains;
+      tExcludeFolders( std::string const& s ) : contains( s ) {}
+      tExcludeFolders& operator=( std::string const& s ) {
+         contains = s;
+         return *this;
+      }
       tExcludeFolders() : contains() {}
 
 
@@ -27,12 +27,12 @@ namespace rlf_ftw {
 
    class tIncludeFiles   {
    public:
-         std::string last;
-       tIncludeFiles(std::string const& s) :last(s){}
-       tIncludeFiles& operator=(std::string const& s){
-			 last = s;
-          return *this;
-		 }
+      std::string last;
+      tIncludeFiles( std::string const& s ) : last( s ) {}
+      tIncludeFiles& operator=( std::string const& s ) {
+         last = s;
+         return *this;
+      }
       tIncludeFiles() : last() {
       }
    };

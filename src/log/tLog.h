@@ -94,6 +94,8 @@ namespace rlf_tlog {
 #define L_C_DEBUG
 #define L_D_DEBUG
 
+#define L_TIFF_DEBUG
+
 #endif
 
 #define L_DEFAULT_DEBUG

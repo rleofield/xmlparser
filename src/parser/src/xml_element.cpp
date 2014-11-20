@@ -41,7 +41,7 @@ www.lug-ottobrunn.de
 
 #include <string>
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 
 
 #include "xml_utl.h"
@@ -57,19 +57,11 @@ www.lug-ottobrunn.de
 #include "alloccheck.h"
 #include "xml_locator.h"
 
-// modied for WIN 
-#if _WIN32
-#pragma warning( disable:4996 4100) // _CRT_SECURE_NO_WARNINGS
-#pragma warning( disable : 4291 ) // Warning 30 warning C4291: 'void *txml::xml_comment::operator new(size_t,const nsl::tLfm &)' : no matching operator delete found; memory will not be freed if initialization throws an exception   c:\raprojekte\snippets\xmldemo\demo.cpp   218
-#pragma warning( disable : 4800 ) //
-#pragma warning( disable : 4996 ) // Warning 1  warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.   c:\raprojekte\snippets\xmldemo\stringhelper.cpp 360
-#pragma warning( disable : 4804 ) // Warning 12 warning C4804: '>' : unsafe use of type 'bool' in operation c:\raprojekte\snippets\xmldemo\mxml_document.cpp   407
-#endif
+
 using namespace std;
 
 
 
-using alloccheck::t_alloc_line_file_method;
 
 
 namespace txml {
@@ -106,31 +98,31 @@ namespace txml {
    }
 
 
-   void* xml_element::operator new( size_t size, t_alloc_line_file_method const& lfm ) {
+   void* xml_element::operator new( size_t size, t_lfm const& lfm ) {
       void*  p;
 
-      p = alloccheck::LocalAlloc( size, lfm );
+      p = alloccheck::checked_alloc( size, lfm );
       return p;
    }
    void xml_element::operator delete( void* p ) {
       xml_node* n = reinterpret_cast<xml_node*>( p );
-      alloccheck::LocalDelete( n );
+      alloccheck::checked_delete( n );
    }
 
-   xml_element* xml_element::create( t_alloc_line_file_method const& lfmcIn, const string& value_ ) {
+   xml_element* xml_element::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_element* p ;
       p = new( lfmcIn ) xml_element( value_ );
       return p;
 
    }
    xml_element* xml_element::create( const string& value_ ) {
-      return create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ), value_ );
+      return create( tlog_lfm_, value_ );
    }
 
 
 
    xml_element::xml_element( const string& _value )
-      : xml_node( xml_node::RL_XML_ELEMENT ), _attributes(), rawattributes() {
+      : xml_node( xml_node::eNodeType::ELEMENT ), _attributes(), rawattributes() {
       _node_value = _value;
    }
 
@@ -238,7 +230,7 @@ namespace txml {
 
 
    xml_node* xml_element::clone() const {
-      xml_element* pClone = new( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) ) xml_element( value() );
+      xml_element* pClone = new( tlog_lfm_ ) xml_element( value() );
 
       copy( *pClone );
       return pClone;
@@ -293,8 +285,8 @@ namespace txml {
       pos.skip();
 
       if( pos.is_end() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_parsing_element, msg_parsing_element + ", unexpected end reached" );
+         throw xml_exception( tlog_lfm_,
+                              eException::parsing_element, msg_parsing_element + ", unexpected end reached" );
       }
 
       string temp;
@@ -310,17 +302,17 @@ namespace txml {
       }
 
       if( txt.empty() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_failed_to_read_element_name, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
+         throw xml_exception( tlog_lfm_,
+                              eException::failed_to_read_element_name, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
       }
 
       // look for start tag, is not here = ok
       size_t si = txt.find( "<", 1 ); // "<"
 
       if( si != string::npos ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_failed_to_read_element_closing_tag,
-                             msg_failed_to_read_element_closing_tag +  " at: '" + temp + "'" );
+         throw xml_exception( tlog_lfm_,
+                              eException::failed_to_read_element_closing_tag,
+                              msg_failed_to_read_element_closing_tag +  " at: '" + temp + "'" );
       }
 
       _node_value = readName( txt );
@@ -330,9 +322,9 @@ namespace txml {
       pos += temp.size();
 
       if( pos.is_end() && !isclosed_Element ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_failed_to_read_element_name,
-                             msg_failed_to_read_element_name +  " at: '" + pos.next25() + "'" );
+         throw xml_exception( tlog_lfm_,
+                              eException::failed_to_read_element_name,
+                              msg_failed_to_read_element_name +  " at: '" + pos.next25() + "'" );
       }
 
       _lookuppath.addEmpty();
@@ -378,8 +370,8 @@ namespace txml {
                ++begin;
 
                if( begin != end ) {
-                  throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                      enum_parsing_empty, msg_parsing_empty );
+                  throw xml_exception( tlog_lfm_,
+                                       eException::parsing_empty, msg_parsing_empty );
                }
 
                return;
@@ -407,7 +399,7 @@ namespace txml {
                string txt1 = pos.next( string( "<" ).size() );
 
                if( txt1 != string( "<" ) ) { // not at '<'
-                  xml_text* textNode = xml_text::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) ) ;
+                  xml_text* textNode = xml_text::create( tlog_lfm_ ) ;
                   string text = pos.next( pos.find( string( "<" ) ) );
                   pos += text.size();
                   ++pos;
@@ -434,8 +426,8 @@ namespace txml {
                   xml_node* node = identify( pos );
 
                   if( node == 0 ) {
-                     throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                         enum_unknown_node_type, msg_unknown_node + ": " + pos.next( 10 ) );
+                     throw xml_exception( tlog_lfm_,
+                                          eException::unknown_node_type, msg_unknown_node + ": " + pos.next( 10 ) );
                   }
 
                   if( node ) {
@@ -469,12 +461,12 @@ namespace txml {
                }
 
                throw xml_exception(
-                  t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                  enum_reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
+                  tlog_lfm_,
+                  eException::reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
             } else {
                throw xml_exception(
-                  t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                  enum_reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
+                  tlog_lfm_,
+                  eException::reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
             }
          }
       }

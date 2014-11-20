@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_UTL_H
-#define RL_XML_UTL_H
+#ifndef RLF_UTL_H
+#define RLF_UTL_H
 
 
 
@@ -48,7 +48,7 @@ www.lug-ottobrunn.de
 #include <string>
 #include <cstdint>
 
-//#include "logger.h"
+
 
 
 
@@ -61,10 +61,10 @@ namespace txml {
       enum { value = v };
    };
 
-   enum  Encoding {
-      ENCODING_UNKNOWN = 0,
-      ENCODING_UTF8 = 1,
-      ENCODING_LEGACY = 2
+   enum  class Encoding : int {
+      UNKNOWN = 0,
+      UTF8 = 1,
+      LEGACY = 2
    };
 
 

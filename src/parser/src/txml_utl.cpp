@@ -84,55 +84,6 @@ namespace txml {
    */
 
 
-
-
-
-   namespace {
-
-      string EncodeString( const string& str ) {
-         size_t  i = 0;
-         string temp;
-
-         while( i < str.size() ) {
-            uint8_t c = ( uint8_t ) str[i];
-
-            if( c == '&'
-                  && i < ( str.length() - 2 )
-                  && str[i + 1] == '#'
-                  && str[i + 2] == 'x' ) {
-               // Hexadecimal character reference.
-               // Pass through unchanged.
-               // &#xA9;   -- copyright symbol, for example.
-               while( i < str.length() - 1 ) {
-                  temp.append( str.c_str() + i, 1 );
-                  ++i;
-
-                  if( str[i] == ';' ) {
-                     break;
-                  }
-               }
-
-               continue;
-            }
-
-            if( c < 32 ) {
-               std::ostringstream o;
-               o << string( "&#x" ) << std::setfill( '0' ) << std::setw( 2 ) << std::hex << c;
-               temp += o.str();
-               ++i;
-               continue;
-            }
-
-            temp += ( char ) c;
-            ++i;
-         }
-
-         return temp;
-      }
-
-   }
-
-
    string extract( string const& s, string const& start, string const& end ) {
       if( boost::starts_with( s, start )
             && boost::ends_with( s, end ) ) { //
@@ -141,9 +92,6 @@ namespace txml {
 
       return string();
    }
-
-
-
 
    namespace {
       bool IsAlphaNum( uint8_t ch ) {

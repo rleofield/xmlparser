@@ -51,18 +51,12 @@ www.lug-ottobrunn.de
 #include "stringhelper.h"
 
 
-
 using namespace std;
 
 
 
 namespace txml {
 
-
-   void xml_printer::Buffer( list<string> &l )const {
-      vector<string>  v = rlf_hstring::split( _buffer, _lineBreak );
-      l.assign( v.begin(), v.end() );
-   }
 
 
 

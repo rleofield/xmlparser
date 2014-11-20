@@ -43,6 +43,8 @@ www.lug-ottobrunn.de
 #include <boost/algorithm/string.hpp>
 
 
+#include "tLog_Category_default.h"
+
 #include "xml_node.h"
 #include "xml_element.h"
 #include "xml_document.h"
@@ -84,10 +86,10 @@ namespace txml {
 
       if( next_ != "<" ) {
          // no '<'
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_unknown_node,
-                             msg_unknown_node + ": " +
-                             pos.next25() );
+         throw xml_exception( tlog_lfm_,
+                              eException::unknown_node,
+                              msg_unknown_node + ": " +
+                              pos.next25() );
          //         return 0;
       }
 
@@ -137,12 +139,13 @@ namespace txml {
 
    xml_node* xml_node::identifyNode( string const& temp ) {
       if( temp.size() < 2 ) { // only <> in element
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_unknown_node, msg_unknown_node + ": " + temp );
+         throw xml_exception( tlog_lfm_,
+                              eException::unknown_node, msg_unknown_node + ": " + temp );
          //         return 0;
       }
 
       if( isElement( temp ) ) {  // is alpha or underscore
+         LOGT_INFO( "Node: " + temp );
          xml_node* node =  xml_element::create();
          node->parent( this );
          return node;
@@ -155,17 +158,18 @@ namespace txml {
       }
 
       if( isDeclaration( temp ) )  {   // "<?xml und ?>"
-         xml_node* node = xml_declaration::create();
+         xml_node* node = xml_declaration::create(tlog_lfm_);
          node->parent( this );
          return node;
       }
 
-      throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                          enum_unknown_node, msg_unknown_node + ": " + temp );
+      throw xml_exception( tlog_lfm_,
+                           eException::unknown_node, msg_unknown_node + ": " + temp );
    }
 
 
-   xml_node::xml_node( NodeType type_ ) :
+   xml_node::xml_node( eNodeType type_ ) :
+      acc(),
       _lookuppath(),
       _type( type_ ),
       _firstChild(),
@@ -175,6 +179,8 @@ namespace txml {
       _parent(),
       _node_value(),
       _rawxml() {}
+
+
 
 
    xml_node::~xml_node() {
@@ -217,21 +223,88 @@ namespace txml {
       return _firstChild;
    }
 
+   string xml_node::tvalue() const {
+      string t = stype();
+      return t + ":" + _node_value;
+   }
+   std::string xml_node::stype()const {
+      if( _type == eNodeType::DOCUMENT ) {
+         return "doc";
+      }
+
+      if( _type == eNodeType::ELEMENT ) {
+         return "elem";
+      }
+
+      if( _type == eNodeType::COMMENT ) {
+         return "com";
+      }
+
+      if( _type == eNodeType::TEXT ) {
+         return "txt";
+      }
+
+      if( _type == eNodeType::DECLARATION ) {
+         return "decl";
+      }
+
+      return "unknown";
+
+   }
+  vector<std::string> xml_node::acc_all ;
+
+
+  std::string xml_node::accs()const{
+     std::string s;
+     for( string a: acc){
+        s += a;
+     }
+     return s;
+  }
+  std::string xml_node::accs_all(){
+     std::string s;
+     for( string& a: acc_all){
+        s += a;
+     }
+     return s;
+  }
 
 
    xml_node* xml_node::linkEndChild( xml_node* node ) {
       assert( node->parent() == 0 || node->parent() == this );
       assert( node->getDocument() == nullptr || node->getDocument() == this->getDocument() );
 
-      if( node->type() == xml_node::RL_XML_DOCUMENT ) {
+      if( node->type() == xml_node::eNodeType::DOCUMENT ) {
          delete node; // do_delete
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_document_top_only, msg_document_top_only );
+         throw xml_exception( tlog_lfm_,
+                              eException::document_top_only, msg_document_top_only );
+      }
+
+      string lcname;
+      string val  = stype();
+      if( lastChild() != nullptr ){
+         val = lastChild()->tvalue();
+      }
+
+      string valn= node->tvalue();
+      acc.push_back( ", a:" + val );
+      acc_all.push_back(", a:" + valn);
+      LOGT_INFO( "acc_all " + accs_all() );
+      LOGT_INFO( "acc     " + accs() );
+      LOGT_INFO( "value   '" + node->tvalue() + "'" );
+      LOGT_INFO( "this    '" + tvalue() + "'" );
+      if( parent() != nullptr )
+            LOGT_INFO( "parent  '" + parent()->value() + "'" );
+
+      vector<string> vacc = acc;
+      vector<string> vacca = acc_all;
+      if( lastChild() != nullptr ) {
+         lcname = lastChild()->value();
       }
 
       node->parent( this );
 
-      if( _lastChild ) {
+      if( _lastChild != nullptr ) {
          _lastChild->_next = node;
       } else {
          _firstChild = node;   // it was an empty list.
@@ -245,7 +318,7 @@ namespace txml {
    }
 
 
-   xml_node* xml_node::insertBeforeChild( xml_node* child, const xml_node& addThis ) {
+   xml_node* xml_node::insertBeforeChild( xml_node* child,  xml_node const* addThis ) {
       if( child == nullptr ) {
          return nullptr;
       }
@@ -256,12 +329,12 @@ namespace txml {
          return nullptr;
       }
 
-      if( addThis.type() == xml_node::RL_XML_DOCUMENT ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_document_top_only, msg_document_top_only );
+      if( addThis->type() == xml_node::eNodeType::DOCUMENT ) {
+         throw xml_exception( tlog_lfm_,
+                              eException::document_top_only, msg_document_top_only );
       }
 
-      xml_node* node = addThis.clone();
+      xml_node* node = addThis->clone();
 
       if( !node ) {
          return nullptr;
@@ -315,8 +388,12 @@ namespace txml {
       const xml_node* node;
 
       for( node = _lastChild; node != nullptr; node = node->_previous ) {
-         if( node->value() == value_ && dynamic_cast<xml_element const*>( node ) ) {
-            return dynamic_cast<xml_element const*>( node );
+         if( node->value() == value_ &&
+              dynamic_cast<xml_element const*>( node )
+
+             ) {
+            return
+                  dynamic_cast<xml_element const*>( node );
          }
       }
 
@@ -327,8 +404,11 @@ namespace txml {
       xml_node* node;
 
       for( node = lastChild(); node != nullptr; node = node->_previous ) {
-         if( node->value() == value_ && dynamic_cast<xml_element const*>( node ) ) {
-            return dynamic_cast<xml_element*>( node );
+         if( node->value() == value_ &&
+             dynamic_cast<xml_element const*>( node )
+             ) {
+            return
+                  dynamic_cast<xml_element*>( node );
          }
       }
 
@@ -343,7 +423,7 @@ namespace txml {
    }
 
 
-   xml_node::NodeType xml_node::type() const  {
+   xml_node::eNodeType xml_node::type() const  {
       return _type;
    }
 
@@ -353,8 +433,9 @@ namespace txml {
 
 
    xml_document const* xml_node::getDocument()  {
-      for( xml_node const* node = this; node != nullptr; node = node->parent() ) {
-         xml_document const* doc = dynamic_cast<xml_document const*>( node ) ;
+      for( const xml_node* node = this; node != nullptr; node = node->parent() ) {
+         xml_document const* doc =
+               dynamic_cast<xml_document const*>( node ) ;
 
          if( doc != nullptr ) {
             return doc;

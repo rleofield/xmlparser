@@ -1,4 +1,6 @@
 const string domain_acpi = "domain.acpi";  //   element:    = ''
+const string domain_acpi__ar = "domain.acpi:ar";  //   attribute:  = 'ar_a'
+const string domain_acpi__ma = "domain.acpi:ma";  //   attribute:  = 'ma_a'
 const string domain_name = "domain.name";  //   element:    = 'ubuntu32'
 const string domain_uuid = "domain.uuid";  //   element:    = '8aa438a7-07da-f904-6c53-96adf2c6188b'
 const string domain_memory = "domain.memory";  //   element:    = '4194304'
@@ -15,7 +17,7 @@ const string domain_features_acpi = "domain.features.acpi";  //   element:    = 
 const string domain_features_apic = "domain.features.apic";  //   element:    = ''
 const string domain_features_pae = "domain.features.pae";  //   element:    = ''
 const string domain_clock = "domain.clock";  //   element:    = ''
-const string domain_clock__offset = "domain.clock:offset";  //   attribute:  = 'true'
+const string domain_clock__offset = "domain.clock:offset";  //   attribute:  = 'set_element_attribute_values(), test, new test clock, seond try'
 const string domain_on_poweroff = "domain.on_poweroff";  //   element:    = 'destroy'
 const string domain_on_reboot = "domain.on_reboot";  //   element:    = 'restart'
 const string domain_on_crash = "domain.on_crash";  //   element:    = 'restart'
@@ -121,6 +123,8 @@ const string domain_devices_memballoon_address__function = "domain.devices.memba
 xmlinterface::tXmlInterface instance;
 instance.parse( xmlTestOut );
 instance.create( domain_acpi, "" );
+instance.create( domain_acpi__ar, "ar_a" );
+instance.create( domain_acpi__ma, "ma_a" );
 instance.create( domain_name, "ubuntu32" );
 instance.create( domain_uuid, "8aa438a7-07da-f904-6c53-96adf2c6188b" );
 instance.create( domain_memory, "4194304" );
@@ -137,7 +141,7 @@ instance.create( domain_features_acpi, "" );
 instance.create( domain_features_apic, "" );
 instance.create( domain_features_pae, "" );
 instance.create( domain_clock, "" );
-instance.create( domain_clock__offset, "true" );
+instance.create( domain_clock__offset, "set_element_attribute_values(), test, new test clock, seond try" );
 instance.create( domain_on_poweroff, "destroy" );
 instance.create( domain_on_reboot, "restart" );
 instance.create( domain_on_crash, "restart" );

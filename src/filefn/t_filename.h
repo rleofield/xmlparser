@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
-#include "boost_cstdint.h"
 #include "boost/filesystem/path.hpp"
 
 
@@ -116,11 +115,11 @@ namespace rlf_filefn {
 
    t_filename splitpath( std::string const& in ) ;
 
-   inline void operator+= ( std::vector<t_filename> &v, t_filename const& s ) {
+   inline void operator+= ( std::vector<t_filename>& v, t_filename const& s ) {
       v.push_back( s );
    }
 
-   inline void operator+=( std::vector<t_filename> &v, const std::vector<t_filename> & in ) {
+   inline void operator+=( std::vector<t_filename>& v, const std::vector<t_filename>& in ) {
       for( size_t i = 0; i < in.size(); i++ ) {
          v += in[i];
       }

@@ -62,18 +62,18 @@ namespace rlf_ftw {
    const string delimiters = ";, ";
 
    class ftw_impl {
-public:
-         std::vector <t_filename > _files;
-         std::vector <t_filename > _folders;
-         std::vector<std::string> _folder_exclude;
-         std::vector<std::string> _file_include;
-         t_filename _path;
+   public:
+      std::vector <t_filename > _files;
+      std::vector <t_filename > _folders;
+      std::vector<std::string> _folder_exclude;
+      std::vector<std::string> _file_include;
+      t_filename _path;
 
-				 ~ftw_impl(){
-					 std::cout << std::endl;
-				 }
-				 ftw_impl() : _files(), _folders(), _folder_exclude(), _file_include(), _path(){}
-				 ftw_impl(std::string const& p) : _files(), _folders(), _folder_exclude(), _file_include(), _path(p) {}
+      ~ftw_impl() {
+         std::cout << std::endl;
+      }
+      ftw_impl() : _files(), _folders(), _folder_exclude(), _file_include(), _path() {}
+      ftw_impl( std::string const& p ) : _files(), _folders(), _folder_exclude(), _file_include(), _path( p ) {}
       std::vector <t_filename > const& files()const {
          return _files;
       }
@@ -93,7 +93,7 @@ public:
             return false;
          }
 
-      for( auto s : list ) {
+         for( auto s : list ) {
             if( s.size() == 0 ) {
                return false;    // not excluded
             }
@@ -120,7 +120,7 @@ public:
             return true;
          }
 
-      for( auto s : list ) {
+         for( auto s : list ) {
             if( s.size() == 0 ) { // included
                return true;
             }
@@ -160,10 +160,12 @@ public:
 
          if( boost::filesystem::is_directory( p ) ) {
             std::string dname = p.string();
-            size_t i = index(dname, ".tmp");
-            if( i != string::npos){
+            size_t i = index( dname, ".tmp" );
+
+            if( i != string::npos ) {
                i = 0;
             }
+
             bool b = exclude_folder( dname, _impl->_folder_exclude );
 
             if( b == false ) {
@@ -175,10 +177,11 @@ public:
 
          if( boost::filesystem::is_regular_file( p ) ) {
             std::string name = p.string();
-            t_filename fn = t_filename(name);
+            t_filename fn = t_filename( name );
             string dir = fn.path();
-            size_t i = index(dir, ".tmp");
-            if( i != string::npos){
+            size_t i = index( dir, ".tmp" );
+
+            if( i != string::npos ) {
                i = 0;
             }
 
@@ -186,6 +189,7 @@ public:
 
             if( bdir == false ) {
                bool b_include = include_file( name, _impl->_file_include );
+
                if( b_include == true ) {
                   _impl->_files.push_back( name );
                }
@@ -197,25 +201,25 @@ public:
       }
    }
    ftw::ftw():
-		 _impl(new ftw_impl())
-      {}
-   ftw::~ftw(){}
+      _impl( new ftw_impl() ) {
+   }
+   ftw::~ftw() {}
 
-	 ftw::ftw(std::string const& p) : _impl(new ftw_impl(p)){}
+   ftw::ftw( std::string const& p ) : _impl( new ftw_impl( p ) ) {}
 
 
    void ftw::path( std::string const& p ) {
       if( _impl->_path.path() != p ) {
          _impl->_path = p;
          _impl->_files.clear();
-				 _impl->_folders.clear();
-			}
+         _impl->_folders.clear();
+      }
    }
-    void ftw::set_include_files( tIncludeFiles const& i) {
+   void ftw::set_include_files( tIncludeFiles const& i ) {
       _impl->_file_include = split( i.last, delimiters );
    }
 
-    void ftw::set_exclude_folders( tExcludeFolders const& i) {
+   void ftw::set_exclude_folders( tExcludeFolders const& i ) {
       _impl->_folder_exclude = split( i.contains, delimiters );
    }
 

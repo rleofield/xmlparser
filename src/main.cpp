@@ -41,13 +41,13 @@ www.lug-ottobrunn.de
 
 #include <iostream>
 
-#include "tLog_Category_default.h"
+
+#include <tLog_Category_default.h>
 
 // demos
 #include "xml_interface.h"
 #include "xml_exception.h"
-
-
+#include "xml_builder.h"
 
 #include "examples.h"
 
@@ -66,9 +66,18 @@ int main() {
 
 
 
+   //  int16_t a1 = 0;
+   //  int32_t b1 = 0;
+   //  blub( static_cast<tLayerID>(b1));
+   //tLayerID lid =  static_cast<tLayerID>(b1);
+
+   //size_t st = static_cast<int16_t>(lid);
+
+
+
    cout << "started" << endl;
 
-   string logfile = "xmltest";
+   string logfile = "xml_log_old";
    bool b = logger().setLogfile( logfile );
 
    if( b == false ) {
@@ -83,6 +92,11 @@ int main() {
    LOGT_INFO( " Start1  " );
 
    try {
+
+      //demo::write_app_settings_doc();
+      //return 0;
+
+      //demo::write_simple_doc2();
 
       examples::ubuntu32_xml_demo();
       // demo create xml file, please comment out unwanted tests

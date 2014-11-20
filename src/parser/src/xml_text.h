@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_TEXT_H
-#define RL_XML_TEXT_H
+#ifndef RLF_XML_TEXT_H
+#define RLF_XML_TEXT_H
 
 
 #include "xml_node.h"
@@ -64,13 +64,13 @@ namespace txml {
       friend class xml_element;
 
       xml_text( const std::string& initValue ) :
-         xml_node( xml_node::RL_XML_TEXT ) {
+         xml_node( xml_node::eNodeType::TEXT ) {
          xml_node::value( initValue );
       }
-      static void* operator new( size_t size, t_alloc_line_file_method const& lfm );
+      static void* operator new( size_t size, t_lfm const& lfm );
       static void operator delete( void* );
 
-      xml_text( const xml_text& xmlText ) : xml_node( xml_node::RL_XML_TEXT ) {
+      xml_text( const xml_text& xmlText ) : xml_node( xml_node::eNodeType::TEXT ) {
          xmlText.copy( *this );
       }
       xml_text& operator=( const xml_text& base )                        {
@@ -82,7 +82,7 @@ namespace txml {
 
       virtual ~xml_text() {}
 
-      static xml_text* create( t_alloc_line_file_method const& lfmcIn, const std::string& value_ = std::string() ) ;
+      static xml_text* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() ) ;
       static xml_text* create( const std::string& value_ ) ;
 
       const std::string value() const; // encoded value

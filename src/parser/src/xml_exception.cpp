@@ -37,19 +37,13 @@ www.rleofield.de
 Linux User Group Ottobrunn / München Südost (LOMSO)
 www.lug-ottobrunn.de
 */
-#ifdef _WIN32
-#pragma warning( disable : 4291 ) // Warning   no matching operator delete found; memory will not be freed if initialization throws an exception
-#pragma warning( disable : 4800 ) //
-#pragma warning( disable : 4996 ) // Warning   This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning( disable : 4804 ) // Warning   unsafe use of type 'bool' in operation
-#pragma warning( disable:4996 4100) // _CRT_SECURE_NO_WARNINGS
-#endif
+
 
 #include <vector>
-#include <boost/assign.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+//#include <boost/assign.hpp>
+//#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
+//#include <boost/lexical_cast.hpp>
 
 #include <string>
 #include <iostream>
@@ -58,149 +52,85 @@ www.lug-ottobrunn.de
 #include <typeinfo>
 
 
+#include "stringhelper.h"
 #include "xml_exception.h"
 #include "xml_utl.h"
 #include "xml_document.h"
 #include "rawxml_position.h"
 #include "xml_fs.h"
 
-#include "stringhelper.h"
 
 using namespace std;
 
 
 namespace txml {
 
+   struct enum_list_entry {
+      enum_list_entry( eException ee ): e( ee ), s() {}
+      enum_list_entry( eException ee, string const& s_ ): e( ee ), s( s_ ) {}
+      eException e;
+      string s;
+   };
+   namespace {
+      vector<enum_list_entry> enum_entries {
+         { eException::none,                            msg_none   },
+         { eException::bad_lexical_cast,                msg_bad_lexical_cast},
+         { eException::reading_file,                    msg_reading_file},
+         { eException::parsing_file,                    msg_parsing_file},
+         { eException::parsing_element,                 msg_parsing_element},
+         { eException::identify_element,                msg_identify_element},
+         { eException::failed_to_read_element_name,     msg_failed_to_read_element_name},
+         { eException::failed_to_read_element_closing_tag,msg_failed_to_read_element_closing_tag},
+         { eException::failed_to_read_element_start_tag,msg_failed_to_read_element_start_tag},
+         { eException::reading_element_value,           msg_reading_element_value},
+         { eException::parse_attributes,                msg_reading_attributes},
+         { eException::parsing_empty,                   msg_parsing_empty},
+         { eException::reading_endtag,                  msg_reading_endtag},
+         { eException::parsing_comment,                 msg_parsing_comment},
+         { eException::parsing_declaration,             msg_parsing_declaration},
+         { eException::document_empty,                  msg_document_empty},
+         { eException::document_top_only,               msg_document_top_only},
+         { eException::key_points_not_to_an_element,    msg_key_points_not_to_an_element},
+         { eException::key_points_not_to_an_attribute,  msg_key_points_not_to_an_attribute},
+         { eException::key_not_found,                   msg_key_not_found},
+         { eException::unknown_node_type,               msg_unknown_node_type},
+         { eException::unknown_node,                    msg_unknown_node},
+         { eException::iterator_underflow,              msg_iterator_underflow},
+         { eException::list_is_empty,                   msg_list_is_empty},
+         { eException::keylist_in_visitor_has_length_zero,          msg_keylist_in_visitor_has_length_zero},
+         { eException::operator_plus_at_or_after_end,   msg_operator_plus_at_or_after_end},
+         { eException::operator_minus_at_or_after_end,  msg_operator_minus_at_or_after_end},
+         { eException::parse_text,                      msg_parse_text},
+         { eException::alloc_id_not_found,              msg_alloc_id_not_found},
+         { eException::alloc_node_not_found,            msg_alloc_node_not_found},
+         {eException::no_parsed_document_found ,        msg_no_parsed_document_found}
+      };
+   }
 
-   string to_string( exception_enum e ) {
-      if( e == enum_none ) {
-         return msg_none;
-      }
+   string to_string( eException e ) {
+      class f {
+         eException _e;
+      public:
+         f( eException e ): _e( e ) {}
+         bool operator()( enum_list_entry const& e )const {
+            if( e.e == _e ) {
+               return true;
+            }
 
-      if( e == enum_no_parsed_document_found ) {
-         return msg_no_parsed_document_found;
-      }
+            return false;
+         }
+      };
 
-      if( e == enum_bad_lexical_cast ) {
-         return msg_bad_lexical_cast;
-      }
+      vector<enum_list_entry>::iterator i = find_if( enum_entries.begin(), enum_entries.end(), f( e ) );
 
-      if( e == enum_reading_file ) {
-         return msg_reading_file;
-      }
-
-      if( e == enum_parsing_file ) {
-         return msg_parsing_file;
-      }
-
-      if( e == enum_parsing_element ) {
-         return msg_parsing_element;
-      }
-
-      if( e == enum_identify_element ) {
-         return msg_identify_element;
-      }
-
-      if( e == enum_failed_to_read_element_name ) {
-         return msg_failed_to_read_element_name;
-      }
-
-      if( e == enum_failed_to_read_element_closing_tag ) {
-         return msg_failed_to_read_element_closing_tag;
-      }
-
-      if( e == enum_failed_to_read_element_start_tag ) {
-         return msg_failed_to_read_element_start_tag;
-      }
-
-      if( e == enum_reading_element_value ) {
-         return msg_reading_element_value;
-      }
-
-      if( e == enum_parse_attributes ) {
-         return msg_reading_attributes;
-      }
-
-      if( e == enum_parsing_empty ) {
-         return msg_parsing_empty;
-      }
-
-      if( e == enum_reading_endtag ) {
-         return msg_reading_endtag;
-      }
-
-      if( e == enum_parsing_comment ) {
-         return msg_parsing_comment;
-      }
-
-      if( e == enum_parsing_declaration ) {
-         return msg_parsing_declaration;
-      }
-
-      if( e == enum_document_empty ) {
-         return msg_document_empty;
-      }
-
-      if( e == enum_document_top_only ) {
-         return msg_document_top_only;
-      }
-
-      if( e == enum_key_points_not_to_an_element ) {
-         return msg_key_points_not_to_an_element;
-      }
-
-      if( e == enum_key_points_not_to_an_attribute ) {
-         return msg_key_points_not_to_an_attribute;
-      }
-
-      if( e == enum_key_not_found ) {
-         return msg_key_not_found;
-      }
-
-      if( e == enum_unknown_node_type ) {
-         return msg_unknown_node_type;
-      }
-
-      if( e == enum_unknown_node ) {
-         return msg_unknown_node;
-      }
-
-      if( e == enum_iterator_underflow ) {
-         return msg_iterator_underflow;
-      }
-
-      if( e == enum_list_is_empty ) {
-         return msg_list_is_empty;
-      }
-
-      if( e == enum_keylist_in_visitor_has_length_zero ) {
-         return msg_keylist_in_visitor_has_length_zero;
-      }
-
-      if( e == enum_operator_plus_at_or_after_end ) {
-         return msg_operator_plus_at_or_after_end;
-      }
-
-      if( e == enum_operator_minus_at_or_after_end ) {
-         return msg_operator_minus_at_or_after_end;
-      }
-
-      if( e == enum_parse_text ) {
-         return msg_parse_text;
-      }
-
-      if( e == enum_alloc_id_not_found ) {
-         return msg_alloc_id_not_found;
-      }
-
-      if( e == enum_alloc_node_not_found ) {
-         return msg_alloc_node_not_found;
+      if( i != enum_entries.end() ) {
+         return i->s;
       }
 
       return "unknown enum";
    }
 
-   xml_exception::xml_exception( t_line_file_method const& lfmIn, exception_enum e, string const& in )
+   xml_exception::xml_exception( t_lfm const& lfmIn, eException e, string const& in )
       : runtime_error( in.c_str() ), _enum( e ), _what( in ), lfm( lfmIn )   {}
 
    size_t xml_exception::line()const {

@@ -9,7 +9,6 @@
 #include <iomanip>
 #include <algorithm>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <locale>
@@ -83,6 +82,10 @@ namespace txml {
       void printKeysAndValues( string const& fn, size_t w = 60 )const;
       void printXmlGenerator( string const& fn_keys, string const& fn_out )const;
       void create( string const& key, string const& value );
+      xml_document const* document()const{
+         return &_doc;
+      }
+
 
    private:
       string _filename;
@@ -121,8 +124,8 @@ namespace txml {
       bool loadOkay = _doc.parseStart( l );
 
       if( !loadOkay ) {
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   enum_parsing_file, "Couldn't parse doc." );
+         throw txml::xml_exception( tlog_lfm_,
+                                    eException::parsing_file, "Couldn't parse doc." );
       }
 
       collect_element_keys( &_doc );
@@ -139,8 +142,8 @@ namespace txml {
       bool loadOkay = _doc.parseStart( l );
 
       if( !loadOkay ) {
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   enum_parsing_file, "Couldn't parse internal doc: '" + _filename + "'" );
+         throw txml::xml_exception( tlog_lfm_,
+                                    eException::parsing_file, "Couldn't parse internal doc: '" + _filename + "'" );
       }
 
       collect_element_keys( &_doc );
@@ -148,13 +151,13 @@ namespace txml {
    }
 
    namespace {
-      void loadFile( std::list<string>  &l, string const& name ) {
+      void loadFile( std::list<string>&  l, string const& name ) {
          try {
             rlf_txtrw::t_text_read()( name, l );
          } catch( rlf_txtrw::bad_text_read& ex ) {
             string msg = string( "error reading XML file: " ) + ex.what();
-            throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                      enum_reading_file, msg );
+            throw txml::xml_exception( tlog_lfm_,
+                                       eException::reading_file, msg );
          }
       }
    }
@@ -171,6 +174,8 @@ namespace txml {
    }
 
    void tXmlInterfaceImpl::parse( string const& fn ) {
+      string s = to_string( eException::document_empty ) ;
+
       if( fn.size() != 0 ) {
          if( fn != _filename ) {
             _filename = fn;
@@ -181,8 +186,8 @@ namespace txml {
             bool loadOkay = _doc.parseStart( l );
 
             if( !loadOkay ) {
-               throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                         txml::enum_parsing_file, "Couldn't parse file: '" + _filename + "'" );
+               throw txml::xml_exception( tlog_lfm_,
+                                          txml::eException::parsing_file, "Couldn't parse file: '" + _filename + "'" );
             }
 
             collect_element_keys( &_doc );
@@ -194,8 +199,8 @@ namespace txml {
    string tXmlInterfaceImpl::getAt( string const& key )const {
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_no_parsed_document_found, msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::no_parsed_document_found, msg );
       }
 
       txml::xml_locator p( key );
@@ -291,8 +296,8 @@ namespace txml {
 
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_no_parsed_document_found, msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::no_parsed_document_found, msg );
       }
 
       txml::xml_locator locator( key );
@@ -318,10 +323,10 @@ namespace txml {
       txml::xml_node* node = findSmallestInsertPointForNewNode( locator );
 
       if( node == nullptr ) {
-         txml::xml_exception ex( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                txml::enum_cannot_insert_root_as_default,
-                                txml::msg_cannot_insert_root_as_default
-                                + ", missingKey = " + key );
+         txml::xml_exception ex( tlog_lfm_,
+                                 txml::eException::cannot_insert_root_as_default,
+                                 txml::msg_cannot_insert_root_as_default
+                                 + ", missingKey = " + key );
          throw ex;
 
       }
@@ -389,16 +394,16 @@ namespace txml {
    void tXmlInterfaceImpl::setAt( string const& key, string const& value ) {  // key points to an element
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_no_parsed_document_found,  msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::no_parsed_document_found,  msg );
       }
 
       txml::xml_locator p( key );
 
       if( p.isAttr() ) {
 
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_key_points_not_to_an_element, txml::msg_key_points_not_to_an_element + ": '" + key + "'" );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::key_points_not_to_an_element, txml::msg_key_points_not_to_an_element + ": '" + key + "'" );
       }
 
       _doc.accept( &p );
@@ -409,8 +414,8 @@ namespace txml {
          return;
       }
 
-      throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                txml::enum_key_not_found, "key not found: '" + key + "'" );
+      throw txml::xml_exception( tlog_lfm_,
+                                 txml::eException::key_not_found, "key not found: '" + key + "'" );
    }
 
 
@@ -433,15 +438,15 @@ namespace txml {
    void tXmlInterfaceImpl::setAttributeAt( string const& key, string const& value ) {  // key points to an attribute
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_no_parsed_document_found, msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::no_parsed_document_found, msg );
       }
 
       txml::xml_locator p( key );
 
       if( !p.isAttr() ) {
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_key_points_not_to_an_attribute, "key didn't point to an attribute: '" + key + "'" );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::key_points_not_to_an_attribute, "key didn't point to an attribute: '" + key + "'" );
       }
 
       _doc.accept( &p );
@@ -452,8 +457,8 @@ namespace txml {
          return;
       }
 
-      throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                txml::enum_key_not_found, "key not found: '" + key + "'" );
+      throw txml::xml_exception( tlog_lfm_,
+                                 txml::eException::key_not_found, "key not found: '" + key + "'" );
    }
 
    void tXmlInterfaceImpl::setIntAttributeAt( string const& key, int value ) {  // key points to an attribute
@@ -468,35 +473,36 @@ namespace txml {
    void tXmlInterfaceImpl::setComment( string const& key, string const& value ) {  // key points to an element
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_no_parsed_document_found, msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::no_parsed_document_found, msg );
       }
 
       txml::xml_locator p( key );
 
       if( p.isAttr() ) {
-         throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_key_points_not_to_an_element, "key didn't point to an element: '" + key + "'" );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::key_points_not_to_an_element, "key didn't point to an element: '" + key + "'" );
       }
 
       _doc.accept( &p );
 
       if( p.accepted() ) {
-         xml_element* e = p.elementfound();
-         txml::keyentries const& lookuppath = e->lookuppath();
-         boost::scoped_ptr<txml::xml_node> comment( txml::xml_comment::create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) ) );
+         xml_element* elementfound = p.elementfound();
+         txml::xml_node* comment = txml::xml_comment::create( tlog_lfm_ ) ;
          comment->value( value );
+
+         txml::keyentries const& lookuppath = elementfound->lookuppath();
          txml::xml_node const* parent   = lookuppath.parentOfLast();
 
          if( parent != nullptr ) {
-            const_cast<txml::xml_node*>( parent )->insertBeforeChild( e, *comment );
+            const_cast<txml::xml_node*>( parent )->insertBeforeChild( elementfound, comment );
          }
 
          return;
       }
 
-      throw txml::xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                txml::enum_key_not_found, "key not found: '" + key + "'" );
+      throw txml::xml_exception( tlog_lfm_,
+                                 txml::eException::key_not_found, "key not found: '" + key + "'" );
    }
 
    void tXmlInterfaceImpl::save( string const& fn ) {
@@ -524,7 +530,7 @@ namespace txml {
 
       try {
          element = dynamic_cast<xml_element const*>( node );
-      } catch( xml_exception&  ) {
+      } catch( xml_exception& ) {
          element = nullptr;
       }
 
@@ -779,20 +785,9 @@ namespace txml {
 
 
    void showAllocList() {
-      alloccheck::tAllocMap const& allocList = alloccheck::alloccheckInstance().getAlloclist();
+      int i = alloccheck::alloc_list_size();
 
-      if( allocList.size() > 0 ) {
-         alloccheck::allocIterator itstart = allocList.begin();
-         alloccheck::allocIterator itend = allocList.end();
-
-         while( itstart != itend ) {
-            pair<size_t, string> pa = *itstart;
-            string info = pa.second;
-            ++itstart;
-         }
-      }
-
-      LOGT_INFO( " end of program, number of not deleted pointers: " + rlf_hstring::toString( ( int )allocList.size() ) );
+      LOGT_INFO( " end of program, number of not deleted pointers: " + rlf_hstring::toString( i ) );
 
    }
 
@@ -838,15 +833,15 @@ namespace txml {
    string to_string( int val ) {
       return rlf_hstring::toString( val );
    }
-//   int to_int( string const& s ) {
-//      return rlf_hstring::to_int( s );
-//   }
-//   // double to_double( string const& s, std::locale l ) {
-//   // return strings::to_double( s, l );
-//   //}
-//   double to_double( string const& s ) {
-//      return rlf_hstring::to_double( s );
-//   }
+   //   int to_int( string const& s ) {
+   //      return rlf_hstring::to_int( s );
+   //   }
+   //   // double to_double( string const& s, std::locale l ) {
+   //   // return strings::to_double( s, l );
+   //   //}
+   //   double to_double( string const& s ) {
+   //      return rlf_hstring::to_double( s );
+   //   }
 
 }
 
@@ -860,8 +855,8 @@ namespace xmlinterface {
          return boost::lexical_cast<int>( s );
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();
-         throw txml::xml_exception( txml::t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_bad_lexical_cast, "msg: " + msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::bad_lexical_cast, "msg: " + msg );
       }
 
    }
@@ -872,8 +867,8 @@ namespace xmlinterface {
          return b;
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();
-         throw txml::xml_exception( txml::t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                                   txml::enum_bad_lexical_cast, "string : " + s + ", msg: " + msg );
+         throw txml::xml_exception( tlog_lfm_,
+                                    txml::eException::bad_lexical_cast, "string : " + s + ", msg: " + msg );
       }
    }
 
@@ -994,9 +989,14 @@ namespace xmlinterface {
       impl->printXmlGenerator( fn_keys, fn_out );
    }
    void tXmlInterface::create( string const& key, string const& value ) {
+      cout << "process: " << key << "::" << value << endl;
       impl->create( key, value );
    }
 
+
+   txml::xml_document const* tXmlInterface::document()const{
+      return impl->document();
+   }
 
    void show_alloc_list() {
       txml::showAllocList();
@@ -1041,15 +1041,15 @@ namespace xmlinterface {
    string to_string( int val ) {
       return rlf_hstring::toString( val );
    }
-//   int to_int( string const& s ) {
-//      return rlf_hstring::to_int( s );
-//   }
-//   // double to_double( string const& s, std::locale l ) {
-//   // return strings::to_double( s, l );
-//   //}
-//   double to_double( string const& s ) {
-//      return rlf_hstring::to_double( s );
-//   }
+   //   int to_int( string const& s ) {
+   //      return rlf_hstring::to_int( s );
+   //   }
+   //   // double to_double( string const& s, std::locale l ) {
+   //   // return strings::to_double( s, l );
+   //   //}
+   //   double to_double( string const& s ) {
+   //      return rlf_hstring::to_double( s );
+   //   }
 
 }
 

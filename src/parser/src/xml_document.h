@@ -39,13 +39,14 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_DOCUMENT_H
-#define RL_XML_DOCUMENT_H
+#ifndef RLF_XML_DOCUMENT_H
+#define RLF_XML_DOCUMENT_H
 
-
+#include <list>
 
 #include "xml_node.h"
 #include "xml_utl.h"
+
 
 
 namespace txml {
@@ -53,7 +54,7 @@ namespace txml {
    class tXmlInterfaceImpl;
 
    class xml_document : public xml_node {
-      static void* operator new( size_t size, t_alloc_line_file_method const& lfm );
+      static void* operator new( size_t size, t_lfm const& lfm );
       static void operator delete( void* );
       static bool _isWhiteSpacePreserved;
       static Encoding _encoding;
@@ -68,11 +69,11 @@ namespace txml {
       bool saveFile( const std::string& filename ) const ;
 
       xml_document();
-      virtual ~xml_document() {}
+      virtual ~xml_document();
 
       bool parseStart( std::list<std::string>  const& v );
 
-      void serialize( std::list<std::string> & v ) const ;
+      void serialize( std::list<std::string>& v ) const ;
 
       virtual void parse( rawxml_position& pos );
       //      const XmlElement* rootElement() const;

@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------
 */
 
-#ifndef RL_XML_FS_H
-#define RL_XML_FS_H
+#ifndef RLF_FS_H
+#define RLF_FS_H
 
 #include <string>
 

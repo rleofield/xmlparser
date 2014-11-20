@@ -39,22 +39,24 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_NODE_H
-#define RL_XML_NODE_H
+#ifndef RLF_NODE_H
+#define RLF_NODE_H
 
 
 #include <string>
 
-
+#include "xml_exception.h"
 
 #include "keyentries.h"
 
+struct null_deleter
+{
+    void operator()(void const *) const
+    {
+    }
+};
 
 
-namespace alloccheck  {
-   class t_alloc_line_file_method;
-}
-using alloccheck::t_alloc_line_file_method;
 
 namespace txml {
    class xml_visitor;
@@ -78,16 +80,20 @@ namespace txml {
 
    public:
 
+
+      static std::vector<std::string> acc_all ;
+      std::vector<std::string> acc ;
+      std::string accs()const;
+      static std::string accs_all();
+
       virtual ~xml_node();
 
-      enum NodeType {
-         RL_XML_NONE,
-         RL_XML_DOCUMENT,
-         RL_XML_ELEMENT,
-         RL_XML_COMMENT,
-         RL_XML_TEXT,
-         RL_XML_DECLARATION,
-         RL_XML_TYPECOUNT
+      enum class eNodeType : uint32_t {
+         DOCUMENT,
+         ELEMENT,
+         COMMENT,
+         TEXT,
+         DECLARATION
       };
 
 
@@ -99,8 +105,9 @@ namespace txml {
       */
       const std::string value() const;
       void value( const std::string& _value );
+      std::string tvalue() const;
 
-
+      std::string stype()const;
       void clear();
 
       const xml_node* firstChild()const;
@@ -127,7 +134,7 @@ namespace txml {
       //std::vector<xml_node*> childs();
       xml_node* linkEndChild( xml_node* addThis );
 
-      xml_node* insertBeforeChild( xml_node* beforeThis, const xml_node& addThis );
+      xml_node* insertBeforeChild( xml_node* beforeThis, xml_node const* addThis );
 
    public:
 
@@ -137,7 +144,7 @@ namespace txml {
       const xml_element* firstChildElement( const std::string& _value ) const   ;
       xml_element* firstChildElement( const std::string& _value )            ;
 
-      NodeType type() const;
+      eNodeType type() const;
 
 
       xml_document const* getDocument() ;
@@ -173,7 +180,7 @@ namespace txml {
       }
 
    protected:
-      xml_node( NodeType _type );
+      xml_node( eNodeType _type );
 
       xml_node* identify( rawxml_position& pos );
       xml_node* identifyNode( std::string const& str );
@@ -186,7 +193,7 @@ namespace txml {
       // path to node
       keyentries _lookuppath ;
 
-      NodeType     _type;
+      eNodeType     _type;
 
       xml_node*     _firstChild;
       xml_node*     _lastChild;

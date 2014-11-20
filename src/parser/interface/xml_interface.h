@@ -39,8 +39,8 @@ Linux User Group Ottobrunn / München Südost (LOMSO)
 www.lug-ottobrunn.de
 */
 
-#ifndef RL_XML_INTERFACE_H
-#define RL_XML_INTERFACE_H
+#ifndef RLF_INTERFACE_H
+#define RLF_INTERFACE_H
 
 #include <vector>
 #include <string>
@@ -152,6 +152,8 @@ namespace xmlinterface {
       // create an element with default
       void create( std::string const& key, std::string const& value );
 
+
+      txml::xml_document const* document()const;
 
    };
 

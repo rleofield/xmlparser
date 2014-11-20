@@ -1,6 +1,5 @@
-/*
---------------------------------------------------------------------------
-Copyright 2013 by Richard Albrecht
+/* --------------------------------------------------------------------------
+Copyright 2012 by Richard Albrecht
 richard.albrecht@rleofield.de
 www.rleofield.de
 
@@ -17,48 +16,31 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------
-
-
-*/
-/*! \file boost_cstdint.h
-\brief typedef for basic integral types with boost
-
-Lib: librimgrw
 */
 
 
+#ifndef imgrw_t_2D_xy_string_H
+#define imgrw_t_2D_xy_string_H
 
-#ifndef rlf_boost_typedefs_H
-#define rlf_boost_typedefs_H
-
-#include <boost/cstdint.hpp>
-
+#include <assert.h>
+#include <string>
+#include <float.h>
+#include <vector>
+#include <cmath>
 #include <cstdint>
 
 
-namespace rlf {
+//#include "boost_cstdint.h"
+#include "t_2D_xy.h"
+#include "stringhelper.h"
 
-   //typedef boost::uint8_t byte_t;
-#ifndef _WIN32
-   typedef boost::uint8_t uint8_t;
-   typedef boost::uint16_t uint16_t;
-   typedef boost::uint32_t uint32_t;
-   typedef boost::uint64_t uint64_t;
 
-   typedef boost::int8_t  int8_t;
-   typedef boost::int16_t int16_t;
-   typedef boost::int32_t int32_t;
-   typedef boost::int64_t int64_t;
-#endif
+namespace rlf_hstring {
 
-   const size_t auto_null = 0;
-
+   std::string toString( rlf_minit::uint32_xy p );
+   std::string toString( rlf_minit::double_xy const& p );
+   std::string toString( rlf_minit::float_xy const& p );
 
 }
 
-
-
-#endif
-
-
-//EOF
+#endif // imgrw_t_2D_xy_string_H

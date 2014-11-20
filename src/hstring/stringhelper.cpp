@@ -35,17 +35,8 @@ namespace rlf_hstring {
 
    namespace nsloc {
 
-#ifdef _WIN32
-      char const* const de = "German";
-#else
       const char* const de = "de_DE.utf8";
-#endif
-
-#ifdef _WIN32
-      char const* const ch = "German_Switzerland";
-#else
       const char* const ch = "de_CH.utf8";
-#endif
 
    }
    string getDE() {
@@ -68,6 +59,11 @@ namespace rlf_hstring {
 
    string stringify( size_t const& val ) {
       return boost::lexical_cast<string>( val );
+   }
+
+   void string_to_list( string const& s, list<string>& l ) {
+      vector<string>  v = rlf_hstring::split( s, "\n" );
+      l.assign( v.begin(), v.end() );
    }
 
 
@@ -416,6 +412,33 @@ namespace rlf_hstring {
       return s;
    }
 
+   namespace {
+      struct add {
+         string s;
+         string const& sep;
+         add( string const& sep_ ): s(), sep( sep_ ) {}
+         void operator()( string const& str ) {
+            if( s.empty() ) {
+               s += str;
+               return;
+            }
+
+            s += sep;
+            s += str;
+         }
+      };
+   }
+   std::string merge( vector<string>  const& v, string const& sep ) {
+      if( v.empty() ) {
+         return string();
+      }
+
+      if( v.size() == 1 ) {
+         return v[0];
+      }
+
+      return for_each( v.begin(), v.end(), add( sep ) ).s;
+   }
 
    /*  vector<string> tokenize( string const& str, const string& delimiters ) {
    string::size_type pos_not_delimiter = str.find_first_not_of( delimiters, 0 );

@@ -45,7 +45,7 @@ www.lug-ottobrunn.de
 // demos
 #include "xml_interface.h"
 #include "tLog_Category_default.h"
-#include "XmlException.h"
+#include "xml_exception.h"
 
 
 
@@ -69,7 +69,7 @@ namespace examples {
 
 
 
-   void xml_path_to_string_const() {
+   void xml_path_to_string_const_() {
 
       // make instance
       xmlinterface::tXmlInterface t;
@@ -91,7 +91,7 @@ namespace examples {
 
    }
 
-   void get_element_attribute_values() {
+   void get_element_attribute_values_() {
 
       // make inatance
       xmlinterface::tXmlInterface t;
@@ -100,7 +100,7 @@ namespace examples {
       // parse first
       try {
          t.parse( xmlTest );
-      } catch( txml::XmlException& ex ) {
+      } catch( txml::xml_exception& ex ) {
          std::string w = ex.What();
          LOGT_INFO( ex.what() );
 
@@ -121,7 +121,7 @@ namespace examples {
 
          try {
             element1 = t.get_string( key1, "xen" );
-         } catch( txml::XmlException& e ) {
+         } catch( txml::xml_exception& e ) {
             msg = e.What();
             LOGT_INFO( msg );
 
@@ -131,7 +131,7 @@ namespace examples {
          // result:
          // a new element node ist inserted with value 'xen'.
          LOGT_INFO( key1 + ",  element: " + element1 );
-      } catch( txml::XmlException& ex ) {
+      } catch( txml::xml_exception& ex ) {
          std::string w = ex.What();
          LOGT_INFO( ex.what() );
 
@@ -148,7 +148,7 @@ namespace examples {
          // resukt:
          // value of attribute = '52:54:00:6c:47:37'
          LOGT_INFO( key3 + ",  attr: " + attribute3 );
-      } catch( txml::XmlException& ex ) {
+      } catch( txml::xml_exception& ex ) {
          std::string w = ex.What();
          LOGT_INFO( ex.what() );
 
@@ -166,7 +166,7 @@ namespace examples {
 
          LOGT_INFO( key4 + ",  attr: " + attribute4 );
 
-      } catch( txml::XmlException& ex ) {
+      } catch( txml::xml_exception& ex ) {
          std::string w = ex.What();
          LOGT_INFO( ex.what() );
 
@@ -180,7 +180,7 @@ namespace examples {
 
 
 
-   void set_element_attribute_values() {
+   void set_element_attribute_values_() {
 
       // make instance
       xmlinterface::tXmlInterface t;
@@ -208,7 +208,7 @@ namespace examples {
 
          LOGT_INFO( key1 + " ,  " + temp );
 
-      } catch( txml::XmlException& ex ) {
+      } catch( txml::xml_exception& ex ) {
          std::string w = ex.What();
          LOGT_INFO( ex.what() );
 
@@ -229,7 +229,7 @@ namespace examples {
 
          LOGT_INFO( key2 + " ,  " + temp );
 
-      } catch( txml::XmlException& ex ) {
+      } catch( txml::xml_exception& ex ) {
          std::string w = ex.What();
          LOGT_INFO( ex.what() );
 

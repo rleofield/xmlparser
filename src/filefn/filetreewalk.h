@@ -13,8 +13,8 @@
 //#if defined(__clang__) && __has_feature(cxx_noexcept) || defined(__GXX_EXPERIMENTAL_CXX0X__)   && __GNUC__ * 10 + __GNUC_MINOR__ >= 46   ||defined(_MSC_FULL_VER)   && _MSC_FULL_VER >= 180021114
 
 // Is noexcept supported?
-#if defined(__clang__) 	|| defined(__GXX_EXPERIMENTAL_CXX0X__) && __GNUC__ * 10 + __GNUC_MINOR__ >= 46 
-  
+#if defined(__clang__)  || defined(__GXX_EXPERIMENTAL_CXX0X__) && __GNUC__ * 10 + __GNUC_MINOR__ >= 46
+
 #  define NOEXCEPT noexcept
 #else
 #  define NOEXCEPT
@@ -42,17 +42,17 @@ namespace rlf_ftw {
    class ftw_impl;
 
    class ftw {
-		 std::unique_ptr<ftw_impl> _impl;
+      std::unique_ptr<ftw_impl> _impl;
 
-      ftw( ftw const&);
-      void operator=(ftw const&);
+      ftw( ftw const& );
+      void operator=( ftw const& );
 
    public:
       ftw();
       ftw( std::string const& p );
 
       ~ftw();
-			void path(std::string const& p) ;
+      void path( std::string const& p ) ;
       std::vector <t_filename > const& files()const;
       std::vector <t_filename > const& folders()const ;
 

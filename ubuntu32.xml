@@ -1,5 +1,4 @@
 <domain type="kvm">
-	<acpi />
 	<name>ubuntu32</name>
 	<uuid>8aa438a7-07da-f904-6c53-96adf2c6188b</uuid>
 	<memory>4194304</memory>
@@ -14,7 +13,7 @@
 		<apic />
 		<pae />
 	</features>
-	<clock offset="clock example value" />
+	<clock offset="set_element_attribute_values(), test, new test clock, seond try" />
 	<on_poweroff>destroy</on_poweroff>
 	<on_reboot>restart</on_reboot>
 	<on_crash>restart</on_crash>

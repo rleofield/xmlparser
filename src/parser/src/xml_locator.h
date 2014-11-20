@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_LOCATOR_H
-#define RL_XML_LOCATOR_H
+#ifndef RLF_LOCATOR_H
+#define RLF_LOCATOR_H
 
 
 #include "xml_element.h"

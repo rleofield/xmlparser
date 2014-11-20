@@ -50,8 +50,7 @@ www.lug-ottobrunn.de
 #include "xml_exception.h"
 #include "rawxml_position.h"
 #include "alloccheck.h"
-
-
+#include "xml_exception.h"
 
 
 
@@ -60,29 +59,29 @@ namespace txml {
    using std::string;
 
 
-   void* xml_comment::operator new( size_t size, t_alloc_line_file_method const& lfm ) {
-      return alloccheck::LocalAlloc( size, lfm );
+   void* xml_comment::operator new( size_t size, t_lfm const& lfm ) {
+      return alloccheck::checked_alloc( size, lfm );
    }
    void xml_comment::operator delete( void* p ) {
       xml_node* n = reinterpret_cast<xml_node*>( p );
-      alloccheck::LocalDelete( n );
+      alloccheck::checked_delete( n );
    }
 
-   xml_node* xml_comment::create( t_alloc_line_file_method const& lfmcIn ) {
+   xml_node* xml_comment::create( t_lfm const& lfmcIn ) {
       xml_comment* p = new( lfmcIn ) xml_comment();
       return p;
 
    }
    xml_node* xml_comment::create( ) {
-      return create( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) );
+      return create( tlog_lfm_ );
    }
 
    void xml_comment::parse( rawxml_position& pos ) {
       if( !pos.starts_with( comment_start ) ) { // "<!--"
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_parsing_comment,
-                             msg_parsing_comment + ": '" +
-                             pos.next25() + "'" );
+         throw xml_exception( tlog_lfm_,
+                              eException::parsing_comment,
+                              msg_parsing_comment + ": '" +
+                              pos.next25() + "'" );
       }
 
       string temp = pos.next_until( comment_end ); //"-->"
@@ -96,7 +95,7 @@ namespace txml {
       return;
    }
 
-   xml_comment::xml_comment( const xml_comment& copy ) : xml_node( xml_node::RL_XML_COMMENT ) {
+   xml_comment::xml_comment( const xml_comment& copy ) : xml_node( xml_node::eNodeType::COMMENT ) {
       value( copy.value() );
    }
 
@@ -113,7 +112,7 @@ namespace txml {
 
 
    xml_node* xml_comment::clone() const {
-      return new( t_alloc_line_file_method( __LINE__, __FILE__, __FUNCTION__ ) ) xml_comment( *this );
+      return new( tlog_lfm_ ) xml_comment( *this );
    }
 
 

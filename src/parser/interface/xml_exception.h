@@ -18,90 +18,98 @@
  ------------------------------------------------------------------------------
 */
 
-#ifndef RL_XML_EXCEPTION_H
-#define RL_XML_EXCEPTION_H
+#ifndef RLF_EXCEPTION_H
+#define RLF_EXCEPTION_H
 
 #include <string>
 #include <stdexcept>
-//#include "stringhelper.h"
 
+#include "tLfm.h"
+using rlf_tlfm::t_lfm;
 
 namespace txml {
 
-   enum exception_enum {
-      enum_none = 1,
-      enum_no_parsed_document_found,
-      enum_bad_lexical_cast,
-      enum_reading_file,
-      enum_parsing_file,
-      enum_identify_element,
-      enum_failed_to_read_element_name,
-      enum_failed_to_read_element_closing_tag,
-      enum_failed_to_read_element_start_tag,
-      enum_reading_element_value,
-      enum_parse_attributes,
-      enum_parsing_empty,
-      enum_reading_endtag,
-      enum_parsing_element,
-      enum_parsing_comment,
-      enum_parse_text,
-      enum_parsing_declaration,
-      enum_document_empty,
-      enum_document_top_only,
-      enum_cannot_insert_root_as_default,
-      enum_key_points_not_to_an_element,
-      enum_key_points_not_to_an_attribute,
-      enum_key_not_found,
-      enum_unknown_node_type,
-      enum_unknown_node,
-      enum_iterator_underflow,
-      enum_list_is_empty,
-      enum_keylist_in_visitor_has_length_zero,
-      enum_operator_plus_at_or_after_end,
-      enum_operator_minus_at_or_after_end,
-      enum_alloc_id_not_found,
-      enum_alloc_node_not_found,
-      enum_bad_cast
-
+   enum class eException : int {
+      none = 1,
+      no_parsed_document_found,
+      bad_lexical_cast,
+      reading_file,
+      parsing_file,
+      identify_element,
+      failed_to_read_element_name,
+      failed_to_read_element_closing_tag,
+      failed_to_read_element_start_tag,
+      reading_element_value,
+      parse_attributes,
+      parsing_empty,
+      reading_endtag,
+      parsing_element,
+      parsing_comment,
+      parse_text,
+      parsing_declaration,
+      document_empty,
+      document_top_only,
+      cannot_insert_root_as_default,
+      key_points_not_to_an_element,
+      key_points_not_to_an_attribute,
+      key_not_found,
+      unknown_node_type,
+      unknown_node,
+      iterator_underflow,
+      list_is_empty,
+      keylist_in_visitor_has_length_zero,
+      operator_plus_at_or_after_end,
+      operator_minus_at_or_after_end,
+      alloc_id_not_found,
+      alloc_node_not_found,
+      bad_cast
    };
-   std::string to_string( exception_enum e );
+   std::string to_string( eException e );
 
-   class t_line_file_method {
-      size_t _line;
-      std::string _file;
-      std::string _method;
-   public:
-      t_line_file_method(): _line( 0 ), _file( "" ), _method( "" ) {}
 
-      t_line_file_method( size_t line_, std::string const& file_, std::string const& method_ )
-         : _line( line_ ), _file( file_ ), _method( method_ )
-      {}
-      size_t line()const {
-         return _line;
-      }
-      std::string const& file()const {
-         return _file;
-      }
+//   class t_lfm {
+//      size_t _line;
+//      std::string _file;
+//      std::string _method;
+//   public:
+//      t_lfm(): _line( 0 ), _file( "" ), _method( "" ) {}
 
-      std::string const& method()const {
-         return _method;
-      }
-      std::string to_string()const {
-         return "File: " + file() + ", Line: " + std::to_string( line() ) + ",Method: " + method();
-      }
-      ~t_line_file_method() {}
-   };
+//      t_lfm( size_t line_, std::string const& file_, std::string const& method_ )
+//         : _line( line_ ), _file( file_ ), _method( method_ ) {
+//      }
+//      size_t line()const {
+//         return _line;
+//      }
+//      std::string const& file()const {
+//         return _file;
+//      }
 
+//      std::string const& method()const {
+//         return _method;
+//      }
+//      std::string to_string()const {
+//         return "File: " + file() + ", Line: " + std::to_string( line() ) + ",Method: " + method();
+//      }
+//      ~t_lfm() {}
+//   };
+
+
+   // use of parameterobject for line, file, method
+//   inline t_lfm tLfm( uint32_t line_, std::string const& file_, std::string const& method_ ) {
+//      return t_lfm( line_, file_, method_ );
+//   }
+
+   //#define tlfm_ txml::tLfm( __LINE__,__FILE__,__FUNCTION__)
 
    class xml_exception: public std::runtime_error {
-      exception_enum _enum;
+      eException _enum;
       std::string _what;
-      t_line_file_method lfm;
+      t_lfm lfm;
 
       //      xml_exception( xml_exception const&);
       //      void operator=( xml_exception const& );
    public:
-      xml_exception( t_line_file_method const& lfm, exception_enum e, std::string const& in );
+      xml_exception( t_lfm const& lfm, eException e, std::string const& in );
       const char* what() const throw() {
          return _what.c_str();
       }
@@ -109,7 +117,7 @@ namespace txml {
          return _what;
       }
       virtual ~xml_exception() throw() {}
-      exception_enum const& getEnum()const {
+      eException const& getEnum()const {
          return _enum;
       }
       std::string getEnumString()const {
@@ -119,13 +127,17 @@ namespace txml {
       std::string const& file()const;
       std::string const& method()const;
       std::string file_line_method()const {
-         return lfm.to_string();
+         return static_cast<std::string>( lfm );
       }
+      operator std::string()const {
+         return static_cast<std::string>( lfm );
+      }
+
    };
 
 
 
-   const std::string msg_none( "no Error" );
+   const std::string msg_none = "no Error";
    const std::string msg_no_parsed_document_found( "no parsed document found" );
    const std::string msg_bad_lexical_cast( "bad lexical cast" );
    const std::string msg_reading_file( "reading file" );
@@ -157,7 +169,6 @@ namespace txml {
    const std::string msg_keylist_in_visitor_has_length_zero( "keylist in visitor has length zero" );
    const std::string msg_operator_plus_at_or_after_end( "operator plus at or after end" );
    const std::string msg_operator_minus_at_or_after_end( "operator minus at or after end" );
-
    const std::string msg_alloc_id_not_found( "alloc id not found" );
    const std::string msg_alloc_node_not_found( "alloc node not found" );
    const std::string msg_bad_cast( "bad cast" );

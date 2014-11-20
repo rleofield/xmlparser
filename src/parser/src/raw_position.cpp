@@ -97,18 +97,19 @@ namespace txml {
    rawxml_position::rawxml_position( vector8_t const& v ) :
       _rawxml( v ),
       _running( _rawxml.begin() ),
-      _next()
-   {}
+      _next() {
+   }
 
    rawxml_position::rawxml_position( std::string const& v ) :
       _rawxml( v.begin(), v.end() ),
       _running( _rawxml.begin() ),
-      _next()
-   {}
+      _next() {
+   }
 
 
    bool rawxml_position::starts_with( std::string const& s ) {
       std::string temp = next( s.size() );
+
       if( temp == s ) {
          return true;
       }
@@ -133,9 +134,11 @@ namespace txml {
    string rawxml_position::next( ptrdiff_t n )const {
       ptrdiff_t temp = n;
       ptrdiff_t diff = _rawxml.end() - _running;
+
       if( temp > diff ) {
          temp = diff;
       }
+
       return std::string( _running,  _running + temp );
    }
 
@@ -143,24 +146,27 @@ namespace txml {
    std::string rawxml_position::next( vector8_t::const_iterator it ) const {
       if( it < _running ) {
          vector8_t::difference_type pos = it - _running;
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_iterator_underflow,
-                             "Position: next(it), iterator underflow: " + rlf_hstring::toString( pos ) );
+         throw xml_exception( tlog_lfm_,
+                              eException::iterator_underflow,
+                              "Position: next(it), iterator underflow: " + rlf_hstring::toString( pos ) );
       }
 
       // check against end() = one char after end of string
       if( it > _rawxml.end() ) {
          return std::string();
       }
+
       string ret = std::string( _running,  it );
       return ret;
    }
 
    std::string rawxml_position::next_until( std::string const& s )const {
       vector8_t::const_iterator vi = find( s );
+
       if( vi == end() ) {
          return std::string();
       }
+
       return next( vi + s.size() );
    }
 
@@ -172,13 +178,13 @@ namespace txml {
 
    void rawxml_position::operator+=( int offset ) {
       if( _rawxml.end() - _running < offset ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_operator_plus_at_or_after_end, "Position: operator += at or after end" );
+         throw xml_exception( tlog_lfm_,
+                              eException::operator_plus_at_or_after_end, "Position: operator += at or after end" );
       }
 
       if( _running >= _rawxml.end() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_operator_plus_at_or_after_end, "Position: operator += at or after end" );
+         throw xml_exception( tlog_lfm_,
+                              eException::operator_plus_at_or_after_end, "Position: operator += at or after end" );
       }
 
       _running += offset;
@@ -187,8 +193,8 @@ namespace txml {
    }
    void rawxml_position::operator-=( int i )const {
       if( i < _running - _rawxml.begin() ) {
-         throw xml_exception( t_line_file_method( __LINE__, __FILE__, __FUNCTION__ ),
-                             enum_operator_minus_at_or_after_end, "Position: operator -= at or after end" );
+         throw xml_exception( tlog_lfm_,
+                              eException::operator_minus_at_or_after_end, "Position: operator -= at or after end" );
       }
 
       _running -= i;
@@ -225,9 +231,11 @@ namespace txml {
       if( _running == _rawxml.end() ) {
          return false;
       }
-      if( isspace(  *_running ) > 0 ) {
+
+      if( isspace( *_running ) > 0 ) {
          return true;
       }
+
       return false;
    }
 
@@ -235,6 +243,7 @@ namespace txml {
       if( _running == _rawxml.end() ) {
          return;
       }
+
       while(
          ( _running != _rawxml.end() )
          && ( ( *_running == ' ' )
@@ -244,10 +253,12 @@ namespace txml {
             ) ) {
          ++_running;
       }
+
       if( _running >= _rawxml.end() ) {
          _next.clear();
          return;
       }
+
       next100();
    }
    vector8_t::difference_type rawxml_position::remainder()const {

@@ -58,8 +58,8 @@ namespace txml {
       remainder(),
       _elementfound( nullptr ),
       _value(),
-      _attr()
-   {}
+      _attr() {
+   }
 
 
    bool xml_locator::enter( const xml_element& element ) {

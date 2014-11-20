@@ -51,7 +51,6 @@ SOURCES += src/main.cpp \
     src/parser/src/txml_fs.cpp \
     src/parser/src/raw_position.cpp \
     src/parser/src/keyentries.cpp \
-    src/parser/src/alloccheck.cpp \
     src/filefn/t_filename.cpp \
     src/hstring/stringhelper.cpp \
     src/hstring/gettokens.cpp \
@@ -66,30 +65,20 @@ SOURCES += src/main.cpp \
     src/parser/src/xml_node.cpp \
     src/parser/src/xml_printer.cpp \
     src/parser/src/xml_text.cpp \
-    src/parser/src/xml_read_text.cpp
+    src/parser/src/xml_read_text.cpp \
+    src/other_demo.cpp \
+    src/log/alloccheck.cpp
 
 
 HEADERS += \
     src/examples.h \
     src/parser/interface/xml_interface.h \
-    src/parser/interface/tLogImpl.h \
-    src/parser/interface/tLogEnum.h \
-    src/parser/interface/tLogCategories.h \
-    src/parser/interface/tLog.h \
-    src/parser/interface/tLog_Category_default.h \
-    src/parser/interface/tLog_Category_D.h \
-    src/parser/interface/tLog_Category_C.h \
-    src/parser/interface/tLog_Category_B.h \
-    src/parser/interface/tLog_Category_A.h \
-    src/parser/interface/tLfmCL.h \
     src/parser/src/xml_utl.h \
     src/parser/src/xml_fs.h \
     src/parser/src/xml_builder.h \
     src/parser/src/rawxml_position.h \
     src/parser/src/keyentries.h \
-    src/parser/src/alloccheck.h \
     src/filefn/t_filename.h \
-    src/filefn/boost_cstdint.h \
     src/hstring/stringhelper.h \
     src/hstring/gettokens.h \
     src/log/tLogImpl.h \
@@ -100,11 +89,11 @@ HEADERS += \
     src/log/tLog_Category_D.h \
     src/log/tLog_Category_C.h \
     src/log/tLog_Category_B.h \
+    src/log/tLog_Category_A.h \
     src/log/tLfmCL.h \
     src/log/tLfm.h \
     src/txtrw/wList.h \
     src/txtrw/rList.h \
-    src/boost/boost_cstdint.h \
     src/parser/src/xml_element.h \
     src/parser/src/xml_attribute.h \
     src/parser/src/xml_comment.h \
@@ -116,8 +105,7 @@ HEADERS += \
     src/parser/src/xml_text.h \
     src/parser/src/xml_visitor.h \
     src/parser/interface/xml_exception.h \
-    src/boost/boost_cstdint.h \
-    src/log/tLogCategories.h
+    src/log/alloccheck.h
 
 
 
@@ -133,6 +121,7 @@ INCLUDEPATH += $$PWD/src/hstring
 INCLUDEPATH += $$PWD/src/log
 INCLUDEPATH += $$PWD/src/parser
 INCLUDEPATH += $$PWD/src/parser/interface
+INCLUDEPATH += $$PWD/src/parser/src
 INCLUDEPATH += $$PWD/src/txtrw
 INCLUDEPATH += $$PWD/src/boost
 

@@ -39,8 +39,8 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RL_XML_ELEMENT_H
-#define RL_XML_ELEMENT_H
+#ifndef RLF_XML_ELEMENT_H
+#define RLF_XML_ELEMENT_H
 
 #include <string>
 #include <vector>
@@ -60,7 +60,7 @@ namespace txml {
       xml_element( const xml_element& );
       xml_element& operator=( const xml_element& base );
       static void operator delete( void* );
-      static void* operator new( size_t, t_alloc_line_file_method const& lfm );
+      static void* operator new( size_t, t_lfm const& lfm );
 
       std::string getAttributes( vector8_t const& temp );
 
@@ -69,7 +69,7 @@ namespace txml {
 
 
    public:
-      static xml_element* create( t_alloc_line_file_method const& lfmcIn, const std::string& value_ = std::string() );
+      static xml_element* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() );
       static xml_element* create( const std::string& value_ = std::string() );
       virtual ~xml_element();
 
