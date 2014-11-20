@@ -29,6 +29,7 @@ using rlf_tlfm::t_lfm;
 
 namespace txml {
 
+
    enum class eException : int {
       none = 1,
       no_parsed_document_found,
