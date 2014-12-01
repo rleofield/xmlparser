@@ -77,7 +77,7 @@ int main() {
 
    cout << "started" << endl;
 
-   string logfile = "xml_log_old";
+   string logfile = "log_old";
    bool b = logger().setLogfile( logfile );
 
    if( b == false ) {
@@ -99,25 +99,26 @@ int main() {
       //demo::write_simple_doc2();
 
       examples::ubuntu32_xml_demo();
+      //examples::ls_xml_demo();
       // demo create xml file, please comment out unwanted tests
 
 
       // other demos, in demo.cpp
 
       // test of some string functions
-      examples::string_convert();
+      // examples::string_convert();
 
       // print a nice xml format
-      examples::pretty_print();
+      //examples::pretty_print();
 
-      examples::xml_path_to_string_const();
+      //examples::xml_path_to_string_const();
 
       // insert a comment before an element
-      examples::add_comments();
+      //examples::add_comments();
 
       // read and set element values, attributes
-      examples::get_element_attribute_values();
-      examples::set_element_attribute_values();
+      //examples::get_element_attribute_values();
+      //examples::set_element_attribute_values();
 
    } catch( std::runtime_error& rt ) {
       LOGT_FATAL( string( "Ex rt: " ) + rt.what() );

@@ -35,41 +35,12 @@ namespace alloccheck {
    const bool use_alloc_check = true;
 
 
-   class t_alloccheck {
-      std::map<size_t, std::string> _alloc_list;
-
-      // secure singleton, don't allow a copy
-      t_alloccheck( t_alloccheck const& pos );
-      void operator=( t_alloccheck const& pos );
-
-      size_t _alloccount;
-      int _totalalloc;
-
-   public:
-      t_alloccheck(): _alloc_list(), _alloccount( 0 ), _totalalloc( 0 ) {}
-
-      std::map<size_t, std::string>  const& alloclist()const {
-         return _alloc_list;
-      }
-      std::map<size_t, std::string> & getMutableAlloclist() {
-         return _alloc_list;
-      }
-      int totalalloc()const{ return _totalalloc; }
-      void totalalloc_add( int i ){ _totalalloc += i; }
-      void totalalloc_subtract( int i ){ _totalalloc -= i; }
-
-      size_t alloccount()const{ return _alloccount; }
-      void incr_alloccount(){ _alloccount++; }
-      void decr_alloccount(){ _alloccount--; }
-
-   };
-
    // get the count of not deleted unchecked pointers, must be zero
-   std::string alloc_list_message() ;
+   std::string alloc_list_message();
    size_t alloc_list_size();
 
    // gets a list of all undeleted checked pointers
-   std::string alloclist();
+   std::string allocliststring();
 
 
 

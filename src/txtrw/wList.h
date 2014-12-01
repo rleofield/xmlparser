@@ -129,18 +129,18 @@ namespace rlf_txtrw {
    };
 
 
-   /*! \class t_write_ascii
-       *  \brief writes text file
+   /*! \class t_write_ascii_list
+       *  \brief writes text file from list
        *
        * a textfile is stored in a <b>string</b> list<br>
        */
-   class t_write_ascii  {
-      t_write_ascii( const t_write_ascii& in );
-      t_write_ascii& operator= ( const t_write_ascii& in );
+   class t_write_ascii_list  {
+      t_write_ascii_list( const t_write_ascii_list& in );
+      t_write_ascii_list& operator= ( const t_write_ascii_list& in );
 
    public:
-      t_write_ascii() {}
-      ~t_write_ascii() {}
+      t_write_ascii_list() {}
+      ~t_write_ascii_list() {}
       void operator()( const std::string& file, std::list<std::string> const& lines, bool overwrite = false ) {
 
          if( ! overwrite ) {
@@ -209,6 +209,83 @@ namespace rlf_txtrw {
 
 
    };
+
+   class t_write_ascii  {
+      t_write_ascii( const t_write_ascii& in );
+      t_write_ascii& operator= ( const t_write_ascii& in );
+
+   public:
+      t_write_ascii() {}
+      ~t_write_ascii() {}
+      void operator()( const std::string& file, std::vector<std::string> const& lines, bool overwrite = false ) {
+
+         if( ! overwrite ) {
+            if( err::file_exists_( file ) ) {
+               throw bad_text_write( err::file_exists( file ) );
+            }
+         }
+
+         //         if( lines.size() == 0 ) {
+         //            throw bad_text_write( err::text_empty( file ) );
+         //         }
+
+         if( lines.size() > 0 ) {
+            std::ofstream fp( file.c_str() );
+
+            if( !fp.is_open() ) {
+               throw bad_text_write( err::file_open( file ) );
+            }
+
+            try {
+               for_each( lines.begin(), lines.end(), writer( fp, file ) );
+            } catch( bad_text_write& ex ) {
+               throw bad_text_write( err::write_file( file + ex.what() ) );
+            }
+         }
+      }
+      void operator()( const std::string& file, std::string const& str, bool overwrite = false ) {
+
+         if( ! overwrite ) {
+            if( err::file_exists_( file ) ) {
+               throw bad_text_write( err::file_exists( file ) );
+            }
+         }
+
+         if( str.size() == 0 ) {
+            throw bad_text_write( err::text_empty( file ) );
+         }
+
+         if( str.size() > 0 ) {
+            std::ofstream fp( file.c_str() );
+
+            if( !fp.is_open() ) {
+               throw bad_text_write( err::file_open( file ) );
+            }
+
+            try {
+               writer( fp, file )( str );
+            } catch( bad_text_write& ex ) {
+               throw bad_text_write( err::write_file( file + ex.what() ) );
+            }
+         }
+      }
+      class writer {
+         std::ofstream& _fp;
+         std::string const& _f;
+      public:
+         writer( std::ofstream& fp, std::string f ): _fp( fp ), _f( f ) {}
+         void operator()( std::string const& s ) {
+            _fp << s << std::endl;
+
+            if( _fp.bad() ) {
+               throw bad_text_write( "" );
+            }
+         }
+      };
+
+
+   };
+
 
 }// end of ns text_write
 

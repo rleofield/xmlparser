@@ -100,6 +100,9 @@ namespace txml {
 
       // skip ' ', '\n', '\t'
       void skip()const;
+
+      // skip BOM, 2 or 3 chars
+      void skip( Encoding e )const;
       vector8_t::difference_type remainder()const;
 
    };

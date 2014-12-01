@@ -58,7 +58,7 @@ namespace txml {
 
    namespace {
 
-      string EncodeString( const string& str ) {
+      string encode( const string& str ) {
          size_t  i = 0;
          string temp;
 
@@ -101,7 +101,7 @@ namespace txml {
 
       class selectInQuotes {
          rawxml_position& _pos;
-         //xml_attribute& _attr;
+         //attribute& _attr;
          string _value;
 
       public:
@@ -155,7 +155,7 @@ namespace txml {
          vector<string> quotes = boost::assign::list_of( SINGLE_QUOTE )( DOUBLE_QUOTE );
          string val  =  for_each( quotes.begin(), quotes.end(), selectInQuotes( pos ) ).value();
          _value = val;
-         keyentry& pe = keys.last();
+         keyentry& pe = path.last();
          pe.attr( _name );
          pe.Value( val );
 
@@ -172,19 +172,19 @@ namespace txml {
 
    void xml_attribute::print( string& str ) const {
 
-      string n = EncodeString( _name );
-      string v = EncodeString( _value );
+      string n = encode( _name );
+      string v = encode( _value );
 
       if( _value.find( '\"' ) == string::npos ) {
-         ( str ) += n;
-         ( str ) += "=\"";
-         ( str ) += v;
-         ( str ) += "\"";
+         str += n;
+         str += "=\"";
+         str += v;
+         str += "\"";
       } else {
-         ( str ) += n;
-         ( str ) += "='";
-         ( str ) += v;
-         ( str ) += "'";
+         str += n;
+         str += "='";
+         str += v;
+         str += "'";
       }
    }
 

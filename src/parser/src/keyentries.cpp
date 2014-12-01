@@ -189,7 +189,7 @@ namespace txml {
       _childcount = chc;
    }
 
-   string keyentry::Attr()const {
+   string keyentry::attr()const {
       return _attr;
    }
    void keyentry::attr( string const& a ) {
@@ -402,9 +402,6 @@ namespace txml {
       return merge( vs, "." );
    }
 
-   //   vector<keyentry> to_keyentries( vector<string> v ) {
-   //      return for_each( v.begin(), v.end(), string_to_keyentry() ).v;
-   //   }
 
 
    keyentry const& keyentries::operator[]( size_t i )const {

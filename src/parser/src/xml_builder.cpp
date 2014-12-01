@@ -52,14 +52,18 @@ www.lug-ottobrunn.de
 #include "xml_document.h"
 #include "xml_declaration.h"
 #include "xml_comment.h"
+#include "xml_attribute.h"
 
 #include "stringhelper.h"
 #include "alloccheck.h"
 
-
+using txml::xml_node;
 using namespace std;
-
-
+using txml::xml_attribute;
+using txml::xml_document;
+using txml::xml_element;
+using txml::xml_text;
+using txml::xml_declaration;
 
 namespace demo {
 
@@ -81,9 +85,9 @@ namespace demo {
             return 0;
          }
 
-         vector<txml::xml_attribute> const& v = pElement->Attributes();
-         vector<txml::xml_attribute>::const_iterator begin = v.begin();
-         vector<txml::xml_attribute>::const_iterator end = v.end();
+         vector<xml_attribute> const& v = pElement->Attributes();
+         vector<xml_attribute>::const_iterator begin = v.begin();
+         vector<xml_attribute>::const_iterator end = v.end();
 
          int count = static_cast<int>( end - begin );
          string pIndent = getIndent( indent );
@@ -125,8 +129,8 @@ namespace demo {
          break;
 
       case txml::xml_node::eNodeType::ELEMENT:
-         cout << "Element [" <<  pParent->value() << "]";
-         num = dump_attribs_to_stdout( dynamic_cast<txml::xml_element const*>( pParent ), indent + 1 );
+         std::cout << "Element [" <<  pParent->value() << "]";
+         num = dump_attribs_to_stdout( dynamic_cast<xml_element const*>( pParent ), indent + 1 );
 
          switch( num ) {
          case 0:
@@ -144,18 +148,18 @@ namespace demo {
 
          break;
 
-      case txml::xml_node::eNodeType::COMMENT:
+      case xml_node::eNodeType::COMMENT:
          cout << "Comment: [" << pParent->value() << "]";
          break;
 
-      case txml::xml_node::eNodeType::TEXT:
-         pText = dynamic_cast<txml::xml_text*>( const_cast<txml::xml_node*>( pParent ) );
+      case xml_node::eNodeType::TEXT:
+         pText = dynamic_cast<xml_text*>( const_cast<xml_node*>( pParent ) );
          v = pText->value();
          v = txml::decodeEntities( v );
          cout << "Text: [" << v << "]";
          break;
 
-      case txml::xml_node::eNodeType::DECLARATION:
+      case xml_node::eNodeType::DECLARATION:
          cout << "Declaration";
          break;
 
@@ -164,7 +168,7 @@ namespace demo {
       }
 
       cout << endl;
-      txml::xml_node const* pChild;
+      xml_node const* pChild;
 
       for( pChild = pParent->firstChild(); pChild != 0; pChild = pChild->next() ) {
          xml_dump_to_stdout( pChild, indent + 1 );
@@ -174,20 +178,20 @@ namespace demo {
 
    void build_simple_doc( ) {
       // Make xml: <?xml ..><Hello>World</Hello>
-      txml::xml_document doc;
-      txml::xml_node* decl = txml::xml_declaration::create( tlog_lfm_ );
-      txml::xml_element* element = txml::xml_element::create( "Hello" );
-      txml::xml_node* text = txml::xml_text::create( tlog_lfm_, "World" );
+      xml_document doc;
+      xml_node* decl = xml_declaration::create( tlog_lfm_ );
+      xml_element* element = xml_element::create( "Hello" );
+      xml_node* text = xml_text::create( tlog_lfm_, "World" );
       element->linkEndChild( text );
       doc.linkEndChild( decl );
       doc.linkEndChild( element );
-      txml::xml_element* element2 = txml::xml_element::create( "ele2" );
-      txml::xml_node* text2 = txml::xml_text::create( tlog_lfm_, "World2" );
+      xml_element* element2 = xml_element::create( "ele2" );
+      xml_node* text2 = xml_text::create( tlog_lfm_, "World2" );
       element2->linkEndChild( text2 );
       doc.linkEndChild( element2 );
 
       xmlinterface::tXmlInterface t;
-      t.parse( doc );
+      t.reparse( doc );
       t.save( "madeByHand.xml" );
    }
 
@@ -196,17 +200,17 @@ namespace demo {
       // same as write_simple_doc1 but add each node
       // as early as possible into the tree.
 
-      txml::xml_document doc;
-      txml::xml_node* decl = txml::xml_declaration::create( tlog_lfm_);
+      xml_document doc;
+      xml_node* decl = xml_declaration::create( tlog_lfm_ );
       //doc.linkEndChild( decl );
 
-      txml::xml_element* element = txml::xml_element::create( "Hello" );
+      xml_element* element = xml_element::create( "Hello" );
       doc.linkEndChild( element );
 
-      txml::xml_node* text = txml::xml_text::create( "World" );
+      xml_node* text = xml_text::create( "World" );
       element->linkEndChild( text );
       xmlinterface::tXmlInterface t;
-      t.parse( doc );
+      t.reparse( doc );
       t.save( "madeByHand2.xml" );
    }
 
@@ -216,40 +220,40 @@ namespace demo {
 
 
    void write_app_settings_doc() {
-      txml::xml_document doc;
-      //txml::xml_node* decl = txml::xml_declaration::create( );
+      xml_document doc;
+      //xml_node* decl = xml_declaration::create( );
       //doc.linkEndChild( decl );
 
-      txml::xml_element* root = txml::xml_element::create( "MyApp" );
+      xml_element* root = xml_element::create( "MyApp" );
       doc.linkEndChild( root );
 
-      //txml::xml_node* comment = txml::xml_comment::create( );
+      //xml_node* comment = xml_comment::create( );
       //comment->value( " Settings for MyApp " );
       //root->linkEndChild( comment );
 
-      txml::xml_element* msgs = txml::xml_element::create( "Messages" );
+      xml_element* msgs = xml_element::create( "Messages" );
       root->linkEndChild( msgs );
 
-      txml::xml_element* msg = txml::xml_element::create( "Welcome" );
-      msg->linkEndChild( txml::xml_text::create( "Welcome to MyApp" ) );
+      xml_element* msg = xml_element::create( "Welcome" );
+      msg->linkEndChild( xml_text::create( "Welcome to MyApp" ) );
       msgs->linkEndChild( msg );
 
 
       //doc->saveFile( "appsettings_smart_Welcome.xml" );
       xmlinterface::tXmlInterface t;
-      t.parse( doc );
-      txml::xml_document const* doc1 = t.document();
+      t.reparse( doc );
+      xml_document const* doc1 = t.document();
       list<string> v;
-      doc1->serialize(v);
+      doc1->serialize( v );
 
-      msg = txml::xml_element::create( tlog_lfm_, "Farewell" );
-      msg->linkEndChild( txml::xml_text::create( "Thank you for using MyApp" ) );
+      msg = xml_element::create( tlog_lfm_, "Farewell" );
+      msg->linkEndChild( xml_text::create( "Thank you for using MyApp" ) );
       msgs->linkEndChild( msg );
 
-      txml::xml_element* windows = txml::xml_element::create( "Windows" );
+      xml_element* windows = xml_element::create( "Windows" );
       root->linkEndChild( windows );
 
-      txml::xml_element* window = txml::xml_element::create( "Window" );
+      xml_element* window = xml_element::create( "Window" );
       windows->linkEndChild( window );
       window->setAttribute( "name", "MainFrame" );
       window->setAttribute( "x", "5" );
@@ -257,14 +261,14 @@ namespace demo {
       window->setAttribute( "w", "400" );
       window->setAttribute( "h", "250" );
 
-      txml::xml_element* cxn = txml::xml_element::create( tlog_lfm_, "Connection" );
+      xml_element* cxn = xml_element::create( tlog_lfm_, "Connection" );
       root->linkEndChild( cxn );
       cxn->setAttribute( "ip", "192.168.0.1" );
       cxn->setAttribute( "timäout", "123.456" ); // floating point attrib
 
       //xmlinterface::tXmlInterface t;
 
-      t.parse( doc );
+      t.reparse( doc );
       t.save( "appsettings_old.xml" );
 
    }

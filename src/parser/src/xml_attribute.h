@@ -54,10 +54,10 @@ namespace txml {
 
    public:
       xml_attribute() :
-         keys(), _name(), _value()   { }
+         path(), _name(), _value()   { }
 
-      xml_attribute( const std::string& name_, const std::string& value_ ) :
-         keys(), _name( name_ ), _value( value_ ) {}
+      xml_attribute( const std::string& n, const std::string& v ) :
+         path(), _name( n ), _value( v ) {}
 
       std::string const& name()  const {
          return _name;
@@ -87,13 +87,13 @@ namespace txml {
       void print( std::string& str ) const;
 
       xml_attribute( const xml_attribute& attr ):
-         keys( attr.keys ), _name( attr._name ), _value( attr._value ) {}
+         path( attr.path ), _name( attr._name ), _value( attr._value ) {}
 
       xml_attribute& operator=( const xml_attribute& attr ) {
          if( this != &attr ) {
             _name = attr._name;
             _value = attr._value;
-            keys = attr.keys;
+            path = attr.path;
          }
 
          return *this;
@@ -103,7 +103,7 @@ namespace txml {
          return _name == attr._name;
       }
 
-      keyentries keys;
+      keyentries path;
    private:
 
       std::string _name;

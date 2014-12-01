@@ -110,6 +110,7 @@ namespace rlf_hstring {
 
 
    void string_to_list( std::string const& s, std::list<std::string>& l ) ;
+   void string_to_vector( std::string const& s, std::vector<std::string>& l ) ;
 
 
    namespace {
@@ -308,6 +309,7 @@ namespace rlf_hstring {
 
 
    // merge with delimiter
+   std::string merge( std::list<std::string>  const& v, std::string const& sep ) ;
    std::string merge( std::vector<std::string>  const& v, std::string const& sep ) ;
 
 

@@ -33,7 +33,9 @@ namespace txml {
 
    // keys for search in xml doc
    class keyentry {
+
    public:
+      std::string to_string()const;
       keyentry();
       keyentry( std::string const& str );
       keyentry( keyentry const& keyentry_ );
@@ -45,14 +47,20 @@ namespace txml {
       int childcount()const ;
       void childcount( int childcount_ ) ;
 
-      std::string Attr()const ;
+      std::string attr()const ;
       void attr( std::string const& a ) ;
       bool is_attr()const ;
       std::string Value()const ;
       void Value( std::string const& v ) ;
+
       std::string Element()const ;
       void Element( std::string element ) ;
-      std::string to_string()const;
+
+
+      operator std::string() {
+         return to_string();
+      }
+
       xml_node const* node()const ;
       xml_node* node() ;
       void node( xml_node* n ) ;

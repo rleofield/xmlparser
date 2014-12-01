@@ -119,17 +119,17 @@ namespace rlf_txtrw {
    *
    * a text file is stored in a <b>string</b> list<br>
    */
-   class t_text_read  {
-      t_text_read& operator= ( const t_text_read& in );
-      t_text_read( const t_text_read& in );
+   class t_text_read_list  {
+      t_text_read_list& operator= ( const t_text_read_list& in );
+      t_text_read_list( const t_text_read_list& in );
 
 
    public:
 
-      t_text_read() {}
-      ~t_text_read() {}
+      t_text_read_list() {}
+      ~t_text_read_list() {}
 
-      void operator()( const std::string& filename, std::list<std::string> & lines )  {
+      void operator()( const std::string& filename, std::list<std::string>& lines )  {
 
          if( !err::file_exists_r( filename ) ) {
             std::string s = err::file_not_exists( filename );
@@ -157,6 +157,19 @@ namespace rlf_txtrw {
             }
          }
       }
+
+   };
+
+   class t_text_read_string  {
+      t_text_read_string& operator= ( const t_text_read_string& in );
+      t_text_read_string( const t_text_read_string& in );
+
+
+   public:
+
+      t_text_read_string() {}
+      ~t_text_read_string() {}
+
       void operator()( const std::string& filename, std::string& str )  {
 
          if( !err::file_exists_r( filename ) ) {
@@ -187,22 +200,80 @@ namespace rlf_txtrw {
       }
 
    };
-   // converts the output list to one string, with linebreaks
-   inline std::string toString( const std::list<std::string>& lines ) {
-      const std::string sep = "\n";
-      std::string s;
 
-for( auto temp : lines ) {
-         if( !s.empty() ) {
-            s += sep;
-            s += temp;
-         } else {
-            s += temp;
+
+   class t_text_read  {
+      t_text_read& operator= ( const t_text_read& in );
+      t_text_read( const t_text_read& in );
+
+
+   public:
+
+      t_text_read() {}
+      ~t_text_read() {}
+
+      void operator()( const std::string& filename, std::vector<std::string>& lines )  {
+
+         if( !err::file_exists_r( filename ) ) {
+            std::string s = err::file_not_exists( filename );
+            throw bad_text_read( s );
+         }
+
+         std::ifstream fp( filename.c_str() );
+
+         if( !fp.is_open() ) {
+            std::string s = err::read_file( filename );
+            throw bad_text_read( s );
+         }
+
+         while( !fp.eof() ) {
+            std::string temp;
+            getline( fp, temp );
+
+            if( !fp.fail() ) {
+               lines.push_back( temp );
+            } else {
+               if( !fp.eof() ) {
+                  std::string s = err::read_file( filename );
+                  throw bad_text_read( s );
+               }
+            }
          }
       }
 
-      return s;
-   }
+   };
+
+   // converts the output list to one string, with linebreaks
+   //   inline std::string toString( const std::list<std::string>& lines  ) {
+   //      const std::string sep = "\n";
+   //      std::string s;
+
+   //      for( auto temp : lines ) {
+   //         if( !s.empty() ) {
+   //            s += sep;
+   //            s += temp;
+   //         } else {
+   //            s += temp;
+   //         }
+   //      }
+
+   //      return s;
+   //   }
+   //   inline std::string toString( const std::vector<std::string>& lines  ) {
+   //      const std::string sep = "\n";
+   //      std::string s;
+
+   //      for( auto temp : lines ) {
+   //         if( !s.empty() ) {
+   //            s += sep;
+   //            s += temp;
+   //         } else {
+   //            s += temp;
+   //         }
+   //      }
+
+   //      return s;
+   //   }
 
 
 }// end of namespace
