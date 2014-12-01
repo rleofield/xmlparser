@@ -66,16 +66,10 @@ namespace txml {
       static xml_node* create();
 
       virtual ~xml_comment() {}
-      virtual xml_node* clone() const;
+      //virtual xml_node* clone() const;
       virtual void parse( rawxml_position& );
 
-      //      virtual const xml_comment*  toComment() const  {
-      //         return this;
-      //      }
-      //      virtual       xml_comment*  toComment()     {
-      //         return this;
-      //      }
-
+      std::string print()const;
       virtual bool accept( xml_visitor* visitor ) const;
 
    protected:

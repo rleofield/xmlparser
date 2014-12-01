@@ -53,7 +53,6 @@ www.lug-ottobrunn.de
 #include "xml_exception.h"
 
 
-
 namespace txml {
 
    using std::string;
@@ -69,6 +68,7 @@ namespace txml {
 
    xml_node* xml_comment::create( t_lfm const& lfmcIn ) {
       xml_comment* p = new( lfmcIn ) xml_comment();
+      ph::add( p );
       return p;
 
    }
@@ -110,13 +110,10 @@ namespace txml {
       return visitor->visit( *this );
    }
 
+   std::string xml_comment::print()const {
+      return comment_start + value() + comment_end;
 
-   xml_node* xml_comment::clone() const {
-      return new( tlog_lfm_ ) xml_comment( *this );
    }
-
-
-
 
 }
 

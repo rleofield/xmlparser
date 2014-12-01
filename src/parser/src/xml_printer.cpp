@@ -62,7 +62,7 @@ namespace txml {
 
    bool xml_printer::enter( const xml_element& element ) {
       indent();
-      _buffer += "<";
+      _buffer += element_start;
       _buffer += element.value();
       std::vector<xml_attribute> v = element.Attributes();
 
@@ -72,11 +72,10 @@ namespace txml {
       }
 
       if( !element.firstChild() ) {
-         _buffer += " />";
+         _buffer += " " + element_close;
          _buffer += _lineBreak;
       } else {
-         _buffer += ">";
-
+         _buffer += element_end;
          xml_text const* text = dynamic_cast<xml_text const*>( element.firstChild() );
 
          if( text != nullptr && element.lastChild() == element.firstChild()
@@ -105,9 +104,9 @@ namespace txml {
             indent();
          }
 
-         _buffer += "</";
+         _buffer += element_exit_start; //"</";
          _buffer += element.value();
-         _buffer += ">";
+         _buffer += element_exit_end; //">";
          _buffer += _lineBreak;
       }
 
@@ -117,16 +116,12 @@ namespace txml {
 
    bool xml_printer::visit( const xml_text& text ) {
       if( simpleTextPrint ) {
-         string str = text.value();
-         _buffer += str;
+         _buffer += text.value();
          return true;
       }
 
       indent();
-      string str = text.value();
-      _buffer += str;
-      _buffer += _lineBreak;
-
+      _buffer += ( text.value() + _lineBreak );
       return true;
    }
 
@@ -142,9 +137,7 @@ namespace txml {
 
    bool xml_printer::visit( const xml_comment& comment ) {
       indent();
-      _buffer += "<!--"; // "<!--";
-      _buffer += comment.value();
-      _buffer += "-->"; // "-->";
+      _buffer += comment.print();
       _buffer += _lineBreak;
       return true;
    }

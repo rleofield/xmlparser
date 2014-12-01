@@ -96,7 +96,7 @@ namespace txml {
       vector8_t::const_iterator ptr_end_tag = pos.find( static_cast<string>( ">" ) ); //">"
       // extract string until on after found position
       string const& content = pos.next( ptr_end_tag + 1 );
-      return identifyNode( content );
+      return createNode( content );
    }
 
 
@@ -137,7 +137,7 @@ namespace txml {
       return false;
    }
 
-   xml_node* xml_node::identifyNode( string const& temp ) {
+   xml_node* xml_node::createNode( string const& temp ) {
       if( temp.size() < 2 ) { // only <> in element
          throw xml_exception( tlog_lfm_,
                               eException::unknown_node, msg_unknown_node + ": " + temp );
@@ -157,8 +157,9 @@ namespace txml {
          return node;
       }
 
+
       if( isDeclaration( temp ) )  {   // "<?xml und ?>"
-         xml_node* node = xml_declaration::create(tlog_lfm_);
+         xml_node* node = xml_declaration::create( tlog_lfm_ );
          node->parent( this );
          return node;
       }
@@ -174,8 +175,8 @@ namespace txml {
       _type( type_ ),
       _firstChild(),
       _lastChild(),
-      _previous(),
-      _next(),
+      _prev_sibling(),
+      _next_sibling(),
       _parent(),
       _node_value(),
       _rawxml() {}
@@ -184,29 +185,46 @@ namespace txml {
 
 
    xml_node::~xml_node() {
-      xml_node* node = firstChild();
+      if( !usePointerContainer ) {
+         xml_node* node = firstChild();
 
-      while( node != 0 ) {
-         xml_node* temp = node;
-         node = node->_next;
-         //tAllocatedPtr a = AllocatedPtrList.to_ptr_instanz(temp, tAllocatedPtr::tNode);
-         //AllocatedPtrList.Delete(a.Id());
+         while( node != 0 ) {
+            xml_node* temp = node;
+            node = node->_next_sibling;
+            //tAllocatedPtr a = AllocatedPtrList.to_ptr_instanz(temp, tAllocatedPtr::tNode);
+            //AllocatedPtrList.Delete(a.Id());
 
-         delete temp; // do_delete
+            delete temp; // do_delete
+         }
       }
    }
 
    void xml_node::clear() {
-      xml_node* node = firstChild();
+      if( !usePointerContainer ) {
+         xml_node* node = firstChild();
 
-      while( node ) {
-         xml_node* temp = node;
-         node = node->_next;
-         delete temp;
+         while( node ) {
+            xml_node* temp = node;
+            node = node->_next_sibling;
+            delete temp;
+         }
+
+         _firstChild = nullptr;
+         _lastChild = nullptr;
       }
+      else{
+         xml_node* node = firstChild();
 
-      _firstChild = nullptr;
-      _lastChild = nullptr;
+         while( node ) {
+            xml_node* temp = node;
+            node = node->_next_sibling;
+            temp = nullptr;
+         }
+
+         _firstChild = nullptr;
+         _lastChild = nullptr;
+
+      }
    }
 
    const string xml_node::value() const {
@@ -251,28 +269,37 @@ namespace txml {
       return "unknown";
 
    }
-  vector<std::string> xml_node::acc_all ;
+   vector<std::string> xml_node::acc_all ;
 
 
-  std::string xml_node::accs()const{
-     std::string s;
-     for( string a: acc){
-        s += a;
-     }
-     return s;
-  }
-  std::string xml_node::accs_all(){
-     std::string s;
-     for( string& a: acc_all){
-        s += a;
-     }
-     return s;
-  }
+   std::string xml_node::accs()const {
+      std::string s;
+
+      for( string a : acc ) {
+         s += a;
+      }
+
+      return s;
+   }
+   std::string xml_node::accs_all() {
+      std::string s;
+
+      for( string & a : acc_all ) {
+         s += a;
+      }
+
+      return s;
+   }
 
 
    xml_node* xml_node::linkEndChild( xml_node* node ) {
-      assert( node->parent() == 0 || node->parent() == this );
-      assert( node->getDocument() == nullptr || node->getDocument() == this->getDocument() );
+      xml_node const* p = node->parent();
+
+      assert( node->parent() == nullptr || node->parent() == this );
+      xml_document const* doc = node->getDocument();
+      xml_document const* d = getDocument();
+
+      assert( node->getDocument() == nullptr || node->getDocument() == getDocument() );
 
       if( node->type() == xml_node::eNodeType::DOCUMENT ) {
          delete node; // do_delete
@@ -282,22 +309,24 @@ namespace txml {
 
       string lcname;
       string val  = stype();
-      if( lastChild() != nullptr ){
+
+      if( lastChild() != nullptr ) {
          val = lastChild()->tvalue();
       }
 
-      string valn= node->tvalue();
+      string valn = node->tvalue();
       acc.push_back( ", a:" + val );
-      acc_all.push_back(", a:" + valn);
-      LOGT_INFO( "acc_all " + accs_all() );
-      LOGT_INFO( "acc     " + accs() );
-      LOGT_INFO( "value   '" + node->tvalue() + "'" );
-      LOGT_INFO( "this    '" + tvalue() + "'" );
-      if( parent() != nullptr )
-            LOGT_INFO( "parent  '" + parent()->value() + "'" );
+      acc_all.push_back( ", a:" + valn );
+      //LOGT_INFO( "acc_all " + accs_all() );
+      //LOGT_INFO( "acc     " + accs() );
+      //LOGT_INFO( "value   '" + node->tvalue() + "'" );
+      //LOGT_INFO( "this    '" + tvalue() + "'" );
+      //      if( parent() != nullptr )
+      //            LOGT_INFO( "parent  '" + parent()->value() + "'" );
 
       vector<string> vacc = acc;
       vector<string> vacca = acc_all;
+
       if( lastChild() != nullptr ) {
          lcname = lastChild()->value();
       }
@@ -305,20 +334,20 @@ namespace txml {
       node->parent( this );
 
       if( _lastChild != nullptr ) {
-         _lastChild->_next = node;
+         _lastChild->_next_sibling = node;
       } else {
          _firstChild = node;   // it was an empty list.
       }
 
-      node->_previous = _lastChild;
-      node->_next = nullptr;
+      node->_prev_sibling = _lastChild;
+      node->_next_sibling = nullptr;
 
       _lastChild = node;
       return node;
    }
 
 
-   xml_node* xml_node::insertBeforeChild( xml_node* child,  xml_node const* addThis ) {
+   xml_node* xml_node::insertCommentBefore( xml_node* child,  xml_node* addThis ) {
       if( child == nullptr ) {
          return nullptr;
       }
@@ -334,7 +363,7 @@ namespace txml {
                               eException::document_top_only, msg_document_top_only );
       }
 
-      xml_node* node = addThis->clone();
+      xml_node* node = addThis; //->clone();
 
       if( !node ) {
          return nullptr;
@@ -342,17 +371,17 @@ namespace txml {
 
       node->parent( this );
 
-      node->_next = child;
-      node->_previous = child->_previous;
+      node->_next_sibling = child;
+      node->_prev_sibling = child->_prev_sibling;
 
-      if( child->_previous ) {
-         child->_previous->_next = node;
+      if( child->_prev_sibling ) {
+         child->_prev_sibling->_next_sibling = node;
       } else {
          assert( _firstChild == child );
          _firstChild = node;
       }
 
-      child->_previous = node;
+      child->_prev_sibling = node;
       return node;
    }
 
@@ -364,7 +393,7 @@ namespace txml {
          return firstChild();
       } else {
          assert( previous->parent() == this );
-         return previous->_next;
+         return previous->_next_sibling;
       }
    }
    xml_node* xml_node::iterateChildren( xml_node* previous ) {
@@ -372,7 +401,7 @@ namespace txml {
          return firstChild();
       } else {
          assert( previous->parent() == this );
-         return previous->_next;
+         return previous->_next_sibling;
       }
    }
 
@@ -387,13 +416,13 @@ namespace txml {
    const xml_element* xml_node::lastChildElement( const string& value_ ) const {
       const xml_node* node;
 
-      for( node = _lastChild; node != nullptr; node = node->_previous ) {
+      for( node = _lastChild; node != nullptr; node = node->_prev_sibling ) {
          if( node->value() == value_ &&
-              dynamic_cast<xml_element const*>( node )
+               dynamic_cast<xml_element const*>( node )
 
-             ) {
+           ) {
             return
-                  dynamic_cast<xml_element const*>( node );
+               dynamic_cast<xml_element const*>( node );
          }
       }
 
@@ -403,12 +432,12 @@ namespace txml {
 
       xml_node* node;
 
-      for( node = lastChild(); node != nullptr; node = node->_previous ) {
+      for( node = lastChild(); node != nullptr; node = node->_prev_sibling ) {
          if( node->value() == value_ &&
-             dynamic_cast<xml_element const*>( node )
-             ) {
+               dynamic_cast<xml_element const*>( node )
+           ) {
             return
-                  dynamic_cast<xml_element*>( node );
+               dynamic_cast<xml_element*>( node );
          }
       }
 
@@ -419,7 +448,7 @@ namespace txml {
 
 
    const xml_node* xml_node::next() const {
-      return _next;
+      return _next_sibling;
    }
 
 
@@ -435,9 +464,12 @@ namespace txml {
    xml_document const* xml_node::getDocument()  {
       for( const xml_node* node = this; node != nullptr; node = node->parent() ) {
          xml_document const* doc =
-               dynamic_cast<xml_document const*>( node ) ;
+            dynamic_cast<xml_document const*>( node ) ;
 
          if( doc != nullptr ) {
+            assert( doc->_next_sibling == nullptr );
+            assert( doc->_prev_sibling == nullptr );
+            assert( doc->_parent == nullptr );
             return doc;
          }
       }
@@ -445,6 +477,44 @@ namespace txml {
       return nullptr;
    }
 
+   void ph::clear_pointers() {
+      if( usePointerContainer ) {
+         for( auto & p : pointers ) {
+            p.second.delete_ptr();
+         }
+
+         pointers.clear();
+      }
+   }
+   void ph::delete_ptr() {
+      if( _ptr != nullptr ) {
+         delete _ptr;
+         _ptr = nullptr;
+      }
+   }
+
+   void ph::add( xml_node* p ) {
+      if( usePointerContainer ) {
+         ph p0( p );
+         ph::pointers[p0.index()] = p0;
+      }
+   }
+
+   std::map<xml_node*, ph> ph::pointers;
+
+
+//   tIndexPtr::tIndexPtr( tIndexPtr const& ip ): _index( INVALID_ID ) {
+//      if( this != & ip ) {
+//         _index = ip._index;
+//      }
+//   }
+//   tIndexPtr& tIndexPtr::operator=( tIndexPtr const& id ) {
+//      if( this != &id ) {
+//         _index = id._index;
+//      }
+
+//      return *this;
+//   }
 
 }
 

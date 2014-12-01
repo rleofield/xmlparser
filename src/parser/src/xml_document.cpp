@@ -68,26 +68,16 @@ namespace txml {
    namespace {
 
       // http://de.wikipedia.org/wiki/Byte_Order_Mark
-      const char bom_UTF8[3]     = {( char )0xEF, ( char )0xBB, ( char )0xBF};
-      const char bom_UTF16_BE[2] = {( char )0xFE, ( char )0xFF };
-      const char bom_UTF16_LE[2] = {( char )0xFF, ( char )0xFE };
+      const char bom_utf8[3]     = {( char )0xEF, ( char )0xBB, ( char )0xBF};
+      const char bom_utf16_big_endian[2] = {( char )0xFE, ( char )0xFF };
+      const char bom_utf16_lower_endian[2] = {( char )0xFF, ( char )0xFE };
 
 
-      bool checkMsBOM( Encoding& encoding, string const& s ) {
+      const string string_bom_utf8 = string( bom_utf8, sizeof( bom_utf8 ) );
+      const string string_bom_utf16_big_endian = string( bom_utf16_big_endian, sizeof( bom_utf16_big_endian ) );
+      const string string_bom_utf16_lower_endian = string( bom_utf16_lower_endian, sizeof( bom_utf16_lower_endian ) );
 
-         // Check for the Microsoft UTF-8 lead bytes.
-         if( s.size() < 3 ) {
-            return false;
-         }
 
-         if( s == string( bom_UTF8, sizeof( bom_UTF8 ) ) ) {
-            encoding = Encoding::UTF8;
-            return true;
-         }
-
-         // other BOM ist not supported
-         return false;
-      }
 
    }
 
@@ -95,7 +85,7 @@ namespace txml {
    bool xml_document::_isWhiteSpacePreserved = true;
    /// http://www.opentag.com/xfaq_enc.htm
    Encoding xml_document::_encoding = Encoding::UNKNOWN;
-   bool xml_document::useMicrosoftBOM = false;
+   std::string xml_document::bom = string();
    std::locale xml_document::loc; // = locEN ;
 
    void xml_document::setPreserveWhiteSpace( bool b )    {
@@ -108,7 +98,8 @@ namespace txml {
 
 
    void* xml_document::operator new( size_t size, t_lfm const& lfm ) {
-      return alloccheck::checked_alloc( size, lfm );
+      void* p =  alloccheck::checked_alloc( size, lfm );
+      return p;
    }
    void xml_document::operator delete( void* p ) {
       xml_node* n = reinterpret_cast<xml_node*>( p );
@@ -132,14 +123,13 @@ namespace txml {
       encoding( Encoding::UTF8 );
 
       // Check for the Microsoft UTF-8 lead bytes.
-      string s = pos.next( 3 );
-      useMicrosoftBOM = checkMsBOM( _encoding, s );
+      string s = pos.next( string_bom_utf8.size() );
 
-      if( useMicrosoftBOM ) {
-         pos += 3;
+      if( s == string_bom_utf8 ) {
+         encoding( Encoding::UTF8 );
+         bom = string_bom_utf8;
+         pos += string_bom_utf8.size();
       }
-
-      pos.skip();
 
       if( *pos == 0 ) {
          throw xml_exception( tlog_lfm_,
@@ -156,10 +146,7 @@ namespace txml {
          if( node ) {
             node->_lookuppath = _lookuppath;
             node->parse( pos );
-            linkEndChild( node );
             xml_declaration const* decl = dynamic_cast<xml_declaration const*>( node );
-
-
             if( decl != nullptr ) {
                if( boost::iequals( decl->encoding(), UTF_8 ) ) {
                   _encoding = Encoding::UTF8;
@@ -167,6 +154,7 @@ namespace txml {
                   _encoding = Encoding::LEGACY;
                }
             }
+            linkEndChild( node );
          } else {
             break;
          }
@@ -191,21 +179,10 @@ namespace txml {
       //LOGT_INFO("");
    }
 
-   xml_document::xml_document( const xml_document& copy_ ) :
-      xml_node( xml_node::eNodeType::DOCUMENT ) {
-      copy_.copy( *this );
-   }
 
 
-   xml_document& xml_document::operator=( const xml_document& copy_ ) {
-      clear();
-      copy_.copy( *this );
-      return *this;
-   }
-
-
-   bool xml_document::parseStart( std::list<string>  const& l ) {
-      class add{
+   bool xml_document::startparsing( std::vector<string>  const& l ) {
+      class add {
       public:
          vector8_t& _v;
          add( vector8_t& v ): _v( v ) {}
@@ -215,8 +192,11 @@ namespace txml {
       };
 
       clear();
+      ph::clear_pointers();
       vector8_t  v;
       for_each( l.begin(), l.end() , add( v ) );
+      // add on space, to prevent end of file after last element
+      v.push_back( ' ' );
       rawxml_position pp( v );
       xml_node::acc_all.clear();
       parse( pp );
@@ -225,15 +205,15 @@ namespace txml {
 
    void xml_document::clear() {
       xml_node::clear();
+      if( usePointerContainer ) {
+         ph::clear_pointers();
+      }
    }
 
-   bool xml_document::saveFile( string const& filename ) const {
+   bool xml_document::save( string const& filename ) const {
 
-      xml_printer p;
-      this->accept( &p );
-      std::list<string> text;
-      string const& b = p.string_buffer();
-      rlf_hstring::string_to_list( b, text );
+      std::vector<string> text;
+      serialize( text );
       bool overwrite = true;
       rlf_txtrw::t_write_ascii()( filename, text, overwrite );
       return false;
@@ -248,9 +228,8 @@ namespace txml {
       rlf_hstring::string_to_list( s, text );
 
       if( text.size() > 0 ) {
-         if( useMicrosoftBOM ) {
-            string temp;
-            temp.append( bom_UTF8, bom_UTF8 + sizeof( bom_UTF8 ) );
+         if( bom.size() > 0 ) {
+            string temp = bom;
             temp += text.front();    // set BOM to start of first line
             text.pop_front();        // remove first lien
             text.push_front( temp ); // add again with bom
@@ -260,22 +239,18 @@ namespace txml {
       v = text;
    }
 
+   void xml_document::serialize( vector<string>& v ) const {
+      v.clear();
+      xml_printer p;
+      this->accept( &p );
 
-   void xml_document::copy( xml_document& target ) const {
-      target.value( value() );
-      target.useMicrosoftBOM = useMicrosoftBOM;
-      xml_node const* node = nullptr;
+      string const& s = p.string_buffer();
+      rlf_hstring::string_to_vector( s, v );
 
-      for( node = firstChild(); node != nullptr; node = node->next() ) {
-         target.linkEndChild( node->clone() );
+      if( bom.size() > 0 ) {
+         v[0] = bom + v[0]; // add with bom
       }
-   }
 
-   xml_node* xml_document::clone() const {
-      xml_document* pclone = new( tlog_lfm_ ) xml_document;
-
-      copy( *pclone );
-      return pclone;
    }
 
 
@@ -283,18 +258,20 @@ namespace txml {
       bool notAccepted = visitor->enter( *this );
 
       string n;
+
       if( notAccepted ) {
 
          for( const xml_node* node = firstChild(); node != nullptr; node = node->next() ) {
             notAccepted = node->accept( visitor );
             n = node->value();
+
             if( !notAccepted ) {
                break;
             }
          }
       }
 
-      return visitor->visitExit( *this );
+      return visitor->exit( *this );
    }
 
 

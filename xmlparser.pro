@@ -42,8 +42,6 @@ message("qmake xmlparser1")
 
 
 SOURCES += src/main.cpp \
-    src/demo.cpp \
-    src/ubuntu32_create.cpp \
     src/parser/src/xml_exception.cpp \
     src/parser/src/xml_builder.cpp \
     src/parser/src/txml_utl.cpp \
@@ -51,11 +49,6 @@ SOURCES += src/main.cpp \
     src/parser/src/txml_fs.cpp \
     src/parser/src/raw_position.cpp \
     src/parser/src/keyentries.cpp \
-    src/filefn/t_filename.cpp \
-    src/hstring/stringhelper.cpp \
-    src/hstring/gettokens.cpp \
-    src/log/tLogImpl.cpp \
-    src/log/tLog.cpp \
     src/parser/src/xml_element.cpp \
     src/parser/src/xml_comment.cpp \
     src/parser/src/xml_declaration.cpp \
@@ -65,7 +58,13 @@ SOURCES += src/main.cpp \
     src/parser/src/xml_node.cpp \
     src/parser/src/xml_printer.cpp \
     src/parser/src/xml_text.cpp \
-    src/parser/src/xml_read_text.cpp \
+    src/filefn/t_filename.cpp \
+    src/hstring/stringhelper.cpp \
+    src/hstring/gettokens.cpp \
+    src/log/tLogImpl.cpp \
+    src/log/tLog.cpp \
+    src/demo.cpp \
+    src/ubuntu32_create.cpp \
     src/other_demo.cpp \
     src/log/alloccheck.cpp
 
@@ -76,24 +75,9 @@ HEADERS += \
     src/parser/src/xml_utl.h \
     src/parser/src/xml_fs.h \
     src/parser/src/xml_builder.h \
+    src/parser/src/win32.h \
     src/parser/src/rawxml_position.h \
     src/parser/src/keyentries.h \
-    src/filefn/t_filename.h \
-    src/hstring/stringhelper.h \
-    src/hstring/gettokens.h \
-    src/log/tLogImpl.h \
-    src/log/tLogEnum.h \
-    src/log/tLogCategories.h \
-    src/log/tLog.h \
-    src/log/tLog_Category_default.h \
-    src/log/tLog_Category_D.h \
-    src/log/tLog_Category_C.h \
-    src/log/tLog_Category_B.h \
-    src/log/tLog_Category_A.h \
-    src/log/tLfmCL.h \
-    src/log/tLfm.h \
-    src/txtrw/wList.h \
-    src/txtrw/rList.h \
     src/parser/src/xml_element.h \
     src/parser/src/xml_attribute.h \
     src/parser/src/xml_comment.h \
@@ -105,6 +89,20 @@ HEADERS += \
     src/parser/src/xml_text.h \
     src/parser/src/xml_visitor.h \
     src/parser/interface/xml_exception.h \
+    src/filefn/t_filename.h \
+    src/filefn/boost_cstdint.h \
+    src/hstring/stringhelper.h \
+    src/hstring/gettokens.h \
+    src/log/tLogImpl.h \
+    src/log/tLogEnum.h \
+    src/log/tLogCategories.h \
+    src/log/tLog.h \
+    src/log/tLog_Category_default.h \
+    src/log/tLog_Category_A.h \
+    src/log/tLfmCL.h \
+    src/log/tLfm.h \
+    src/txtrw/wList.h \
+    src/txtrw/rList.h \
     src/log/alloccheck.h
 
 
@@ -123,7 +121,7 @@ INCLUDEPATH += $$PWD/src/parser
 INCLUDEPATH += $$PWD/src/parser/interface
 INCLUDEPATH += $$PWD/src/parser/src
 INCLUDEPATH += $$PWD/src/txtrw
-INCLUDEPATH += $$PWD/src/boost
+
 
 #LIBS += -L$$PWD/../libtxml/ -ltxml
 #LIBS += /usr/lib/libboost_system-mt.a

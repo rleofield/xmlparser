@@ -51,6 +51,8 @@ www.lug-ottobrunn.de
 #include "alloccheck.h"
 
 
+
+
 namespace txml {
    using std::string;
    using std::vector;
@@ -68,7 +70,12 @@ namespace txml {
 
    xml_node* xml_declaration::create( t_lfm const& lfmcIn ) {
       xml_declaration* p = new( lfmcIn ) xml_declaration();
-      //p->setStandalone("yes");
+      ph::add( p );
+      return p;
+   }
+   xml_node* xml_declaration::create() {
+      xml_declaration* p = new( tlog_lfm_ ) xml_declaration();
+      ph::add( p );
       return p;
    }
 
@@ -133,14 +140,14 @@ namespace txml {
 
    }
 
-   xml_declaration::xml_declaration( const xml_declaration& copy_ )
-      : xml_node( xml_node::eNodeType::DECLARATION ), _version( copy_._version ), _encoding( copy_._encoding ), _standalone( copy_._standalone ) {
-      copy_.copy( *this );
+   xml_declaration::xml_declaration( const xml_declaration& decl )
+      : xml_node( xml_node::eNodeType::DECLARATION ), _version( decl._version ), _encoding( decl._encoding ), _standalone( decl._standalone ) {
+      decl.copy( *this );
    }
 
-   xml_declaration& xml_declaration::operator=( const xml_declaration& copy_ ) {
+   xml_declaration& xml_declaration::operator=( const xml_declaration& decl ) {
       clear();
-      copy_.copy( *this );
+      decl.copy( *this );
       return *this;
    }
 
@@ -178,13 +185,6 @@ namespace txml {
 
    bool xml_declaration::accept( xml_visitor* visitor ) const {
       return visitor->visit( *this );
-   }
-
-
-   xml_node* xml_declaration::clone() const {
-      xml_declaration* pclone = new( tlog_lfm_ ) xml_declaration();
-      copy( *pclone );
-      return pclone;
    }
 
 

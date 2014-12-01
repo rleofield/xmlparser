@@ -122,10 +122,7 @@ namespace xmlinterface {
 
       // lese Xml-Document, welches mit txml aufgebaut wurde
       // Parse() baut zusätzliche interne Strukturen auf
-      void parse( txml::xml_document const& doc );
-
-      // read internal Xml-Document and parses again (refresh of internal structures)
-      void parse();
+      void reparse( txml::xml_document const& doc );
 
       // write XML out
       void save( std::string const& fn );
@@ -159,6 +156,7 @@ namespace xmlinterface {
 
 
    void show_alloc_list();
+   std::string allocliststring();
 
    int str_to_int( std::string const& s );
    double str_to_double( std::string const& s );

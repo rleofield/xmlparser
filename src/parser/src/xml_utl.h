@@ -63,8 +63,9 @@ namespace txml {
 
    enum  class Encoding : int {
       UNKNOWN = 0,
-      UTF8 = 1,
-      LEGACY = 2
+      UTF8,
+      LEGACY
+
    };
 
 
@@ -73,6 +74,13 @@ namespace txml {
 
    const std::string declaration_start = "<?xml";
    const std::string declaration_end =  "?>";
+
+   const std::string element_start = "<";
+   const std::string element_end =  ">";
+   const std::string element_close =  "/>";
+
+   const std::string element_exit_start =  "</";
+   const std::string element_exit_end =  element_end;
 
    const std::string SINGLE_QUOTE = "\'";
    const std::string DOUBLE_QUOTE = "\"";

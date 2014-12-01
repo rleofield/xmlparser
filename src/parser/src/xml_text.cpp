@@ -344,7 +344,7 @@ namespace txml {
             return decode_utf( p1, encoding );
          }
 
-         string value = string() + ( char ) * pos;
+         string value(1, ( char ) *pos ) ;
          ++pos;
          return value;
       }
@@ -422,6 +422,7 @@ namespace txml {
 
    xml_text* xml_text::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_text* p = new( lfmcIn ) xml_text( value_ );
+      ph::add( p );
       return p;
    }
 
@@ -459,11 +460,6 @@ namespace txml {
       return visitor->visit( *this );
    }
 
-   xml_node* xml_text::clone() const {
-      xml_text* pclone = new( tlog_lfm_ ) xml_text( "" );
-      copy( *pclone );
-      return pclone;
-   }
 
 }
 

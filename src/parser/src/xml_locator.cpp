@@ -128,7 +128,7 @@ namespace txml {
       }
 
       keyentry const& last = lookupkeys.last();
-      _elementfound->setAttribute( last.Attr(), value_ );
+      _elementfound->setAttribute( last.attr(), value_ );
    }
 
    bool xml_locator::isAttr()const {
@@ -137,7 +137,7 @@ namespace txml {
       }
 
       keyentry const& last = lookupkeys.last();
-      return !last.Attr().empty();
+      return !last.attr().empty();
    }
 
 

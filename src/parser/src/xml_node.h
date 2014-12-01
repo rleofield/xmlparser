@@ -43,17 +43,16 @@ www.lug-ottobrunn.de
 #define RLF_NODE_H
 
 
+#include <map>
 #include <string>
 
 #include "xml_exception.h"
 
 #include "keyentries.h"
 
-struct null_deleter
-{
-    void operator()(void const *) const
-    {
-    }
+struct null_deleter {
+   void operator()( void const* ) const {
+   }
 };
 
 
@@ -69,6 +68,7 @@ namespace txml {
 
 namespace txml {
 
+   const bool usePointerContainer = true;
 
 
    class rawxml_position;
@@ -134,7 +134,7 @@ namespace txml {
       //std::vector<xml_node*> childs();
       xml_node* linkEndChild( xml_node* addThis );
 
-      xml_node* insertBeforeChild( xml_node* beforeThis, xml_node const* addThis );
+      xml_node* insertCommentBefore( xml_node* beforeThis, xml_node* addThis );
 
    public:
 
@@ -153,12 +153,8 @@ namespace txml {
          return _firstChild == nullptr;
       }
 
-      // return null, if not of the requested type.
-      //const xml_document*    toXmlDocument()    const ;
-      //      const XmlElement*     toXmlElement()     const ;
-      //      XmlElement*           toXmlElement()     ;
 
-      virtual xml_node* clone() const = 0;
+      //virtual xml_node* clone() const = 0;
 
       virtual bool accept( xml_visitor* visitor ) const = 0;
 
@@ -183,7 +179,7 @@ namespace txml {
       xml_node( eNodeType _type );
 
       xml_node* identify( rawxml_position& pos );
-      xml_node* identifyNode( std::string const& str );
+      xml_node* createNode( std::string const& str );
       void         parent( xml_node* p ) ;
 
       virtual void parse( rawxml_position& ) = 0;
@@ -198,8 +194,8 @@ namespace txml {
       xml_node*     _firstChild;
       xml_node*     _lastChild;
 
-      xml_node*      _previous;
-      xml_node*      _next;
+      xml_node*      _prev_sibling;
+      xml_node*      _next_sibling;
 
       xml_node*     _parent;
 
@@ -209,6 +205,56 @@ namespace txml {
       void operator=( const xml_node& base );
    };
 
+
+//   class tIndexPtr {
+//      friend class ph;
+//      friend class xml_document;
+//      xml_node* _index;
+//     public:
+//      tIndexPtr( xml_node* p ): _index( p ) {}
+//      tIndexPtr(): _index( INVALID_ID ) {}
+//      tIndexPtr( tIndexPtr const& );
+//      virtual ~tIndexPtr() {}
+//      tIndexPtr& operator=( tIndexPtr const& id );
+//      bool operator==( tIndexPtr const& id )const {
+//         return id._index == _index;
+//      }
+//      bool operator!=( tIndexPtr const& id )const {
+//         return id._index != _index;
+//      }
+//      bool isValid()const {
+//         return _index != INVALID_ID;
+//      }
+//      xml_node* index()const {
+//         return _index;
+//      }
+
+//      xml_node* INVALID_ID = nullptr;
+//   };
+
+
+   class ph {
+      xml_node* _ptr;
+   public:
+      ph(): _ptr( nullptr ) {}
+      ph(  xml_node* p ): _ptr( p ) {}
+      ph( ph const& ph_ ): _ptr( ph_._ptr ) {}
+      ph& operator=( ph const& p ) {
+//         if( &p != this ) {
+            _ptr = p._ptr;
+//         }
+         return *this;
+      }
+
+      xml_node* index()const {
+         return _ptr; //_index.index();
+      }
+      void delete_ptr();
+
+      static void add( xml_node* p );
+      static std::map<xml_node*, ph> pointers;
+      static void clear_pointers();
+   };
 
 } // end of namespace txml
 

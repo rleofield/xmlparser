@@ -72,7 +72,7 @@ namespace txml {
       virtual bool enter( const xml_document& )        {
          return true;
       }
-      virtual bool visitExit( const xml_document& )         {
+      virtual bool exit( const xml_document& )         {
          return true;
       }
 

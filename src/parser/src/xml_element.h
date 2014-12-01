@@ -56,6 +56,7 @@ namespace txml {
 
    class xml_element : public xml_node {
 
+      int x;
       explicit xml_element( const std::string& _value );
       xml_element( const xml_element& );
       xml_element& operator=( const xml_element& base );
@@ -91,12 +92,12 @@ namespace txml {
       void setText( std::string const& s );
 
 
-      virtual xml_node* clone() const;
+      //virtual xml_node* clone() const;
 
       virtual void parse( rawxml_position& pos );
       virtual bool accept( xml_visitor* visitor ) const;
    protected:
-      void copy( xml_element& target ) const;
+      //void copy( xml_element& target ) const;
 
    };
 

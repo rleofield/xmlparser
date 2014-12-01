@@ -58,7 +58,7 @@ namespace txml {
       static void operator delete( void* );
       static bool _isWhiteSpacePreserved;
       static Encoding _encoding;
-      static bool useMicrosoftBOM;
+      static std::string bom;
 
       xml_document( const xml_document& copy );
       xml_document& operator=( const xml_document& copy );
@@ -66,14 +66,15 @@ namespace txml {
 
    public:
       static std::locale loc;
-      bool saveFile( const std::string& filename ) const ;
+      bool save( const std::string& filename ) const ;
 
       xml_document();
       virtual ~xml_document();
 
-      bool parseStart( std::list<std::string>  const& v );
+      bool startparsing( std::vector<std::string>  const& v );
 
       void serialize( std::list<std::string>& v ) const ;
+      void serialize( std::vector<std::string>& v ) const ;
 
       virtual void parse( rawxml_position& pos );
       //      const XmlElement* rootElement() const;
@@ -88,10 +89,9 @@ namespace txml {
 
    protected :
       // [internal use]
-      virtual xml_node* clone() const;
+      //virtual xml_node* clone() const;
 
    private:
-      void copy( xml_document& target ) const;
 
       friend class tXmlInterfaceImpl;
 

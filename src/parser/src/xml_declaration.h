@@ -75,7 +75,7 @@ namespace txml {
 
    public:
       static xml_node* create( t_lfm const& lfmcIn ) ;
-      //static xml_node* create() ;
+      static xml_node* create() ;
 
       virtual ~xml_declaration()   {}
 
@@ -92,7 +92,7 @@ namespace txml {
          return _standalone;
       }
 
-      virtual xml_node* clone() const;
+      //virtual xml_node* clone() const;
       virtual void print( int depth, std::string& str ) const;
 
       virtual void parse( rawxml_position& pos );

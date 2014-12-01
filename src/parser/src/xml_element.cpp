@@ -99,10 +99,7 @@ namespace txml {
 
 
    void* xml_element::operator new( size_t size, t_lfm const& lfm ) {
-      void*  p;
-
-      p = alloccheck::checked_alloc( size, lfm );
-      return p;
+      return alloccheck::checked_alloc( size, lfm );
    }
    void xml_element::operator delete( void* p ) {
       xml_node* n = reinterpret_cast<xml_node*>( p );
@@ -112,6 +109,9 @@ namespace txml {
    xml_element* xml_element::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_element* p ;
       p = new( lfmcIn ) xml_element( value_ );
+
+      ph::add( p );
+
       return p;
 
    }
@@ -122,35 +122,25 @@ namespace txml {
 
 
    xml_element::xml_element( const string& _value )
-      : xml_node( xml_node::eNodeType::ELEMENT ), _attributes(), rawattributes() {
+      : xml_node( xml_node::eNodeType::ELEMENT ), x( 15 ), _attributes(), rawattributes() {
       _node_value = _value;
    }
 
 
    xml_element::~xml_element() {
-      clear();
+      if( !usePointerContainer ) {
+         clear();
+      }
    }
 
 
-   class namecompare {
-      string _name;
-   public:
-      namecompare( string const& name ): _name( name ) {}
-      bool operator()( xml_attribute const& a )const {
-         if( a.name() == _name ) {
-            return true;
-         }
-
-         return false;
-      }
-   };
 
    class keycompare {
       string _key;
    public:
       keycompare( string const& name ): _key( name ) {}
       bool operator()( xml_attribute const& a )const {
-         if( a.keys.to_string() == _key ) {
+         if( a.path.to_string() == _key ) {
             return true;
          }
 
@@ -158,8 +148,17 @@ namespace txml {
       }
    };
 
+   class namecompare {
+      string _name;
+   public:
+      namecompare( string const& name ): _name( name ) {}
+      bool operator()( xml_attribute const& a )const {
+         return a.name() == _name;
+      }
+   };
 
    string xml_element::attribute( const string& name ) const {
+
       vector<xml_attribute>::const_iterator v = find_if( _attributes.begin(), _attributes.end(), namecompare( name ) );
 
       if( v != _attributes.end() ) {
@@ -187,23 +186,13 @@ namespace txml {
       vector<xml_attribute>::iterator v = find_if( _attributes.begin(), _attributes.end(), namecompare( name ) );
 
       if( v == _attributes.end() ) {
-         xml_attribute attrib = xml_attribute();
-         attrib.name( name );
-         attrib.value( val );
+         xml_attribute attrib = xml_attribute( name, val );
          _attributes.push_back( attrib );
       } else {
          v->value( val );
       }
    }
 
-   void xml_element::copy( xml_element& target ) const {
-      target.value( value() );
-      target._attributes = _attributes;
-
-      for( xml_node const* node = firstChild(); node != nullptr; node = node->_next ) {
-         target.linkEndChild( node->clone() );
-      }
-   }
 
    bool xml_element::accept( xml_visitor* visitor ) const {
 
@@ -229,12 +218,6 @@ namespace txml {
    }
 
 
-   xml_node* xml_element::clone() const {
-      xml_element* pClone = new( tlog_lfm_ ) xml_element( value() );
-
-      copy( *pClone );
-      return pClone;
-   }
 
 
    const string xml_element::getText() const {
@@ -271,7 +254,7 @@ namespace txml {
 
       if( n != nullptr ) {
          val =  n->getText();
-         string a = Attr();
+         string a = attr();
 
          if( !a.empty() ) {
             val = n->attribute( a );
@@ -516,7 +499,7 @@ namespace txml {
          pp.skip();
 
          xml_attribute attrib;
-         attrib.keys = _lookuppath;
+         attrib.path = _lookuppath;
          attrib.parseAttr( pp );
 
          _attributes.push_back( attrib );
