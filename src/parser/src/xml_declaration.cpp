@@ -42,7 +42,8 @@ www.lug-ottobrunn.de
 #include <boost/algorithm/string.hpp>
 
 
-#include "xml_declaration.h"\
+#include "xml_declaration.h"
+#include "xml_document.h"
  
 #include "xml_visitor.h"
 #include "xml_utl.h"
@@ -50,7 +51,7 @@ www.lug-ottobrunn.de
 #include "rawxml_position.h"
 #include "alloccheck.h"
 
-
+#include "tPointers.h"
 
 
 namespace txml {
@@ -70,13 +71,11 @@ namespace txml {
 
    xml_node* xml_declaration::create( t_lfm const& lfmcIn ) {
       xml_declaration* p = new( lfmcIn ) xml_declaration();
-      ph::add( p );
+      xml_document::pointers.add( p );
       return p;
    }
    xml_node* xml_declaration::create() {
-      xml_declaration* p = new( tlog_lfm_ ) xml_declaration();
-      ph::add( p );
-      return p;
+      return create ( tlog_lfm_  );
    }
 
 

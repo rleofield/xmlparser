@@ -39,70 +39,53 @@ www.lug-ottobrunn.de
 
 */
 
-#ifndef RLF_XML_DOCUMENT_H
-#define RLF_XML_DOCUMENT_H
+#ifndef RLF_TPOINTERS_H
+#define RLF_TPOINTERS_H
 
-#include <list>
 
-#include "xml_node.h"
-#include "xml_utl.h"
-#include "tPointers.h"
+#include <map>
+#include <string>
+#include <assert.h>
 
 
 
 namespace txml {
+  class xml_node;
+  class xml_document;
 
-   class tXmlInterfaceImpl;
+   const bool usePointerContainer = true;
 
-   class xml_document : public xml_node {
-      static void* operator new( size_t size, t_lfm const& lfm );
-      static void operator delete( void* );
-      static bool _isWhiteSpacePreserved;
-      static Encoding _encoding;
-      static std::string bom;
 
-      xml_document( const xml_document& copy );
-      xml_document& operator=( const xml_document& copy );
-      void clear();
 
+   class tPointers {
+      xml_node* _ptr;
+
+
+      tPointers( tPointers const& ptrs ) ;
 
    public:
-      static tPointers pointers;
-      static std::locale loc;
-      bool save( const std::string& filename ) const ;
+      tPointers(): _ptr( nullptr ) {
+      }
+       tPointers(  xml_node* p ): _ptr( p ) {}
+      tPointers& operator=( tPointers const& p ) {
+         if( this != & p){
+            _ptr = p._ptr;
+         }
+         return *this;
+      }
 
-      xml_document();
-      virtual ~xml_document();
+      xml_node* index()const {
+         return _ptr; //_index.index();
+      }
+      void delete_ptr();
 
-      bool parse_begin( std::vector<std::string>  const& v );
-
-      void serialize( std::list<std::string>& v ) const ;
-      void serialize( std::vector<std::string>& v ) const ;
-
-      virtual void parse( rawxml_position& pos );
-      //      const XmlElement* rootElement() const;
-      //      XmlElement* rootElement();
-
-      virtual bool accept( xml_visitor* content ) const;
-
-      static Encoding encoding() ;
-      static void encoding( Encoding e );
-      static void setPreserveWhiteSpace( bool b )    ;
-      static bool isWhiteSpacePreserved()   ;
-
-   protected :
-      // [internal use]
-      //virtual xml_node* clone() const;
-
-   private:
-
-      friend class tXmlInterfaceImpl;
-      friend class xml_element;
-
+      void add( xml_node* p );
+      static std::map<xml_node*, tPointers> pointers;
+      void clear();
    };
 
-
 } // end of namespace txml
+
 
 
 #endif

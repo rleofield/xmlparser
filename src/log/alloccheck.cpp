@@ -52,7 +52,7 @@ www.lug-ottobrunn.de
 #include "tLfm.h"
 
 #include "alloccheck.h"
-//#include "win32.h"
+//
 
 using rlf_tlfm::t_lfm;
 using namespace std;
@@ -84,10 +84,6 @@ namespace alloccheck {
 
 
    string clip_at_pos( string const& s, size_t pos ) {
-//      assert( pos != string::npos );
-//      if( s.size() == 0 ) {
-//         return s;
-//      }
       return s.substr( 0, pos ) ;
    }
 

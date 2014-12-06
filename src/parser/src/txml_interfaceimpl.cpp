@@ -121,7 +121,7 @@ namespace txml {
 
 
    tXmlInterfaceImpl::~tXmlInterfaceImpl() {
-      ph::clear_pointers();
+      //doc.pointers.clear();
    }
 
    void tXmlInterfaceImpl::reparse( xml_document const& doc ) {
@@ -130,7 +130,7 @@ namespace txml {
       vector<string> l;
       doc.serialize( l );
       collected_keys.clear();
-      bool loadOkay = _doc.startparsing( l );
+      bool loadOkay = _doc.parse_begin( l );
 
       if( !loadOkay ) {
          throw xml_exception( tlog_lfm_,
@@ -184,7 +184,7 @@ namespace txml {
          _isparsed = false;
          std::vector<string>  l;
          loadFile( l, _filename );
-         bool ok = _doc.startparsing( l );
+         bool ok = _doc.parse_begin( l );
 
          if( !ok ) {
             throw xml_exception( tlog_lfm_,

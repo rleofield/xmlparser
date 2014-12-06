@@ -422,7 +422,8 @@ namespace txml {
 
    xml_text* xml_text::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_text* p = new( lfmcIn ) xml_text( value_ );
-      ph::add( p );
+      xml_document const* doc = p->getDocument() ;
+      xml_document::pointers.add( p );
       return p;
    }
 

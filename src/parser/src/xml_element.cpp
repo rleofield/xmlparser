@@ -57,11 +57,12 @@ www.lug-ottobrunn.de
 #include "alloccheck.h"
 #include "xml_locator.h"
 
+#include "tPointers.h"
 
 using namespace std;
 
 
-
+using txml::tPointers;
 
 
 namespace txml {
@@ -109,8 +110,9 @@ namespace txml {
    xml_element* xml_element::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_element* p ;
       p = new( lfmcIn ) xml_element( value_ );
+      xml_document const* doc = p->getDocument() ;
 
-      ph::add( p );
+      xml_document::pointers.add( p );
 
       return p;
 

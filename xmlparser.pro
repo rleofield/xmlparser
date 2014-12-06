@@ -103,7 +103,8 @@ HEADERS += \
     src/log/tLfm.h \
     src/txtrw/wList.h \
     src/txtrw/rList.h \
-    src/log/alloccheck.h
+    src/log/alloccheck.h \
+    src/parser/src/tPointers.h
 
 
 

@@ -44,6 +44,7 @@ www.lug-ottobrunn.de
 
 
 #include "xml_comment.h"
+#include "xml_document.h"
 
 #include "xml_utl.h"
 #include "xml_visitor.h"
@@ -68,7 +69,8 @@ namespace txml {
 
    xml_node* xml_comment::create( t_lfm const& lfmcIn ) {
       xml_comment* p = new( lfmcIn ) xml_comment();
-      ph::add( p );
+      xml_document const* doc = p->getDocument() ;
+       xml_document::pointers.add( p );
       return p;
 
    }

@@ -48,7 +48,7 @@ www.lug-ottobrunn.de
 #include "rawxml_position.h"
 #include "xml_node.h"
 #include "xml_attribute.h"
-
+#include "xml_document.h"
 
 
 namespace txml {

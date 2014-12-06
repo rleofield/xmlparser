@@ -69,6 +69,7 @@ namespace txml {
       xml_visitor() {}
       virtual ~xml_visitor() {}
 
+      // recursive objects, enter and exit
       virtual bool enter( const xml_document& )        {
          return true;
       }
@@ -83,6 +84,7 @@ namespace txml {
          return true;
       }
 
+      // non recursive objects
       virtual bool visit( const xml_declaration& )  {
          return true;
       }

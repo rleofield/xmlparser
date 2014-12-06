@@ -64,11 +64,8 @@ namespace txml {
    class xml_comment;
    class xml_text;
    class xml_declaration;
-}
 
-namespace txml {
 
-   const bool usePointerContainer = true;
 
 
    class rawxml_position;
@@ -206,55 +203,7 @@ namespace txml {
    };
 
 
-//   class tIndexPtr {
-//      friend class ph;
-//      friend class xml_document;
-//      xml_node* _index;
-//     public:
-//      tIndexPtr( xml_node* p ): _index( p ) {}
-//      tIndexPtr(): _index( INVALID_ID ) {}
-//      tIndexPtr( tIndexPtr const& );
-//      virtual ~tIndexPtr() {}
-//      tIndexPtr& operator=( tIndexPtr const& id );
-//      bool operator==( tIndexPtr const& id )const {
-//         return id._index == _index;
-//      }
-//      bool operator!=( tIndexPtr const& id )const {
-//         return id._index != _index;
-//      }
-//      bool isValid()const {
-//         return _index != INVALID_ID;
-//      }
-//      xml_node* index()const {
-//         return _index;
-//      }
 
-//      xml_node* INVALID_ID = nullptr;
-//   };
-
-
-   class ph {
-      xml_node* _ptr;
-   public:
-      ph(): _ptr( nullptr ) {}
-      ph(  xml_node* p ): _ptr( p ) {}
-      ph( ph const& ph_ ): _ptr( ph_._ptr ) {}
-      ph& operator=( ph const& p ) {
-//         if( &p != this ) {
-            _ptr = p._ptr;
-//         }
-         return *this;
-      }
-
-      xml_node* index()const {
-         return _ptr; //_index.index();
-      }
-      void delete_ptr();
-
-      static void add( xml_node* p );
-      static std::map<xml_node*, ph> pointers;
-      static void clear_pointers();
-   };
 
 } // end of namespace txml
 

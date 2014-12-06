@@ -176,12 +176,15 @@ namespace txml {
    }
 
    xml_document::~xml_document() {
-      //LOGT_INFO("");
+      pointers.clear();
    }
 
+   tPointers xml_document::pointers;
 
 
-   bool xml_document::startparsing( std::vector<string>  const& l ) {
+
+
+   bool xml_document::parse_begin( std::vector<string>  const& l ) {
       class add {
       public:
          vector8_t& _v;
@@ -192,7 +195,6 @@ namespace txml {
       };
 
       clear();
-      ph::clear_pointers();
       vector8_t  v;
       for_each( l.begin(), l.end() , add( v ) );
       // add on space, to prevent end of file after last element
@@ -206,7 +208,8 @@ namespace txml {
    void xml_document::clear() {
       xml_node::clear();
       if( usePointerContainer ) {
-         ph::clear_pointers();
+         size_t s = pointers.pointers.size();
+         pointers.clear();
       }
    }
 

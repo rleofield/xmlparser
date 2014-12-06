@@ -78,7 +78,7 @@ namespace txml {
          // - Declaration: <?xml
         */
 
-   xml_node* xml_node::identify( rawxml_position& pos ) {
+   xml_node* xml_node::identify( rawxml_position& pos) {
 
       pos.skip();
 
@@ -200,31 +200,18 @@ namespace txml {
    }
 
    void xml_node::clear() {
-      if( !usePointerContainer ) {
          xml_node* node = firstChild();
 
          while( node ) {
             xml_node* temp = node;
             node = node->_next_sibling;
-            delete temp;
-         }
-
-         _firstChild = nullptr;
-         _lastChild = nullptr;
-      }
-      else{
-         xml_node* node = firstChild();
-
-         while( node ) {
-            xml_node* temp = node;
-            node = node->_next_sibling;
+            if( !usePointerContainer ) {
+               delete temp;
+            }
             temp = nullptr;
          }
-
          _firstChild = nullptr;
          _lastChild = nullptr;
-
-      }
    }
 
    const string xml_node::value() const {
@@ -477,30 +464,33 @@ namespace txml {
       return nullptr;
    }
 
-   void ph::clear_pointers() {
-      if( usePointerContainer ) {
+   void tPointers::clear() {
+
          for( auto & p : pointers ) {
             p.second.delete_ptr();
          }
 
          pointers.clear();
-      }
+
    }
-   void ph::delete_ptr() {
+   void tPointers::delete_ptr() {
       if( _ptr != nullptr ) {
          delete _ptr;
          _ptr = nullptr;
       }
    }
 
-   void ph::add( xml_node* p ) {
+   void tPointers::add( xml_node* p ) {
       if( usePointerContainer ) {
-         ph p0( p );
-         ph::pointers[p0.index()] = p0;
+         tPointers p0( p );
+         tPointers::pointers[p0.index()] = p0;
       }
    }
 
-   std::map<xml_node*, ph> ph::pointers;
+std::map<xml_node*, tPointers> tPointers::pointers;
+
+
+//   std::map<xml_node*, tPointers> tPointers::pointers;
 
 
 //   tIndexPtr::tIndexPtr( tIndexPtr const& ip ): _index( INVALID_ID ) {
