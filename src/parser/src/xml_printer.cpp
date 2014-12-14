@@ -78,7 +78,7 @@ namespace txml {
          _buffer += element_end;
          xml_text const* text = dynamic_cast<xml_text const*>( element.firstChild() );
 
-         if( text != nullptr && element.lastChild() == element.firstChild()
+         if( text != nullptr && element.last_child() == element.firstChild()
            ) {
             simpleTextPrint = true;
             // no DoLineBreak()!

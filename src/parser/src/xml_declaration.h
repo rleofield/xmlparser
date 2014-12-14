@@ -80,7 +80,7 @@ namespace txml {
       virtual ~xml_declaration()   {}
 
 
-      void getAttributes( std::string const& temp );
+      void attributes( std::string const& temp );
 
       std::string const& version() const  {
          return _version;
@@ -92,7 +92,7 @@ namespace txml {
          return _standalone;
       }
 
-      virtual void parse( rawxml_position& pos );
+      virtual void parse( raw_buffer& pos );
       virtual void print( int depth, std::string& str ) const;
       virtual bool accept( xml_visitor* visitor ) const;
 

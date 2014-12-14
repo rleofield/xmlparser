@@ -98,7 +98,6 @@ HEADERS += \
     src/log/tLogCategories.h \
     src/log/tLog.h \
     src/log/tLog_Category_default.h \
-    src/log/tLog_Category_A.h \
     src/log/tLfmCL.h \
     src/log/tLfm.h \
     src/txtrw/wList.h \

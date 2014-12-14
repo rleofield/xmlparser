@@ -50,8 +50,8 @@ www.lug-ottobrunn.de
 
 
 namespace txml {
-  class xml_node;
-  class xml_document;
+   class xml_node;
+   class xml_document;
 
    const bool usePointerContainer = true;
 
@@ -66,11 +66,12 @@ namespace txml {
    public:
       tPointers(): _ptr( nullptr ) {
       }
-       tPointers(  xml_node* p ): _ptr( p ) {}
+      tPointers( xml_node* p ): _ptr( p ) {}
       tPointers& operator=( tPointers const& p ) {
-         if( this != & p){
+         if( this != & p ) {
             _ptr = p._ptr;
          }
+
          return *this;
       }
 

@@ -182,16 +182,17 @@ namespace demo {
       xml_node* decl = xml_declaration::create( tlog_lfm_ );
       xml_element* element = xml_element::create( "Hello" );
       xml_node* text = xml_text::create( tlog_lfm_, "World" );
-      element->linkEndChild( text );
-      doc.linkEndChild( decl );
-      doc.linkEndChild( element );
+      //text->parent( &doc );
+      element->link_end_child( text );
+      doc.link_end_child( decl );
+      doc.link_end_child( element );
       xml_element* element2 = xml_element::create( "ele2" );
       xml_node* text2 = xml_text::create( tlog_lfm_, "World2" );
-      element2->linkEndChild( text2 );
-      doc.linkEndChild( element2 );
+      element2->link_end_child( text2 );
+      doc.link_end_child( element2 );
 
       xmlinterface::tXmlInterface t;
-      t.reparse( doc );
+      t.rebuild( doc );
       t.save( "madeByHand.xml" );
    }
 
@@ -205,12 +206,12 @@ namespace demo {
       //doc.linkEndChild( decl );
 
       xml_element* element = xml_element::create( "Hello" );
-      doc.linkEndChild( element );
+      doc.link_end_child( element );
 
       xml_node* text = xml_text::create( "World" );
-      element->linkEndChild( text );
+      element->link_end_child( text );
       xmlinterface::tXmlInterface t;
-      t.reparse( doc );
+      t.rebuild( doc );
       t.save( "madeByHand2.xml" );
    }
 
@@ -225,36 +226,36 @@ namespace demo {
       //doc.linkEndChild( decl );
 
       xml_element* root = xml_element::create( "MyApp" );
-      doc.linkEndChild( root );
+      doc.link_end_child( root );
 
       //xml_node* comment = xml_comment::create( );
       //comment->value( " Settings for MyApp " );
       //root->linkEndChild( comment );
 
       xml_element* msgs = xml_element::create( "Messages" );
-      root->linkEndChild( msgs );
+      root->link_end_child( msgs );
 
       xml_element* msg = xml_element::create( "Welcome" );
-      msg->linkEndChild( xml_text::create( "Welcome to MyApp" ) );
-      msgs->linkEndChild( msg );
+      msg->link_end_child( xml_text::create( "Welcome to MyApp" ) );
+      msgs->link_end_child( msg );
 
 
       //doc->saveFile( "appsettings_smart_Welcome.xml" );
       xmlinterface::tXmlInterface t;
-      t.reparse( doc );
+      t.rebuild( doc );
       xml_document const* doc1 = t.document();
       list<string> v;
       doc1->serialize( v );
 
       msg = xml_element::create( tlog_lfm_, "Farewell" );
-      msg->linkEndChild( xml_text::create( "Thank you for using MyApp" ) );
-      msgs->linkEndChild( msg );
+      msg->link_end_child( xml_text::create( "Thank you for using MyApp" ) );
+      msgs->link_end_child( msg );
 
       xml_element* windows = xml_element::create( "Windows" );
-      root->linkEndChild( windows );
+      root->link_end_child( windows );
 
       xml_element* window = xml_element::create( "Window" );
-      windows->linkEndChild( window );
+      windows->link_end_child( window );
       window->setAttribute( "name", "MainFrame" );
       window->setAttribute( "x", "5" );
       window->setAttribute( "y", "15" );
@@ -262,13 +263,13 @@ namespace demo {
       window->setAttribute( "h", "250" );
 
       xml_element* cxn = xml_element::create( tlog_lfm_, "Connection" );
-      root->linkEndChild( cxn );
+      root->link_end_child( cxn );
       cxn->setAttribute( "ip", "192.168.0.1" );
       cxn->setAttribute( "timäout", "123.456" ); // floating point attrib
 
       //xmlinterface::tXmlInterface t;
 
-      t.reparse( doc );
+      t.rebuild( doc );
       t.save( "appsettings_old.xml" );
 
    }

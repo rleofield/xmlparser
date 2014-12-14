@@ -34,7 +34,7 @@ namespace txml {
 
    const bool useNext100 = true;
 
-   class rawxml_position {
+   class raw_buffer {
 
    public:
 
@@ -46,53 +46,57 @@ namespace txml {
       void next100( int2type<false> )const;
       void next100( int2type<true> )const;
 
-      mutable vector8_t::const_iterator _running;
+      // position change doesn't change value of buffer
+      mutable vector8_t::const_iterator _position;
       mutable std::string _next;
 
-      rawxml_position( rawxml_position const& pos );
-      void operator=( rawxml_position const& pos );
+      raw_buffer( raw_buffer const& pos );
+      void operator=( raw_buffer const& pos );
 
    public :
-      rawxml_position( vector8_t const& v );
-      rawxml_position( std::string  const& v );
+      raw_buffer( vector8_t const& v );
+      raw_buffer( std::string  const& v );
 
       vector8_t::const_iterator end() {
          return _rawxml.end();
       }
 
 
-      // next bytes for the debugger, "" if release
+      // next bytes for the debugger, "" in release
       void next100()const;
       std::string next25()const;
 
       // compares until s.size()
       bool starts_with( std::string const& s );
 
-      bool operator<( rawxml_position const& p )const;
+      bool operator<( raw_buffer const& p )const;
 
       bool is_end()const;
       vector8_t::const_iterator end()const;
-      std::ptrdiff_t running_position()const;
+
+      vector8_t::difference_type remainder()const;
+      vector8_t::difference_type position()const;
+      size_t size()const;
+
+      // iterator at current position
+      vector8_t::const_iterator running()const;
+
 
       std::string next( ptrdiff_t size )const;
       std::string next( vector8_t::const_iterator it )const;
       std::string next_until( std::string const& s )const;
 
 
-      rawxml_position& operator++();
+      raw_buffer& operator++();
 
-      void operator+=( int offset );
-      void operator+=( size_t offset ) {
-         operator+=( static_cast<int>( offset ) );
-      }
-      void operator-=( int i )const;
+      void operator+=( int32_t offset )const;
+      void operator-=( int32_t i )const;
 
-      size_t position()const;
-      size_t size()const;
 
-      vector8_t::const_iterator running()const;
 
-      operator int8_t const* ()const;
+      //operator int8_t const* ()const;
+      uint8_t value()const;
+
       vector8_t::const_iterator find( int8_t ch )const;
       vector8_t::const_iterator find( std::string const& s )const;
 
@@ -103,7 +107,6 @@ namespace txml {
 
       // skip BOM, 2 or 3 chars
       void skip( Encoding e )const;
-      vector8_t::difference_type remainder()const;
 
    };
 

@@ -29,9 +29,8 @@ using rlf_tlfm::t_lfm;
 
 namespace txml {
 
-
    enum class eException : int {
-      none = 1,
+      none = 0,
       no_parsed_document_found,
       bad_lexical_cast,
       reading_file,
@@ -68,71 +67,19 @@ namespace txml {
    std::string to_string( eException e );
 
 
-//   class t_lfm {
-//      size_t _line;
-//      std::string _file;
-//      std::string _method;
-//   public:
-//      t_lfm(): _line( 0 ), _file( "" ), _method( "" ) {}
-
-//      t_lfm( size_t line_, std::string const& file_, std::string const& method_ )
-//         : _line( line_ ), _file( file_ ), _method( method_ ) {
-//      }
-//      size_t line()const {
-//         return _line;
-//      }
-//      std::string const& file()const {
-//         return _file;
-//      }
-
-//      std::string const& method()const {
-//         return _method;
-//      }
-//      std::string to_string()const {
-//         return "File: " + file() + ", Line: " + std::to_string( line() ) + ",Method: " + method();
-//      }
-//      ~t_lfm() {}
-//   };
-
-
-   // use of parameterobject for line, file, method
-//   inline t_lfm tLfm( uint32_t line_, std::string const& file_, std::string const& method_ ) {
-//      return t_lfm( line_, file_, method_ );
-//   }
-
-   //#define tlfm_ txml::tLfm( __LINE__,__FILE__,__FUNCTION__)
 
    class xml_exception: public std::runtime_error {
       eException _enum;
       std::string _what;
-      t_lfm lfm;
+      t_lfm _lfm;
 
-      //      xml_exception( xml_exception const&);
-      //      void operator=( xml_exception const& );
    public:
       xml_exception( t_lfm const& lfm, eException e, std::string const& in );
-      const char* what() const throw() {
-         return _what.c_str();
-      }
-      std::string What() const throw() {
-         return _what;
-      }
-      virtual ~xml_exception() throw() {}
-      eException const& getEnum()const {
-         return _enum;
-      }
-      std::string getEnumString()const {
-         return to_string( _enum );
-      }
-      size_t line()const;
-      std::string const& file()const;
-      std::string const& method()const;
-      std::string file_line_method()const {
-         return static_cast<std::string>( lfm );
-      }
-      operator std::string()const {
-         return static_cast<std::string>( lfm );
-      }
+      const char* what() const throw();
+      std::string What() const throw();
+      virtual ~xml_exception() throw();
+      eException const& getEnum()const;
+      t_lfm const& lfm()const;
 
    };
 

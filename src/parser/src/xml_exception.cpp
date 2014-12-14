@@ -80,8 +80,8 @@ namespace txml {
          { eException::parsing_element,                 msg_parsing_element},
          { eException::identify_element,                msg_identify_element},
          { eException::failed_to_read_element_name,     msg_failed_to_read_element_name},
-         { eException::failed_to_read_element_closing_tag,msg_failed_to_read_element_closing_tag},
-         { eException::failed_to_read_element_start_tag,msg_failed_to_read_element_start_tag},
+         { eException::failed_to_read_element_closing_tag, msg_failed_to_read_element_closing_tag},
+         { eException::failed_to_read_element_start_tag, msg_failed_to_read_element_start_tag},
          { eException::reading_element_value,           msg_reading_element_value},
          { eException::parse_attributes,                msg_reading_attributes},
          { eException::parsing_empty,                   msg_parsing_empty},
@@ -130,18 +130,23 @@ namespace txml {
       return "unknown enum";
    }
 
-   xml_exception::xml_exception( t_lfm const& lfmIn, eException e, string const& in )
-      : runtime_error( in.c_str() ), _enum( e ), _what( in ), lfm( lfmIn )   {}
+   xml_exception::xml_exception( t_lfm const& lflfm_, eException e, string const& in )
+      : runtime_error( in.c_str() ), _enum( e ), _what( in ), _lfm( lflfm_ )   {}
 
-   size_t xml_exception::line()const {
-      return lfm.line();
+
+   const char* xml_exception::what() const throw() {
+      return _what.c_str();
    }
-   string const& xml_exception::file()const {
-      return lfm.file();
+   std::string xml_exception::What() const throw() {
+      return _what;
+   }
+   xml_exception::~xml_exception() throw() {}
+   eException const& xml_exception::getEnum()const {
+      return _enum;
    }
 
-   string const& xml_exception::method()const {
-      return lfm.method();
+   t_lfm const& xml_exception::lfm()const {
+      return _lfm;
    }
 
 

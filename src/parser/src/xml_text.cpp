@@ -40,6 +40,7 @@ www.lug-ottobrunn.de
 
 
 #include <boost/assign.hpp>
+#include <boost/lexical_cast.hpp>
 #include <vector>
 
 #include "xml_text.h"
@@ -63,7 +64,7 @@ using namespace std;
 namespace txml {
 
 
-
+namespace{
    class tEntity {
    public:
       tEntity( string s, char ch ): str( s ), chr( ch ) {}
@@ -80,14 +81,23 @@ namespace txml {
                               ( tEntity( "&apos;", '\'' ) );
 
 
-   char findEntity( string s ) {
-      for( size_t i = 0; i < entities.size(); i++ ) {
-         if( entities[i].str == s ) {
-            return entities[i].chr;
+   char findEntity( string const& s_ ) {
+      for( auto const& e: entities ){
+         if( e.str == s_ ) {
+            return e.chr;
          }
       }
 
-      return 0; //tEntity( string(),' ' );
+      return 0;
+   }
+   string findEntity( char ch ) {
+      for( auto const& e: entities ){
+         if( e.chr == ch ) {
+            return e.str;
+         }
+      }
+
+      return string() + ch;
    }
 
 
@@ -104,69 +114,29 @@ namespace txml {
    }
 
 
-   // print, ascii out
-   string decodeEntities( string const& s ) {
-      string temp = s;
-
-      for( size_t i = 0;  i < entities.size(); i++ ) {
-         tEntity e = entities[i];
-         size_t p = temp.find( e.str );
-
-         while( p != string::npos ) {
-            string ech;
-            ech += e.chr;
-            temp = replace_first( temp, e.str, ech );
-            p = temp.find( e.str );
-         }
-      }
-
-      return temp;
-   }
-   string encodeEntities( string const& s ) {
-      string temp;
-      string::const_iterator start = s.begin();
-      string::const_iterator end = s.end();
-
-      while( start != end ) {
-         char ch = *start;
-         size_t i = 0;
-
-         for( ;  i < entities.size(); i++ ) {
-            tEntity e = entities[i];
-
-            if( e.chr == ch ) {
-               temp += e.str;
-               break;
-            }
-         }
-
-         if( i == entities.size() ) {
-            temp += ch;
-         }
-
-         ++start;
-      }
-
-      return temp;
-   }
-
 
 
    //00000000 -- 0000007F:    0xxxxxxx
    //00000080 -- 000007FF:    110xxxxx 10xxxxxx
    //00000800 -- 0000FFFF:    1110xxxx 10xxxxxx 10xxxxxx
    //00010000 -- 001FFFFF:    11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-   string utf32_to_utf8( unsigned long input ) {
-      int length = 0;
+   string utf32_to_utf8( uint32_t input ) {
+      uint32_t length = 0;
 
       if( input < 0x80 ) {
          length = 1;
-      } else if( input < 0x800 ) {
-         length = 2;
-      } else if( input < 0x10000 ) {
-         length = 3;
-      } else if( input < 0x200000 ) {
-         length = 4;
+      } else {
+         if( input < 0x800 ) {
+            length = 2;
+         } else {
+            if( input < 0x10000 ) {
+               length = 3;
+            } else {
+               if( input < 0x200000 ) {
+                  length = 4;
+               }
+            }
+         }
       }
 
       const uint8_t BYTE_MASK = 0xBF;
@@ -175,11 +145,9 @@ namespace txml {
 
       const uint8_t FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-      char buf[32];
+      vector<char> buf( 32 );
 
-      memset( buf, 0, 32 );
-
-      char* p = buf + length;
+      char* p = &buf[0] + length;
 
       switch( length ) {
       case 4:
@@ -202,8 +170,20 @@ namespace txml {
          *p = ( char )( input | FIRST_BYTE_MARK[length] );
       }
 
-      return string( buf );
+      return &buf[0];
    }
+
+
+   // converts a hex string to size_t
+   size_t hex_to_size_t( string const& s )  {
+      size_t x;
+      std::istringstream insx( s );
+      insx >> std::hex;
+      insx >> x;
+      return x;
+   }
+
+
 
 
 
@@ -285,27 +265,29 @@ namespace txml {
    }
 
    string decode_utf( string const& p1,  Encoding encoding ) {
+      // example for an entity
       // &abcabcabca;
-      rawxml_position pp( vector8_t ( p1.begin() + 1, p1.end() - 1 ) ); // no & at start, no ; at end
+      raw_buffer pp( vector8_t ( p1.begin() + 1, p1.end() - 1 ) ); // no & at start, no ; at end
 
-      if( *pp == '#' ) {
+      if( pp.value() == '#' ) {
          ++pp; // skip #
-         size_t unicode = 0;
+         uint32_t unicode = 0;
 
-         if( *pp == 'x' ) {
+         if( pp.value() == 'x' ) {
             // Hexadecimal
             ++pp; // skip 'x'
-            string s( pp.running(), pp.end() );
-            unicode = rlf_hstring::hex_to_size_t( s );
+            string s = pp.next(pp.remainder());
+            unicode = hex_to_size_t( s );
          } else {
-            string s( pp.running(), pp.end() );
-            unicode = xmlinterface::to_int( s );
+            string s = pp.next(pp.remainder());
+            unicode = boost::lexical_cast<uint32_t>( s );
          }
 
          if( encoding == Encoding::UTF8 ) {
-            return utf32_to_utf8( static_cast<unsigned long>( unicode ) );
+            return utf32_to_utf8( static_cast<uint32_t>( unicode ) );
          }
 
+         // not utf8, use simple char
          return string() + ( char )unicode;
       }
 
@@ -322,16 +304,18 @@ namespace txml {
 
    // Get a character, while interpreting entities
    // The length can be from 1 to 4 bytes
-   string next_char( rawxml_position& pos, Encoding encoding ) {
+   string next_char( raw_buffer& pos, Encoding encoding ) {
       int length = 1;
+      uint8_t index = 0;
 
       if( encoding == Encoding::UTF8 ) {
-         length = utf8ByteTable[( uint8_t ) * pos ];
+         index = pos.value();
+         length = utf8ByteTable[ index ];
       }
 
       if( length == 1 ) {
-         if( *pos == '&' ) {  // is entity
-
+         if( pos.value() == '&' ) {  // is entity
+            // MAX_ENTITY_SIZE = 8
             string p = pos.next( MAX_ENTITY_SIZE );
             string p1 = getUntilNextSemicolon( p.begin(), p.end() );
 
@@ -344,7 +328,7 @@ namespace txml {
             return decode_utf( p1, encoding );
          }
 
-         string value(1, ( char ) *pos ) ;
+         string value( 1, ( char ) pos.value() ) ;
          ++pos;
          return value;
       }
@@ -356,62 +340,87 @@ namespace txml {
    }
 
 
-   string notPreserveWhiteSpace( string const& p ) {
-      rawxml_position pos( vector8_t ( p.begin(), p.end() ) );
+
+   string no_preserve_white_space( string const& s ) {
+      raw_buffer buffer( s );
       string text;
 
-      while( pos.running() < pos.end() ) {
-         string p1 = pos.next( MAX_ENTITY_SIZE ); // MAX_ENTITY_SIZE = 8
-         rawxml_position pp( vector8_t ( p1.begin(), p1.end() ) );
-         string ch  = next_char( pp, xml_document::encoding() );
+      while( buffer.running() < buffer.end() ) {
+         // MAX_ENTITY_SIZE = 8
+         raw_buffer next( buffer.next( MAX_ENTITY_SIZE ) );
+         string ch  = next_char( next, xml_document::encoding() );
          text.append( ch );
-         pos += pp.position();
+         buffer += next.position();
       }
 
       return text;
    }
 
-   string preserveWhiteSpace( string const& p ) {
-      rawxml_position pos( vector8_t ( p.begin(), p.end() ) );
+   string preserve_white_space( string const& p ) {
+      raw_buffer buffer( p );
 
       string text;
-      bool iswhitespace = false;
-      // Remove leading white space:
-      pos.skip();
 
-      while( pos.running() < pos.end() ) {
-         if( pos.is_white_space() ) {
-            iswhitespace = true;
-            ++pos;
+      while( buffer.running() < buffer.end() ) {
+         if( buffer.is_white_space() ) {
+            text += buffer.value();
+            ++buffer;
             continue;
          }
 
-         if( iswhitespace ) {
-            text  += ' ';
-            iswhitespace = false;
-         }
 
-         string p1 = pos.next( MAX_ENTITY_SIZE );
-         rawxml_position pp( vector8_t ( p1.begin(), p1.end() ) );
-         string arr = next_char( pp, xml_document::encoding() );
-         text.append( arr );
-         pos += pp.position();
+         // entity or utf8
+         raw_buffer next( buffer.next( MAX_ENTITY_SIZE ) );
+         // maybe is utf8
+         string nextchar = next_char( next, xml_document::encoding() );
+         text.append( nextchar );
+         buffer += next.position();
 
       }
 
       return text;
-
-
    }
+
+
+} // end anon ns
+
+
+// print, ascii out
+string decodeEntities( string const& s ) {
+   string temp = s;
+
+   for( size_t i = 0;  i < entities.size(); i++ ) {
+      tEntity e = entities[i];
+      size_t p = temp.find( e.str );
+
+      while( p != string::npos ) {
+         string ech;
+         ech += e.chr;
+         temp = replace_first( temp, e.str, ech );
+         p = temp.find( e.str );
+      }
+   }
+
+   return temp;
+}
+
+
+string encodeEntities( string const& s ) {
+   string temp;
+   for( auto ch : s ){
+      temp += findEntity( ch );
+   }
+   return temp;
+}
 
 
    string readText( string const& text ) {
-      if( xml_document::isWhiteSpacePreserved() ) {
-         return preserveWhiteSpace( text );
-      }
-
-      return notPreserveWhiteSpace( text );
+   if( xml_document::preserve_white_space() ) {
+      return preserve_white_space( text );
    }
+
+   return no_preserve_white_space( text );
+}
 
    void* xml_text::operator new( size_t size, t_lfm const& lfm ) {
       return alloccheck::checked_alloc( size, lfm );
@@ -437,7 +446,7 @@ namespace txml {
       xml_node::value( temp );
    }
 
-   void xml_text::parse( rawxml_position& ) {
+   void xml_text::parse( raw_buffer& ) {
       throw xml_exception( tlog_lfm_,
                            eException::parse_text, msg_parse_text );
    }
@@ -452,9 +461,6 @@ namespace txml {
    }
 
 
-   void xml_text::copy( xml_node& target ) const {
-      target.value( value() );
-   }
 
 
    bool xml_text::accept( xml_visitor* visitor ) const {

@@ -59,7 +59,7 @@ namespace txml {
       static void operator delete( void* );
       static bool _isWhiteSpacePreserved;
       static Encoding _encoding;
-      static std::string bom;
+      static std::string _bom;
 
       xml_document( const xml_document& copy );
       xml_document& operator=( const xml_document& copy );
@@ -74,25 +74,22 @@ namespace txml {
       xml_document();
       virtual ~xml_document();
 
-      bool parse_begin( std::vector<std::string>  const& v );
+      bool parse_begin( std::string  const& );
 
+      void serialize( std::string& s ) const ;
       void serialize( std::list<std::string>& v ) const ;
       void serialize( std::vector<std::string>& v ) const ;
 
-      virtual void parse( rawxml_position& pos );
+      void parse( raw_buffer& pos );
       //      const XmlElement* rootElement() const;
       //      XmlElement* rootElement();
 
-      virtual bool accept( xml_visitor* content ) const;
+      bool accept( xml_visitor* content ) const;
 
       static Encoding encoding() ;
       static void encoding( Encoding e );
-      static void setPreserveWhiteSpace( bool b )    ;
-      static bool isWhiteSpacePreserved()   ;
-
-   protected :
-      // [internal use]
-      //virtual xml_node* clone() const;
+      static void preserve_white_space( bool b )    ;
+      static bool preserve_white_space();
 
    private:
 

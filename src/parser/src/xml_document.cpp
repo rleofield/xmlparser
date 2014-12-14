@@ -85,14 +85,14 @@ namespace txml {
    bool xml_document::_isWhiteSpacePreserved = true;
    /// http://www.opentag.com/xfaq_enc.htm
    Encoding xml_document::_encoding = Encoding::UNKNOWN;
-   std::string xml_document::bom = string();
+   std::string xml_document::_bom = string();
    std::locale xml_document::loc; // = locEN ;
 
-   void xml_document::setPreserveWhiteSpace( bool b )    {
+   void xml_document::preserve_white_space( bool b )    {
       _isWhiteSpacePreserved = b;
    }
 
-   bool xml_document::isWhiteSpacePreserved()            {
+   bool xml_document::preserve_white_space()            {
       return _isWhiteSpacePreserved;
    }
 
@@ -114,39 +114,40 @@ namespace txml {
       _encoding = e;
    }
 
-   void xml_document::parse( rawxml_position& pos ) {
-      if( pos.is_end() ) {
+   void xml_document::parse( raw_buffer& buffer ) {
+
+      if( buffer.is_end() ) {
          throw xml_exception( tlog_lfm_,
                               eException::document_empty, msg_document_empty );
       }
 
       encoding( Encoding::UTF8 );
 
+
+
       // Check for the Microsoft UTF-8 lead bytes.
-      string s = pos.next( string_bom_utf8.size() );
+      string s = buffer.next( string_bom_utf8.size() );
 
       if( s == string_bom_utf8 ) {
          encoding( Encoding::UTF8 );
-         bom = string_bom_utf8;
-         pos += string_bom_utf8.size();
+         _bom = string_bom_utf8;
+         buffer += string_bom_utf8.size();
       }
 
-      if( *pos == 0 ) {
+      if( buffer.value() == 0 ) {
          throw xml_exception( tlog_lfm_,
                               eException::document_empty, msg_document_empty );
       }
 
-      //      keyentry ke( _node_value );
-      //      ke.node( this );
-      //      _lookuppath.add( ke );
 
-      while( !pos.is_end() ) {
-         xml_node* node = identify( pos );
+      while( !buffer.is_end() ) {
+         xml_node* node = identify_in_doc( buffer );
 
          if( node ) {
             node->_lookuppath = _lookuppath;
-            node->parse( pos );
+            node->parse( buffer );
             xml_declaration const* decl = dynamic_cast<xml_declaration const*>( node );
+
             if( decl != nullptr ) {
                if( boost::iequals( decl->encoding(), UTF_8 ) ) {
                   _encoding = Encoding::UTF8;
@@ -154,12 +155,13 @@ namespace txml {
                   _encoding = Encoding::LEGACY;
                }
             }
-            linkEndChild( node );
+
+            link_end_child( node );
          } else {
             break;
          }
 
-         pos.skip();
+         buffer.skip();
       }
 
       if( firstChild() == 0 ) {
@@ -167,7 +169,6 @@ namespace txml {
                               eException::document_empty, msg_document_empty );
       }
 
-      return;
    }
 
 
@@ -184,7 +185,7 @@ namespace txml {
 
 
 
-   bool xml_document::parse_begin( std::vector<string>  const& l ) {
+   bool xml_document::parse_begin( string  const& l ) {
       class add {
       public:
          vector8_t& _v;
@@ -195,18 +196,33 @@ namespace txml {
       };
 
       clear();
-      vector8_t  v;
-      for_each( l.begin(), l.end() , add( v ) );
-      // add on space, to prevent end of file after last element
-      v.push_back( ' ' );
-      rawxml_position pp( v );
-      xml_node::acc_all.clear();
-      parse( pp );
+      //      vector8_t  v;
+      //      for_each( l.begin(), l.end() , add( v ) );
+      //      // add on space, to prevent end of file after last element
+      //      v.push_back( ' ' );
+      raw_buffer pp( l );
+      //xml_node::acc_all.clear();
+
+      string w ;
+
+      try {
+
+         parse( pp );
+      } catch( xml_exception& ex ) {
+         w = ex.what();
+         LOGT_ERROR( "ex: " + w );
+         //LOGT_ERROR(w);
+
+      }
+
+      //   LOGT_ERROR("");
+
       return true;
    }
 
    void xml_document::clear() {
       xml_node::clear();
+
       if( usePointerContainer ) {
          size_t s = pointers.pointers.size();
          pointers.clear();
@@ -218,41 +234,36 @@ namespace txml {
       std::vector<string> text;
       serialize( text );
       bool overwrite = true;
-      rlf_txtrw::t_write_ascii()( filename, text, overwrite );
-      return false;
-   }
 
-   void xml_document::serialize( list<string>& v ) const {
-      v.clear();
-      xml_printer p;
-      this->accept( &p );
-      std::list<string> text;
-      string const& s = p.string_buffer();
-      rlf_hstring::string_to_list( s, text );
-
-      if( text.size() > 0 ) {
-         if( bom.size() > 0 ) {
-            string temp = bom;
-            temp += text.front();    // set BOM to start of first line
-            text.pop_front();        // remove first lien
-            text.push_front( temp ); // add again with bom
-         }
+      try {
+         rlf_txtrw::t_write_ascii()( filename, text, overwrite );
+      } catch( rlf_txtrw::bad_text_write& ex ) {
+         string w =  ex.what();
+         LOGT_ERROR( "ex: " + w );
+         return false;
       }
 
-      v = text;
+      return true;
+   }
+
+   void xml_document::serialize( string& s ) const {
+      xml_printer p;
+      this->accept( &p );
+      s = _bom + p.string_buffer();
+   }
+
+   void xml_document::serialize( list<string>& l ) const {
+      vector<string> vec;
+      serialize( vec );
+      l.assign( vec.begin(), vec.end() );
    }
 
    void xml_document::serialize( vector<string>& v ) const {
-      v.clear();
-      xml_printer p;
-      this->accept( &p );
-
-      string const& s = p.string_buffer();
+      string s;
+      serialize( s );
       rlf_hstring::string_to_vector( s, v );
 
-      if( bom.size() > 0 ) {
-         v[0] = bom + v[0]; // add with bom
-      }
+      //      v[0] = _bom + v[0]; // add with bom
 
    }
 

@@ -71,7 +71,7 @@ namespace examples {
       } catch( txml::xml_exception& ex ) {
          w = ex.What();
          LOGT_INFO( ex.what() );
-         LOGT_INFO( static_cast<std::string>( ex ) );
+         LOGT_INFO( static_cast<std::string>( ex.lfm() ) );
       }
 
       LOGT_INFO( "" );
@@ -91,7 +91,9 @@ namespace examples {
          instance.create( "domain.vcpu", "4" );
          instance.create( "domain.os", "" );
          instance.create( "domain.os.type", "hvm" );
+         instance.create( "domain.os.type:arch", "i686ä" );
          instance.create( "domain.os.type:arch", "i686" );
+
          instance.create( "domain.os.type:machine", "pc-1.0" );
          instance.create( "domain.os.boot", "" );
          instance.create( "domain.os.boot:dev", "hd" );

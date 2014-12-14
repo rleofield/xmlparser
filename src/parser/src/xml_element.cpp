@@ -41,7 +41,6 @@ www.lug-ottobrunn.de
 
 #include <string>
 #include <algorithm>
-//#include <boost/algorithm/string.hpp>
 
 
 #include "xml_utl.h"
@@ -56,6 +55,9 @@ www.lug-ottobrunn.de
 #include "stringhelper.h"
 #include "alloccheck.h"
 #include "xml_locator.h"
+
+#include <tLog_Category_default.h>
+
 
 #include "tPointers.h"
 
@@ -266,7 +268,7 @@ namespace txml {
       return val;
    }
 
-   void xml_element::parse( rawxml_position& pos ) {
+   void xml_element::parse( raw_buffer& pos ) {
       pos.skip();
 
       if( pos.is_end() ) {
@@ -274,25 +276,30 @@ namespace txml {
                               eException::parsing_element, msg_parsing_element + ", unexpected end reached" );
       }
 
-      string temp;
+
       vector8_t::const_iterator vi = pos.find( string( ">" ) ); // ">"
-      temp = pos.next( vi + 1 ); // skip >
 
-      string txt = extract( temp, "<", "/>" ); // "<" and "/>"
-      bool isclosed_Element = true;
+      // get element name + attributes
+      string temp = pos.next( vi + 1 ); // skip >
 
-      if( txt.size() == 0 ) {
-         txt = extract( temp, "<", ">" );
-         isclosed_Element = false;
+      size_t s1 = temp.rfind( "/>" );
+
+      bool isclosed_Element = ( s1 == temp.size() - 2 );
+
+      string inner = rlf_hstring::trim( extract( temp, "<", ">" ) );
+
+      if( isclosed_Element ) {
+         inner = rlf_hstring::trim( extract( temp, "<", "/>" ) );
+
       }
 
-      if( txt.empty() ) {
+      if( inner.empty() ) {
          throw xml_exception( tlog_lfm_,
                               eException::failed_to_read_element_name, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
       }
 
-      // look for start tag, is not here = ok
-      size_t si = txt.find( "<", 1 ); // "<"
+      // look for start tag, shouldn't be here
+      size_t si = inner.find( "<", 1 ); // "<"
 
       if( si != string::npos ) {
          throw xml_exception( tlog_lfm_,
@@ -300,7 +307,9 @@ namespace txml {
                               msg_failed_to_read_element_closing_tag +  " at: '" + temp + "'" );
       }
 
-      _node_value = readName( txt );
+      //  read name and attributes
+      _node_value = readName( inner );
+      LOGT_DEBUG( _node_value );
 
       string lp = _lookuppath.to_string();
 
@@ -319,7 +328,7 @@ namespace txml {
 
       // look for previous child, for internal numbering
       xml_node* parent_ = parent();
-      xml_node* prevChild = parent_->lastChildElement( _node_value );
+      xml_node* prevChild = parent_->last_child_element( _node_value );
 
       if( prevChild != nullptr ) {
          keyentry const& pe_prev = prevChild->lookuppath().last();
@@ -336,37 +345,41 @@ namespace txml {
          }
       }
 
+
+      string attributepart = inner;
+
       while( !pos.is_end() ) {
          size_t s = _node_value.size();
 
          // if element has no attributes, txt = "" or "/"
-         if( s < txt.size() ) {
-            // txt is "/" or attributes
-            txt = string( txt.begin() + _node_value.size() , txt.end() );
+         if( s < attributepart.size() ) {
+            // txt is "/" or has attributes
+            attributepart = rlf_hstring::trim( attributepart.substr( _node_value.size() ) );
          }
 
-         txt = rlf_hstring::trim( txt );
-         string::const_iterator begin = txt.begin();
-         string::const_iterator end   = txt.end();
+         bool b = attributepart.size() > 0 || isclosed_Element ;
 
-         if( !txt.empty() ) { // we have an empty tag and/or we have attributes
-            if( txt[0] == '/' ) {
+         if( b ) { // we have an empty tag with /> and/or we have attributes
+            if( isclosed_Element &&  attributepart.size() == 0 ) {
                // is empty tag
-               ++begin;
+               //++begin;
 
-               if( begin != end ) {
-                  throw xml_exception( tlog_lfm_,
-                                       eException::parsing_empty, msg_parsing_empty );
-               }
+               //               if( attributepart.size() != 1 ) {
+               //                  throw xml_exception( tlog_lfm_,
+               //                                       eException::parsing_empty, msg_parsing_empty );
+               //               }
 
                return;
-            } else {
-               // parse attribute
-               // txt contains _node_value or attributes
-               vector8_t vectorattributes( begin, end );
-               rawattributes = vectorattributes;
-               txt = rlf_hstring::trim( getAttributes( vectorattributes ) );
             }
+
+            // parse attributes
+            // txt contains _node_value or attributes
+            string::const_iterator begin = attributepart.begin();
+            string::const_iterator end   = attributepart.end();
+            vector8_t vectorattributes( begin, end );
+            rawattributes = vectorattributes;
+            // result must be empty or contains the last '/' after attributes
+            attributepart = rlf_hstring::trim( getAttributes( vectorattributes ) );
          } else {
             pos.skip();
 
@@ -383,6 +396,7 @@ namespace txml {
                // if at text start
                string txt1 = pos.next( string( "<" ).size() );
 
+               // if at '<' then is element value
                if( txt1 != string( "<" ) ) { // not at '<'
                   xml_text* textNode = xml_text::create( tlog_lfm_ ) ;
                   string text = pos.next( pos.find( string( "<" ) ) );
@@ -394,7 +408,7 @@ namespace txml {
                      delete textNode; // do_delete
                   } else {
 
-                     linkEndChild( textNode );
+                     link_end_child( textNode );
                      ke.Value( textNode->value() );
 
                   }
@@ -404,11 +418,11 @@ namespace txml {
                   }
                }
 
-               // We hit a '</'
+               // We hit a '</' == end tag start, if text in element
                txt1 = pos.next( string( "</" ).size() );
 
                if( txt1 != "</" ) {  // "</"
-                  xml_node* node = identify( pos );
+                  xml_node* node = identify_in_elem( pos );
 
                   if( node == 0 ) {
                      throw xml_exception( tlog_lfm_,
@@ -418,7 +432,7 @@ namespace txml {
                   if( node ) {
                      node->_lookuppath = _lookuppath;
                      node->parse( pos );
-                     linkEndChild( node );
+                     link_end_child( node );
                   }
                }
 
@@ -454,7 +468,7 @@ namespace txml {
                   eException::reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
             }
          }
-      }
+      } // while
 
       return;
    }
@@ -488,7 +502,7 @@ namespace txml {
 
    string xml_element::getAttributes( vector8_t const& v ) {
 
-      rawxml_position pp( v );
+      raw_buffer pp( v );
 
       while( true ) {
          vector8_t::const_iterator i = pp.find( '=' );
@@ -508,7 +522,7 @@ namespace txml {
       }
 
       // must be v.size(), end of raw vector with attributes
-      std::ptrdiff_t running_position = pp.running_position();
+      std::ptrdiff_t running_position = pp.position();
       string s = pp.next( running_position );
       // must be "", no attributes left
       return s;

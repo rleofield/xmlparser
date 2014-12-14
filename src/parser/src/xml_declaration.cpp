@@ -44,7 +44,7 @@ www.lug-ottobrunn.de
 
 #include "xml_declaration.h"
 #include "xml_document.h"
- 
+
 #include "xml_visitor.h"
 #include "xml_utl.h"
 #include "xml_exception.h"
@@ -75,11 +75,11 @@ namespace txml {
       return p;
    }
    xml_node* xml_declaration::create() {
-      return create ( tlog_lfm_  );
+      return create( tlog_lfm_ );
    }
 
 
-   void xml_declaration::getAttributes( string const& temp ) {
+   void xml_declaration::attributes( string const& temp ) {
 
       /*
        example:
@@ -122,7 +122,7 @@ namespace txml {
       return;
    }
 
-   void xml_declaration::parse( rawxml_position& pos ) {
+   void xml_declaration::parse( raw_buffer& pos ) {
       pos.skip();
 
       if( !pos.starts_with( declaration_start ) ) { //"<?xml"
@@ -134,7 +134,7 @@ namespace txml {
 
       string temp = pos.next_until( declaration_end ); // "?>"
       pos += temp.size();
-      getAttributes( temp );
+      attributes( temp );
       return ;
 
    }

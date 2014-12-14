@@ -478,8 +478,7 @@ namespace rlf_hstring {
       return tTokens( l, delimiters )();
    }
    vector<string> split( string const& l, char delim ) {
-      string d;
-      d += delim;
+      string d( 1, delim );
       return split( l, d );
    }
 

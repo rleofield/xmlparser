@@ -88,8 +88,8 @@ namespace examples {
 
       // from string
 
-      int iabc = xmlinterface::str_to_int( "-127777" );
-      double dabc = xmlinterface::str_to_double( "-127777.888 " );
+      int iabc = xmlinterface::to_int( "-127777" );
+      double dabc = xmlinterface::to_double( "-127777.888 " );
       LOGT_INFO( "t.str_to_int( \"  -127777 int variable as string\" ); = " + xmlinterface::to_string( iabc ) );
       LOGT_INFO( "t.str_to_double( \" -127777.888 \" ); = " + xmlinterface::to_string( dabc ) );
 

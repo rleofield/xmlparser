@@ -63,12 +63,6 @@ namespace examples {
 
 
 
-
-
-
-
-
-
    void xml_path_to_string_const_() {
 
       // make instance

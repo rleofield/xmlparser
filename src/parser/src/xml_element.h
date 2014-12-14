@@ -94,7 +94,7 @@ namespace txml {
 
       //virtual xml_node* clone() const;
 
-      virtual void parse( rawxml_position& pos );
+      virtual void parse( raw_buffer& pos );
       virtual bool accept( xml_visitor* visitor ) const;
    protected:
       //void copy( xml_element& target ) const;

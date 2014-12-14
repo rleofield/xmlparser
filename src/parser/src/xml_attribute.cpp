@@ -100,12 +100,11 @@ namespace txml {
       }
 
       class selectInQuotes {
-         rawxml_position& _pos;
-         //attribute& _attr;
+         raw_buffer& _pos;
          string _value;
 
       public:
-         selectInQuotes( rawxml_position& raw_pos ) : _pos( raw_pos ), _value() {}
+         selectInQuotes( raw_buffer& pos ) : _pos( pos ), _value() {}
 
          void operator()( string const& quote ) {
             size_t pos = _pos.position();
@@ -118,12 +117,12 @@ namespace txml {
                return;
             }
 
-            if( *_pos != quote[0] ) {
+            if( _pos.value() != quote[0] ) {
                return;
             }
 
             ++_pos; // skip quote
-            string p = _pos.next( _pos.find( quote ) );
+            auto const& p = _pos.next( _pos.find( quote ) );
             _pos += p.size();
             ++_pos; // skip quote
             _value = readText( p );
@@ -137,7 +136,7 @@ namespace txml {
 
 
 
-   void xml_attribute::parseAttr( rawxml_position& pos ) {
+   void xml_attribute::parseAttr( raw_buffer& pos ) {
 
       try {
          vector8_t::const_iterator i = pos.find( '=' );

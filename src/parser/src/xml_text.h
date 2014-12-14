@@ -63,18 +63,20 @@ namespace txml {
    class xml_text : public xml_node {
       friend class xml_element;
 
-      xml_text( const std::string& initValue ) :
-         xml_node( xml_node::eNodeType::TEXT ) {
-         xml_node::value( initValue );
+      xml_text( const std::string& val ) :
+         xml_node( xml_node::eNodeType::TEXT, val ) {
       }
       static void* operator new( size_t size, t_lfm const& lfm );
       static void operator delete( void* );
 
       xml_text( const xml_text& xmlText ) : xml_node( xml_node::eNodeType::TEXT ) {
-         xmlText.copy( *this );
+         xml_node::value( xmlText.unencoded_value() );
       }
-      xml_text& operator=( const xml_text& base )                        {
-         base.copy( *this );
+      xml_text& operator=( const xml_text& txt )                        {
+         if( this != &txt ) {
+            xml_node::value( txt.unencoded_value() );
+         }
+
          return *this;
       }
 
@@ -88,20 +90,18 @@ namespace txml {
       const std::string value() const; // encoded value
       const std::string unencoded_value() const; // encoded value
 
-      void parse( rawxml_position& );
+      void parse( raw_buffer& );
       void parseText( std::string const& p );
 
       virtual bool accept( xml_visitor* content ) const;
 
    protected :
-      //virtual xml_node* clone() const;
-      void copy( xml_node& target ) const;
-
+      //void copy( xml_node& target ) const;
    };
 
 
    std::string encodeEntities( std::string const& s ); // display -> XML
-   std::string decodeEntities( std::string const& s ) ;
+   std::string decodeEntities( std::string const& s ); // XML -> display
 
 
 

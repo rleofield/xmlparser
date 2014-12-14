@@ -68,7 +68,19 @@ namespace txml {
 
 
 
-   class rawxml_position;
+   class raw_buffer;
+
+   // nodeholder
+   class nodeh {
+   public:
+      xml_node*     firstChild;
+      xml_node*     lastChild;
+
+      xml_node*      prev_sibling;
+      xml_node*      next_sibling;
+      nodeh(): firstChild( nullptr ), lastChild( nullptr ), prev_sibling( nullptr ), next_sibling( nullptr ) {}
+   };
+
 
    class xml_node {
 
@@ -78,10 +90,10 @@ namespace txml {
    public:
 
 
-      static std::vector<std::string> acc_all ;
-      std::vector<std::string> acc ;
-      std::string accs()const;
-      static std::string accs_all();
+      //static std::vector<std::string> acc_all ;
+      //std::vector<std::string> acc ;
+      //std::string accs()const;
+      //static std::string accs_all();
 
       virtual ~xml_node();
 
@@ -101,53 +113,38 @@ namespace txml {
       in Text:       the text string
       */
       const std::string value() const;
-      void value( const std::string& _value );
+      void value( const std::string& );
       std::string tvalue() const;
 
-      std::string stype()const;
       void clear();
 
       const xml_node* firstChild()const;
       xml_node* firstChild();
-
-      //      const xml_node* FirstChild( std::string const& value ) const;
-      //      xml_node* FirstChild( const std::string& _value );
-
-      const xml_node* lastChild()const;
-      xml_node* lastChild();
-
-      //      const xml_node* LastChild( const std::string& _value ) const;
-      //      xml_node* LastChild( const std::string& _value ) ;
-
-      const xml_element* lastChildElement( const std::string& _value ) const;
-      xml_element* lastChildElement( const std::string& _value ) ;
-
-      const xml_node* iterateChildren( const xml_node* previous ) const;
-      xml_node* iterateChildren( xml_node* previous ) ;
-
-      //      const xml_node* IterateChildren( const std::string& _value, const xml_node* previous ) const  ;
-      //      xml_node* IterateChildren( const std::string& _value,  xml_node* previous ) ;
-
-      //std::vector<xml_node*> childs();
-      xml_node* linkEndChild( xml_node* addThis );
-
-      xml_node* insertCommentBefore( xml_node* beforeThis, xml_node* addThis );
-
-   public:
-
-      const xml_node* next() const;
-
-
       const xml_element* firstChildElement( const std::string& _value ) const   ;
       xml_element* firstChildElement( const std::string& _value )            ;
 
-      eNodeType type() const;
 
+      const xml_node* last_child()const;
+      xml_node* last_child();
+      const xml_element* last_child_element( const std::string& _value ) const;
+      xml_element* last_child_element( const std::string& _value ) ;
+
+
+      xml_node* link_end_child( xml_node* addThis );
+      void insert_comment_before( xml_node* node, xml_comment* comment );
+
+
+      const xml_node* prev() const;
+      xml_node* prev();
+      const xml_node* next() const;
+      xml_node* next();
+
+      eNodeType type() const;
 
       xml_document const* getDocument() ;
 
       bool noChildren() const {
-         return _firstChild == nullptr;
+         return firstChild() == nullptr;
       }
 
 
@@ -174,12 +171,14 @@ namespace txml {
 
    protected:
       xml_node( eNodeType _type );
+      xml_node( eNodeType t, std::string const& );
 
-      xml_node* identify( rawxml_position& pos );
-      xml_node* createNode( std::string const& str );
+      xml_node* identify_in_elem( raw_buffer&  );
+      xml_node* identify_in_doc( raw_buffer&  );
+      xml_node* createNode( std::string const&  );
       void         parent( xml_node* p ) ;
 
-      virtual void parse( rawxml_position& ) = 0;
+      virtual void parse( raw_buffer& ) = 0;
 
    private:
 
@@ -188,11 +187,7 @@ namespace txml {
 
       eNodeType     _type;
 
-      xml_node*     _firstChild;
-      xml_node*     _lastChild;
-
-      xml_node*      _prev_sibling;
-      xml_node*      _next_sibling;
+      nodeh _nh;
 
       xml_node*     _parent;
 
@@ -202,7 +197,7 @@ namespace txml {
       void operator=( const xml_node& base );
    };
 
-
+   std::string to_string( xml_node::eNodeType  t ) ;
 
 
 } // end of namespace txml

@@ -62,12 +62,12 @@ namespace txml {
 
    public:
       static void operator delete( void* );
-      static xml_node* create( t_lfm const& lfm );
-      static xml_node* create();
+      static xml_comment* create( t_lfm const& lfm );
+      static xml_comment* create();
 
       virtual ~xml_comment() {}
       //virtual xml_node* clone() const;
-      virtual void parse( rawxml_position& );
+      virtual void parse( raw_buffer& );
 
       std::string print()const;
       virtual bool accept( xml_visitor* visitor ) const;

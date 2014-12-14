@@ -48,7 +48,7 @@ www.lug-ottobrunn.de
 
 namespace txml {
 
-   class rawxml_position;
+   class raw_buffer;
 
    class xml_attribute {
 
@@ -82,7 +82,7 @@ namespace txml {
          return _name > a._name;
       }
 
-      void parseAttr( rawxml_position& pos );
+      void parseAttr( raw_buffer& pos );
 
       void print( std::string& str ) const;
 
