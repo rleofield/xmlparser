@@ -117,8 +117,7 @@ namespace txml {
    void xml_document::parse( raw_buffer& buffer ) {
 
       if( buffer.is_end() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::document_empty, msg_document_empty );
+         throw Xml_exception( eEx::parse, msg_document_empty );
       }
 
       encoding( Encoding::UTF8 );
@@ -135,24 +134,25 @@ namespace txml {
       }
 
       if( buffer.value() == 0 ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::document_empty, msg_document_empty );
+         throw Xml_exception( eEx::parse, msg_document_empty );
       }
 
 
       while( !buffer.is_end() ) {
-         xml_node* node = identify_in_doc( buffer );
+         xml_node* node = create_in_doc( buffer );
 
          if( node ) {
-            node->_lookuppath = _lookuppath;
+            node->_path = _path;
             node->parse( buffer );
-            xml_declaration const* decl = dynamic_cast<xml_declaration const*>( node );
+            if( encoding() == Encoding::UNKNOWN){
+               xml_declaration const* decl = dynamic_cast<xml_declaration const*>( node );
 
-            if( decl != nullptr ) {
-               if( boost::iequals( decl->encoding(), UTF_8 ) ) {
-                  _encoding = Encoding::UTF8;
-               } else {
-                  _encoding = Encoding::LEGACY;
+               if( decl != nullptr ) {
+                  if( boost::iequals( decl->encoding(), UTF_8 ) ) {
+                     _encoding = Encoding::UTF8;
+                  } else {
+                     _encoding = Encoding::LEGACY;
+                  }
                }
             }
 
@@ -165,15 +165,13 @@ namespace txml {
       }
 
       if( firstChild() == 0 ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::document_empty, msg_document_empty );
+         throw Xml_exception( eEx::parse, msg_document_empty );
       }
 
    }
 
 
-   xml_document::xml_document() : xml_node( xml_node::eNodeType::DOCUMENT ) {
-      //LOGT_INFO("");
+   xml_document::xml_document() : xml_node( xml_node::eType::DOC ) {
    }
 
    xml_document::~xml_document() {
@@ -196,12 +194,7 @@ namespace txml {
       };
 
       clear();
-      //      vector8_t  v;
-      //      for_each( l.begin(), l.end() , add( v ) );
-      //      // add on space, to prevent end of file after last element
-      //      v.push_back( ' ' );
-      raw_buffer pp( l );
-      //xml_node::acc_all.clear();
+       raw_buffer pp( l );
 
       string w ;
 
@@ -211,11 +204,7 @@ namespace txml {
       } catch( xml_exception& ex ) {
          w = ex.what();
          LOGT_ERROR( "ex: " + w );
-         //LOGT_ERROR(w);
-
       }
-
-      //   LOGT_ERROR("");
 
       return true;
    }

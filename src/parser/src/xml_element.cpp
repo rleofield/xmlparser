@@ -110,24 +110,20 @@ namespace txml {
    }
 
    xml_element* xml_element::create( t_lfm const& lfmcIn, const string& value_ ) {
-      xml_element* p ;
-      p = new( lfmcIn ) xml_element( value_ );
-      xml_document const* doc = p->getDocument() ;
-
+      xml_element* p = new( lfmcIn ) xml_element( value_ );
       xml_document::pointers.add( p );
-
       return p;
 
    }
    xml_element* xml_element::create( const string& value_ ) {
-      return create( tlog_lfm_, value_ );
+      return create( tlfm_, value_ );
    }
 
 
 
-   xml_element::xml_element( const string& _value )
-      : xml_node( xml_node::eNodeType::ELEMENT ), x( 15 ), _attributes(), rawattributes() {
-      _node_value = _value;
+   xml_element::xml_element( const string& value_ )
+      : xml_node( eType::ELEM ), x( 15 ), _attributes(), rawattributes() {
+      _value = value_;
    }
 
 
@@ -144,7 +140,7 @@ namespace txml {
    public:
       keycompare( string const& name ): _key( name ) {}
       bool operator()( xml_attribute const& a )const {
-         if( a.path.to_string() == _key ) {
+         if( a._path == _key ) {
             return true;
          }
 
@@ -252,7 +248,7 @@ namespace txml {
 
    }
 
-   string keyentry::toValue()const {
+   string path_element::toValue()const {
       xml_element const* n =  dynamic_cast<xml_element const*>( _node );
       string val;
 
@@ -269,11 +265,12 @@ namespace txml {
    }
 
    void xml_element::parse( raw_buffer& pos ) {
-      pos.skip();
+
+       pos.skip();
 
       if( pos.is_end() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::parsing_element, msg_parsing_element + ", unexpected end reached" );
+         throw Xml_exception(
+                              eEx::parse, msg_parsing_element + ", unexpected end reached" );
       }
 
 
@@ -294,45 +291,45 @@ namespace txml {
       }
 
       if( inner.empty() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::failed_to_read_element_name, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
+         throw Xml_exception(
+                              eEx::parse, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
       }
 
       // look for start tag, shouldn't be here
       size_t si = inner.find( "<", 1 ); // "<"
 
       if( si != string::npos ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::failed_to_read_element_closing_tag,
+         throw Xml_exception(
+                              eEx::parse,
                               msg_failed_to_read_element_closing_tag +  " at: '" + temp + "'" );
       }
 
       //  read name and attributes
-      _node_value = readName( inner );
-      LOGT_DEBUG( _node_value );
+      _value = readName( inner );
+      LOGT_DEBUG( _value );
 
-      string lp = _lookuppath.to_string();
+      string lp = _path;
 
       pos += temp.size();
 
       if( pos.is_end() && !isclosed_Element ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::failed_to_read_element_name,
+         throw Xml_exception(
+                              eEx::parse,
                               msg_failed_to_read_element_name +  " at: '" + pos.next25() + "'" );
       }
 
-      _lookuppath.addEmpty();
-      keyentry& ke = _lookuppath.last();
-      ke.Element( _node_value );
+      path_element ke;
+      ke.Element( _value );
       ke.node( this );
+      _path.add( ke );
 
       // look for previous child, for internal numbering
       xml_node* parent_ = parent();
-      xml_node* prevChild = parent_->last_child_element( _node_value );
+      xml_node* prevChild = parent_->last_child_element( _value );
 
       if( prevChild != nullptr ) {
-         keyentry const& pe_prev = prevChild->lookuppath().last();
-         keyentry& pe_local =  lookuppath().last();
+         path_element const& pe_prev = prevChild->lookuppath().last();
+         path_element& pe_local =  lookuppath().last();
 
          if( pe_prev == pe_local ) { // compare by element
             int iprev = pe_prev.childcount();
@@ -349,12 +346,12 @@ namespace txml {
       string attributepart = inner;
 
       while( !pos.is_end() ) {
-         size_t s = _node_value.size();
+         size_t s = _value.size();
 
          // if element has no attributes, txt = "" or "/"
          if( s < attributepart.size() ) {
             // txt is "/" or has attributes
-            attributepart = rlf_hstring::trim( attributepart.substr( _node_value.size() ) );
+            attributepart = rlf_hstring::trim( attributepart.substr( _value.size() ) );
          }
 
          bool b = attributepart.size() > 0 || isclosed_Element ;
@@ -398,7 +395,7 @@ namespace txml {
 
                // if at '<' then is element value
                if( txt1 != string( "<" ) ) { // not at '<'
-                  xml_text* textNode = xml_text::create( tlog_lfm_ ) ;
+                  xml_text* textNode = xml_text::create( tlfm_ ) ;
                   string text = pos.next( pos.find( string( "<" ) ) );
                   pos += text.size();
                   ++pos;
@@ -409,7 +406,7 @@ namespace txml {
                   } else {
 
                      link_end_child( textNode );
-                     ke.Value( textNode->value() );
+                     ke.value( textNode->value() );
 
                   }
 
@@ -422,15 +419,15 @@ namespace txml {
                txt1 = pos.next( string( "</" ).size() );
 
                if( txt1 != "</" ) {  // "</"
-                  xml_node* node = identify_in_elem( pos );
+                  xml_node* node = create_in_elem( pos );
 
                   if( node == 0 ) {
-                     throw xml_exception( tlog_lfm_,
-                                          eException::unknown_node_type, msg_unknown_node + ": " + pos.next( 10 ) );
+                     throw Xml_exception(
+                                          eEx::parse, msg_unknown_node + ": " + pos.next( 10 ) );
                   }
 
                   if( node ) {
-                     node->_lookuppath = _lookuppath;
+                     node->_path = _path;
                      node->parse( pos );
                      link_end_child( node );
                   }
@@ -448,7 +445,7 @@ namespace txml {
             // endtag ?
             // </tag > and </tag> are both valid
             string nodeClosing = "</"; //  "</" ;
-            nodeClosing += _node_value;
+            nodeClosing += _value;
 
             if( pos.starts_with( nodeClosing ) ) {
                pos += nodeClosing.length();
@@ -459,13 +456,11 @@ namespace txml {
                   return;
                }
 
-               throw xml_exception(
-                  tlog_lfm_,
-                  eException::reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
+               throw Xml_exception(
+                  eEx::parse, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
             } else {
-               throw xml_exception(
-                  tlog_lfm_,
-                  eException::reading_endtag, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
+               throw Xml_exception(
+                  eEx::parse, msg_reading_endtag + ", endtag: '" + nodeClosing + "'" );
             }
          }
       } // while
@@ -515,8 +510,8 @@ namespace txml {
          pp.skip();
 
          xml_attribute attrib;
-         attrib.path = _lookuppath;
-         attrib.parseAttr( pp );
+         attrib._path = _path;
+         attrib.parse( pp );
 
          _attributes.push_back( attrib );
       }

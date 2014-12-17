@@ -72,7 +72,7 @@ namespace txml {
       }
 
       string keys_element = element.lookupPathString();
-      string strLookupkeys = lookupkeys.to_string();
+      string strLookupkeys = lookupkeys;
 
       // search depth reached
       if( element.lookuppath().size() == lookupkeys.size() ) {
@@ -90,7 +90,7 @@ namespace txml {
          return false;
       }
 
-      string lookupkey = lookupkeys.to_string();
+      string lookupkey = lookupkeys;
       string a = element.attributeByKey( lookupkey );
 
       if( !a.empty() ) {
@@ -127,7 +127,7 @@ namespace txml {
          return ;
       }
 
-      keyentry const& last = lookupkeys.last();
+      path_element const& last = lookupkeys.last();
       _elementfound->setAttribute( last.attr(), value_ );
    }
 
@@ -136,7 +136,7 @@ namespace txml {
          return false;
       }
 
-      keyentry const& last = lookupkeys.last();
+      path_element const& last = lookupkeys.last();
       return !last.attr().empty();
    }
 

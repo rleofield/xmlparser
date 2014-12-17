@@ -64,12 +64,12 @@ namespace txml {
       friend class xml_element;
 
       xml_text( const std::string& val ) :
-         xml_node( xml_node::eNodeType::TEXT, val ) {
+         xml_node( xml_node::eType::TEXT, val ) {
       }
       static void* operator new( size_t size, t_lfm const& lfm );
       static void operator delete( void* );
 
-      xml_text( const xml_text& xmlText ) : xml_node( xml_node::eNodeType::TEXT ) {
+      xml_text( const xml_text& xmlText ) : xml_node( xml_node::eType::TEXT ) {
          xml_node::value( xmlText.unencoded_value() );
       }
       xml_text& operator=( const xml_text& txt )                        {

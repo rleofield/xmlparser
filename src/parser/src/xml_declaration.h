@@ -56,7 +56,7 @@ namespace txml {
    class xml_declaration : public xml_node {
 
       xml_declaration()   :
-         xml_node( xml_node::eNodeType::DECLARATION ),
+         xml_node( xml_node::eType::DECL ),
          _version( "1.0" ),
          _encoding(),
          _standalone() {
@@ -74,8 +74,8 @@ namespace txml {
 
 
    public:
-      static xml_node* create( t_lfm const& lfmcIn ) ;
-      static xml_node* create() ;
+      static xml_declaration* create( t_lfm const& lfmcIn ) ;
+      static xml_declaration* create() ;
 
       virtual ~xml_declaration()   {}
 
@@ -97,7 +97,7 @@ namespace txml {
       virtual bool accept( xml_visitor* visitor ) const;
 
    protected:
-      void copy( xml_declaration& target ) const;
+      //void copy( xml_declaration& target ) const;
 
    };
 

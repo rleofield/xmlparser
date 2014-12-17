@@ -52,14 +52,26 @@ namespace txml {
 
    class xml_attribute {
 
+
    public:
       xml_attribute() :
-         path(), _name(), _value()   { }
+         _path(), _name(), _value()   { }
 
       xml_attribute( const std::string& n, const std::string& v ) :
-         path(), _name( n ), _value( v ) {}
+         _path(), _name( n ), _value( v ) {}
 
-      std::string const& name()  const {
+      xml_attribute( const xml_attribute& attr ):
+         _path( attr._path ), _name( attr._name ), _value( attr._value ) {}
+
+      xml_attribute& operator=( const xml_attribute& attr ) {
+         if( this != &attr ) {
+            this->~xml_attribute();
+            new (this) xml_attribute(attr);
+         }
+         return *this;
+      }
+
+      std::string const& name()  const noexcept {
          return _name;
       }
       std::string const& value() const {
@@ -72,6 +84,7 @@ namespace txml {
          _value = v;
       }
 
+      // compare only the name, for find()
       bool operator==( const xml_attribute& a ) const {
          return a._name == _name;
       }
@@ -82,28 +95,12 @@ namespace txml {
          return _name > a._name;
       }
 
-      void parseAttr( raw_buffer& pos );
+      void parse( raw_buffer&  );
 
       void print( std::string& str ) const;
 
-      xml_attribute( const xml_attribute& attr ):
-         path( attr.path ), _name( attr._name ), _value( attr._value ) {}
 
-      xml_attribute& operator=( const xml_attribute& attr ) {
-         if( this != &attr ) {
-            _name = attr._name;
-            _value = attr._value;
-            path = attr.path;
-         }
-
-         return *this;
-      }
-      // compare only the name, for find()
-      bool operator==( const xml_attribute& attr ) {
-         return _name == attr._name;
-      }
-
-      keyentries path;
+      path _path;
    private:
 
       std::string _name;

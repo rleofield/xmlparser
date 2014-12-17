@@ -98,7 +98,7 @@ namespace txml {
 
          return temp;
       }
-
+namespace{
       class selectInQuotes {
          raw_buffer& _pos;
          string _value;
@@ -108,12 +108,7 @@ namespace txml {
 
          void operator()( string const& quote ) {
             size_t pos = _pos.position();
-
-            if( quote.empty() ) {
-               return;
-            }
-
-            if( pos >= _pos.size() ) {
+            if( quote.empty() || pos >= _pos.size() ) {
                return;
             }
 
@@ -132,11 +127,11 @@ namespace txml {
          }
       };
    }
+   } // end of anon ns
 
 
 
-
-   void xml_attribute::parseAttr( raw_buffer& pos ) {
+   void xml_attribute::parse( raw_buffer& pos ) {
 
       try {
          vector8_t::const_iterator i = pos.find( '=' );
@@ -151,12 +146,12 @@ namespace txml {
          pos.skip();
 
          // value is quoted
-         vector<string> quotes = boost::assign::list_of( SINGLE_QUOTE )( DOUBLE_QUOTE );
-         string val  =  for_each( quotes.begin(), quotes.end(), selectInQuotes( pos ) ).value();
-         _value = val;
-         keyentry& pe = path.last();
+         static vector<string> quotes = boost::assign::list_of( SINGLE_QUOTE )( DOUBLE_QUOTE );
+
+         _value = for_each( quotes.begin(), quotes.end(), selectInQuotes( pos ) ).value();
+         path_element& pe = _path.last();
          pe.attr( _name );
-         pe.Value( val );
+         pe.value( _value );
 
 
 

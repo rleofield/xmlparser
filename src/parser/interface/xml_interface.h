@@ -158,13 +158,13 @@ namespace xmlinterface {
    void show_alloc_list();
    std::string allocliststring();
 
+   // helpers
    int to_int( std::string const& s );
    double to_double( std::string const& s );
    std::string int_to_string( int val );
    std::string double_to_string( double val );
 
 
-   std::vector<std::string> split( std::string const& l, std::string const& pat ) ;
    std::string replace_all( std::string const& ins, const std::string& pattern, const std::string& replace ) ;
    size_t index( std::string const& s, std::string const& pattern, size_t pos ) ;
    std::string trim( std::string const& str, char ch = ' ' ) ;

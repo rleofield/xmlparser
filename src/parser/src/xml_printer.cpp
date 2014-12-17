@@ -62,7 +62,7 @@ namespace txml {
 
    bool xml_printer::enter( const xml_element& element ) {
       indent();
-      _buffer += element_start;
+      _buffer += "<";
       _buffer += element.value();
       std::vector<xml_attribute> v = element.Attributes();
 
@@ -72,10 +72,10 @@ namespace txml {
       }
 
       if( !element.firstChild() ) {
-         _buffer += " " + element_close;
+         _buffer += string(" ") + ">";
          _buffer += _lineBreak;
       } else {
-         _buffer += element_end;
+         _buffer += ">";
          xml_text const* text = dynamic_cast<xml_text const*>( element.firstChild() );
 
          if( text != nullptr && element.last_child() == element.firstChild()
@@ -104,9 +104,9 @@ namespace txml {
             indent();
          }
 
-         _buffer += element_exit_start; //"</";
+         _buffer += "</";
          _buffer += element.value();
-         _buffer += element_exit_end; //">";
+         _buffer += ">";
          _buffer += _lineBreak;
       }
 

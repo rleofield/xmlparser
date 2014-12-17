@@ -53,6 +53,7 @@ www.lug-ottobrunn.de
 
 #include "tPointers.h"
 
+using rlf_tlfm ::t_lfm;
 
 namespace txml {
    using std::string;
@@ -65,17 +66,17 @@ namespace txml {
 
 
    void xml_declaration::operator delete( void* p ) {
-      xml_node* n = reinterpret_cast<xml_node*>( p );
+      xml_declaration* n = reinterpret_cast<xml_declaration*>( p );
       alloccheck::checked_delete( n );
    }
 
-   xml_node* xml_declaration::create( t_lfm const& lfmcIn ) {
-      xml_declaration* p = new( lfmcIn ) xml_declaration();
+   xml_declaration* xml_declaration::create( t_lfm const& lfm ) {
+      xml_declaration* p = new( lfm ) xml_declaration();
       xml_document::pointers.add( p );
       return p;
    }
-   xml_node* xml_declaration::create() {
-      return create( tlog_lfm_ );
+   xml_declaration* xml_declaration::create() {
+      return create( tlfm_ );
    }
 
 
@@ -85,69 +86,45 @@ namespace txml {
        example:
            <?xml declaration ?>
       */
-      string txt = extract( temp, "<?xml", "?>" );
-      boost::trim( txt );
 
       vector<string> v;
-      boost::split( v, txt, boost::is_any_of( " \t\n" ) );
+      boost::split( v, temp, boost::is_any_of( " \t\n" ) );
 
-
-      vector<string>::const_iterator begin = v.begin();
-      vector<string>::const_iterator end = v.end();
-
-      while( begin != end ) {
+      for( auto s : v ){
          vector<string> a;
-         boost::split( a, *begin, boost::is_any_of( "=" ) );
-
-         if( a.size() == 2 ) {
-            if( boost::iequals( a[0], attr_version ) ) {
-               boost::trim_if( a[1], boost::is_any_of( "\"" ) );
-               _version = a[1];
-            }
-
-            if( boost::iequals( a[0], attr_encoding ) ) {
-               boost::trim_if( a[1], boost::is_any_of( "\"" ) );
-               _encoding = a[1];
-            }
-
-            if( boost::iequals( a[0], attr_standalone ) ) {
-               boost::trim_if( a[1], boost::is_any_of( "\"" ) );
-               _standalone = a[1];
-            }
+         boost::split( a, s, boost::is_any_of( "=" ) );
+         if( a.size() != 2 ) {
+            continue;
          }
+         string const& s0 = a[0];
+         string & s1 = a[1];
+            if( boost::iequals( s0, attr_version ) ) {
+               boost::trim_if( s1, boost::is_any_of( "\"" ) );
+               _version = s1;
+               continue;
+            }
 
-         ++begin;
+            if( boost::iequals( s0, attr_encoding ) ) {
+               boost::trim_if( s1, boost::is_any_of( "\"" ) );
+               _encoding = s1;
+               continue;
+            }
+
+            if( boost::iequals( s0, attr_standalone ) ) {
+               boost::trim_if( s1, boost::is_any_of( "\"" ) );
+               _standalone = s1;
+            }
       }
-
       return;
    }
 
    void xml_declaration::parse( raw_buffer& pos ) {
-      pos.skip();
-
-      if( !pos.starts_with( declaration_start ) ) { //"<?xml"
-         throw xml_exception( tlog_lfm_,
-                              eException::parsing_declaration,
-                              msg_parsing_declaration  + ": '" +
-                              pos.next25() + "'" );
-      }
-
-      string temp = pos.next_until( declaration_end ); // "?>"
+      string temp = pos.next_until( "?>" );
       pos += temp.size();
+      temp = extract( temp, "<?xml", "?>" );
       attributes( temp );
       return ;
 
-   }
-
-   xml_declaration::xml_declaration( const xml_declaration& decl )
-      : xml_node( xml_node::eNodeType::DECLARATION ), _version( decl._version ), _encoding( decl._encoding ), _standalone( decl._standalone ) {
-      decl.copy( *this );
-   }
-
-   xml_declaration& xml_declaration::operator=( const xml_declaration& decl ) {
-      clear();
-      decl.copy( *this );
-      return *this;
    }
 
    void xml_declaration::print( int , string& str ) const {
@@ -173,14 +150,6 @@ namespace txml {
 
       str  += "?>";
    }
-
-   void xml_declaration::copy( xml_declaration& target ) const {
-      target.value( value() );
-      target._version = _version;
-      target._encoding = _encoding;
-      target._standalone = _standalone;
-   }
-
 
    bool xml_declaration::accept( xml_visitor* visitor ) const {
       return visitor->visit( *this );

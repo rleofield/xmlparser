@@ -31,33 +31,34 @@ namespace txml {
 
    class xml_node;
 
-   // keys for search in xml doc
-   class keyentry {
+   // path_elements for search in xml doc
+   // contains element names and attributename
+   class path_element {
+         std::string to_string()const;
 
    public:
-      std::string to_string()const;
-      keyentry();
-      keyentry( std::string const& str );
-      keyentry( keyentry const& keyentry_ );
+      path_element();
+      path_element( std::string const& str );
+      path_element( path_element const& keyentry_ );
 
-      keyentry& operator=( keyentry const& keyentry_ );
+      path_element& operator=( path_element const& keyentry_ );
 
       // compares elements only
-      bool operator==( keyentry const& keyentry_ )const ;
+      bool operator==( path_element const& keyentry_ )const ;
       int childcount()const ;
       void childcount( int childcount_ ) ;
 
-      std::string attr()const ;
+      std::string const& attr()const ;
       void attr( std::string const& a ) ;
       bool is_attr()const ;
-      std::string Value()const ;
-      void Value( std::string const& v ) ;
+      //std::string const& value()const ;
+      void value( std::string const& v ) ;
 
       std::string Element()const ;
       void Element( std::string element ) ;
 
 
-      operator std::string() {
+      operator std::string()const {
          return to_string();
       }
 
@@ -82,42 +83,44 @@ namespace txml {
 
    };
 
-   class keyentries {
-      std::vector<keyentry> _keyentries;
-   public:
-      keyentries();
-      keyentries( std::string const& key );
-      bool operator>( keyentries const& ke )const;
-      bool operator==( keyentries const& k )const;
-      keyentries& operator=( std::string const& key );
-      keyentries& operator=( keyentries const& ke );
-
+   class path {
+      std::vector<path_element> _keyentries;
       std::string  to_string()const;
+   public:
+      path();
+      path( std::string const& key );
+      bool operator>( path const& ke )const;
+      bool operator==( path const& k )const;
+      path& operator=( std::string const& key );
+      path& operator=( path const& ke );
+
+      operator std::string()const {
+         return to_string();
+      }
+
+
       void toPatterns( std::string const& key );
       bool empty()const ;
-      //void add( std::string const& s ) ;
       void addEmpty() ;
-      //void add( keyentry const& ke ) ;
-      void insert_front( keyentry const& ke );
-      keyentry const& last()const;
-      keyentry& last();
+      void add( path_element const& ke );
+      void insert_front( path_element const& ke );
+
+      path_element const& last()const;
+      path_element& last();
 
       size_t size()const ;
 
-      keyentry const& operator[]( size_t i )const;
-      keyentry& operator[]( size_t i );
+      path_element const& operator[]( size_t i )const;
+      path_element& operator[]( size_t i );
 
       xml_node const* parentOfLast()const;
 
-      void remove_last() ;
+      void remove_last();
 
-
-      bool compareByElement( keyentries const& v1 )const ;
-
-      bool compareByChildCount( keyentries const& v1 ) const ;
+      bool compareByElement( path const& v1 )const ;
+      bool compareByChildCount( path const& v1 ) const ;
 
    };
-   //std::vector<keyentry> to_keyentries( std::vector<std::string> );
 
 
 

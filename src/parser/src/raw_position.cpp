@@ -139,9 +139,7 @@ namespace txml {
    std::string raw_buffer::next( vector8_t::const_iterator it ) const {
       if( it < _position ) {
          vector8_t::difference_type pos = it - _position;
-         throw xml_exception( tlog_lfm_,
-                              eException::iterator_underflow,
-                              "Position: next(it), iterator underflow: " + rlf_hstring::toString( pos ) );
+         throw Xml_exception( eEx::buffer, msg_iterator_underflow + rlf_hstring::toString( pos ) );
       }
 
       // check against end() = one char after end of string
@@ -167,8 +165,8 @@ namespace txml {
       ++_position;
 
       if( _position > _rawxml.end() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::operator_plus_at_or_after_end, "Position: operator += at or after end" );
+         throw Xml_exception(
+                              eEx::buffer, msg_operator_plus_at_or_after_end );
       }
 
       next100();
@@ -179,13 +177,13 @@ namespace txml {
       auto diff = remainder();
 
       if( diff < offset ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::operator_plus_at_or_after_end, "Position: operator += at or after end" );
+         throw Xml_exception(
+                              eEx::buffer, msg_operator_plus_at_or_after_end );
       }
 
       if( _position > _rawxml.end() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::operator_plus_at_or_after_end, "Position: operator += at or after end" );
+         throw Xml_exception(
+                              eEx::buffer, msg_operator_plus_at_or_after_end );
       }
 
       _position += offset;
@@ -195,8 +193,8 @@ namespace txml {
    void raw_buffer::operator-=( int32_t i )const {
 
       if( i < _position - _rawxml.begin() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::operator_minus_at_or_after_end, "Position: operator -= at or after end" );
+         throw Xml_exception(
+                              eEx::buffer, msg_operator_minus_at_or_after_end );
       }
 
       _position -= i;

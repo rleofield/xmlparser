@@ -89,11 +89,11 @@ namespace txml {
       }
    }
 
-   string keyentry::left_bracket = "[";
-   string keyentry::right_bracket = "]";
-   string keyentry::double_colon = ":";
+   string path_element::left_bracket = "[";
+   string path_element::right_bracket = "]";
+   string path_element::double_colon = ":";
 
-   keyentry::keyentry( string const& val ): _element(), _attr(), _childcount( 0 ), _value(), _node( 0 ) {
+   path_element::path_element( string const& val ): _element(), _attr(), _childcount( 0 ), _value(), _node( 0 ) {
 
       string index;
       string element;
@@ -147,21 +147,21 @@ namespace txml {
    }
 
 
-   keyentry::keyentry():
+   path_element::path_element():
       _element(),
       _attr(),
       _childcount( 0 ),
       _value(),
       _node( nullptr ) {}
 
-   keyentry::keyentry( keyentry const& ke ):
+   path_element::path_element( path_element const& ke ):
       _element( ke._element ),
       _attr( ke._attr ),
       _childcount( ke._childcount ),
       _value( ke._value ),
       _node( ke._node ) {}
 
-   keyentry& keyentry::operator=( keyentry const& ke ) {
+   path_element& path_element::operator=( path_element const& ke ) {
       if( this != &ke ) {
          _element = ke._element;
          _attr = ke._attr;
@@ -174,7 +174,7 @@ namespace txml {
    }
 
    // compares elements only
-   bool keyentry::operator==( keyentry const& pe )const {
+   bool path_element::operator==( path_element const& pe )const {
       if( _element == pe._element ) {
          return true;
       }
@@ -182,49 +182,49 @@ namespace txml {
       return false;
    }
 
-   int keyentry::childcount()const {
+   int path_element::childcount()const {
       return _childcount;
    }
-   void keyentry::childcount( int chc ) {
+   void path_element::childcount( int chc ) {
       _childcount = chc;
    }
 
-   string keyentry::attr()const {
+   string const& path_element::attr()const {
       return _attr;
    }
-   void keyentry::attr( string const& a ) {
+   void path_element::attr( string const& a ) {
       _attr = a;
    }
-   bool keyentry::is_attr()const {
+   bool path_element::is_attr()const {
       return !_attr.empty();
    }
-   string keyentry::Value()const {
-      return _value;
-   }
-   void keyentry::Value( string const& v ) {
+//   string const& keyentry::value()const {
+//      return _value;
+//   }
+   void path_element::value( string const& v ) {
       _value = v;
    }
-   string keyentry::Element()const {
+   string path_element::Element()const {
       return _element;
    }
-   void keyentry::Element( string element ) {
+   void path_element::Element( string element ) {
       _element = element;
    }
-   xml_node const* keyentry::node()const {
+   xml_node const* path_element::node()const {
       return _node;
    }
-   xml_node* keyentry::node() {
+   xml_node* path_element::node() {
       return _node;
    }
-   void keyentry::node( xml_node* n ) {
+   void path_element::node( xml_node* n ) {
       _node = n;
    }
    // for default inserter
-   void keyentry::removeAttr() {
+   void path_element::removeAttr() {
       _attr = "";
    }
 
-   string keyentry::to_string()const {
+   string path_element::to_string()const {
       if( _childcount > 0 ) {
          string chcount = rlf_hstring::trim( rlf_hstring::toString( _childcount ) );
 
@@ -242,42 +242,42 @@ namespace txml {
       return _element + double_colon + _attr;
    }
 
-   keyentries::keyentries( string const& key ): _keyentries() {
+   path::path( string const& key ): _keyentries() {
 
       vector<string> v0 = rlf_hstring::split( key, "." );
 
       for( size_t i = 0; i < v0.size(); i++ ) {
-         keyentry ke( v0[i] );
+         path_element ke( v0[i] );
          _keyentries.push_back( ke );
       }
 
 
    }
 
-   keyentries& keyentries::operator=( string const& key ) {
+   path& path::operator=( string const& key ) {
       _keyentries.clear();
       vector<string> v0 = rlf_hstring::split( key, "." );
 
       for( size_t i = 0; i < v0.size(); i++ ) {
-         keyentry ke( v0[i] );
+         path_element ke( v0[i] );
          _keyentries.push_back( ke );
       }
 
       return *this;
    }
-   keyentries::keyentries(): _keyentries() {}
+   path::path(): _keyentries() {}
 
-   bool keyentries::operator>( keyentries const& ke )const {
+   bool path::operator>( path const& ke )const {
       return _keyentries.size() > ke._keyentries.size();
    }
 
-   bool keyentries::operator==( keyentries const& k )const {
+   bool path::operator==( path const& k )const {
       return _keyentries == k._keyentries;
    }
 
 
 
-   keyentries& keyentries::operator=( keyentries const& ke ) {
+   path& path::operator=( path const& ke ) {
       if( this != &ke ) {
          _keyentries = ke._keyentries;
       }
@@ -287,23 +287,20 @@ namespace txml {
 
 
 
-   bool keyentries::empty()const {
+   bool path::empty()const {
       return _keyentries.empty();
    }
-   //   void keyentries::add( string const& s ) {
-   //      _keyentries.push_back( keyentry( s ) );
-   //   }
-   void keyentries::addEmpty() {
-      _keyentries.push_back( keyentry() );
+   void path::addEmpty() {
+      _keyentries.push_back( path_element() );
    }
-   //   void keyentries::add( keyentry const& ke ) {
-   //      _keyentries.push_back( ke );
-   //   }
-   void keyentries::insert_front( keyentry const& ke ) {
+      void path::add( path_element const& ke ) {
+         _keyentries.push_back( ke );
+      }
+   void path::insert_front( path_element const& ke ) {
       _keyentries.insert( _keyentries.begin(),  ke );
    }
 
-   size_t keyentries::size()const {
+   size_t path::size()const {
       return _keyentries.size();
    }
 
@@ -311,12 +308,12 @@ namespace txml {
 
 
 
-   void keyentries::remove_last() {
+   void path::remove_last() {
       _keyentries.erase( _keyentries.end() - 1 );
    }
 
 
-   bool keyentries::compareByElement( keyentries const& v1 )const {
+   bool path::compareByElement( path const& v1 )const {
       if( _keyentries.size() != v1._keyentries.size() ) {
          return false;
       }
@@ -329,7 +326,7 @@ namespace txml {
 
       return true;
    }
-   bool keyentries::compareByChildCount( keyentries const& v1 ) const {
+   bool path::compareByChildCount( path const& v1 ) const {
       if( _keyentries.size() != v1._keyentries.size() ) {
          return false;
       }
@@ -346,13 +343,6 @@ namespace txml {
 
 
    namespace {
-      struct string_to_keyentry {
-         vector<keyentry> v;
-         string_to_keyentry(): v() {}
-         void operator()( string const& s ) {
-            v.push_back( keyentry( s ) );
-         }
-      };
    }
 
    namespace {
@@ -386,62 +376,58 @@ namespace txml {
       struct pattern2vstring {
          vector<string>  v;
          pattern2vstring(): v() {}
-         void operator()( keyentry const& pe ) {
-            v.push_back( pe.to_string() );
+         void operator()( path_element const& pe ) {
+            v.push_back( pe );
          }
       };
 
    }
-   string to_string( vector<keyentry> const& pev ) {
+   string to_string( vector<path_element> const& pev ) {
       vector<string> v = for_each( pev.begin(), pev.end(), pattern2vstring() ).v;
       return merge( v, "." );
 
    }
-   string  keyentries::to_string()const {
+   string  path::to_string()const {
       vector<string> vs = for_each( _keyentries.begin(), _keyentries.end(), pattern2vstring() ).v;
       return merge( vs, "." );
    }
 
 
 
-   keyentry const& keyentries::operator[]( size_t i )const {
+   path_element const& path::operator[]( size_t i )const {
       if( _keyentries.empty() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::list_is_empty, msg_list_is_empty );
+         throw Xml_exception(
+                              eEx::pathlist, msg_list_is_empty );
       }
 
       return _keyentries[i];
    }
 
-   keyentry& keyentries::operator[]( size_t i ) {
+   path_element& path::operator[]( size_t i ) {
       if( _keyentries.empty() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::list_is_empty, msg_list_is_empty );
+         throw Xml_exception( eEx::pathlist, msg_list_is_empty );
       }
 
       return _keyentries[i];
    }
 
-   keyentry const& keyentries::last()const {
+   path_element const& path::last()const {
       if( _keyentries.empty() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::list_is_empty, msg_list_is_empty );
+         throw Xml_exception( eEx::pathlist, msg_list_is_empty );
       }
 
       return _keyentries[_keyentries.size() - 1];
    }
-   keyentry& keyentries::last() {
+   path_element& path::last() {
       if( _keyentries.empty() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::list_is_empty, msg_list_is_empty );
+         throw Xml_exception( eEx::pathlist, msg_list_is_empty );
       }
 
       return _keyentries[_keyentries.size() - 1];
    }
-   xml_node const* keyentries::parentOfLast()const {
+   xml_node const* path::parentOfLast()const {
       if( _keyentries.empty() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::keylist_in_visitor_has_length_zero, msg_keylist_in_visitor_has_length_zero );
+         throw Xml_exception( eEx::visitor, msg_keylist_in_visitor_has_length_zero );
       }
 
       // parent is document
@@ -450,13 +436,21 @@ namespace txml {
          return n->parent();
       }
 
-      keyentry const& ke =   _keyentries[_keyentries.size() - 2];
+      path_element const& ke =   _keyentries[_keyentries.size() - 2];
       return  ke.node();
    }
 
 
-   void keyentries::toPatterns( string const& key ) {
+   void path::toPatterns( string const& key ) {
       vector<string> vs = rlf_hstring::split( key, "." );
+      struct string_to_keyentry {
+         vector<path_element> v;
+         string_to_keyentry(): v() {}
+         void operator()( string const& s ) {
+            v.push_back( path_element( s ) );
+         }
+      };
+
       _keyentries = for_each( vs.begin(), vs.end(), string_to_keyentry() ).v;
 
    }

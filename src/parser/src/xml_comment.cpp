@@ -55,7 +55,11 @@ www.lug-ottobrunn.de
 
 using std::string;
 
+
+
 namespace txml {
+
+
 
    void* xml_comment::operator new( size_t size, t_lfm const& lfm ) {
       return alloccheck::checked_alloc( size, lfm );
@@ -67,35 +71,31 @@ namespace txml {
 
    xml_comment* xml_comment::create( t_lfm const& lfmcIn ) {
       xml_comment* p = new( lfmcIn ) xml_comment();
-      xml_document const* doc = p->getDocument() ;
       xml_document::pointers.add( p );
       return p;
 
    }
    xml_comment* xml_comment::create( ) {
-      return create( tlog_lfm_ );
+      return create( tlfm_ );
    }
 
    void xml_comment::parse( raw_buffer& pos ) {
-      if( !pos.starts_with( comment_start ) ) { // "<!--"
-         throw xml_exception( tlog_lfm_,
-                              eException::parsing_comment,
-                              msg_parsing_comment + ": '" +
-                              pos.next25() + "'" );
+      if( !pos.starts_with( "<!--" ) ) {
+         throw Xml_exception( eEx::parse, msg_parsing_comment + ": '" + pos.next25() + "'" );
       }
 
-      string temp = pos.next_until( comment_end ); //"-->"
+      string temp = pos.next_until( "-->" );
       /*
            example:
                <!-- declarations for <head> & <body> -->
          */
-      string comment = extract( temp, comment_start, comment_end );
+      string comment = extract( temp, "<!--", "-->" );
       pos += temp.size();
       value( comment );
       return;
    }
 
-   xml_comment::xml_comment( const xml_comment& copy ) : xml_node( xml_node::eNodeType::COMMENT ) {
+   xml_comment::xml_comment( const xml_comment& copy ) : xml_node( eType::COMMENT ) {
       value( copy.value() );
    }
 
@@ -111,7 +111,7 @@ namespace txml {
    }
 
    std::string xml_comment::print()const {
-      return comment_start + value() + comment_end;
+      return "<!-- " + value() + " -->";
 
    }
 

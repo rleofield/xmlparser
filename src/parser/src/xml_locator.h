@@ -79,8 +79,8 @@ namespace txml {
          return _elementfound != nullptr;
       }
 
-      keyentries lookupkeys;
-      keyentries remainder;
+      path lookupkeys;
+      path remainder;
 
    private:
       xml_element* _elementfound;

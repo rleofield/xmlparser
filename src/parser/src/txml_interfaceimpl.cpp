@@ -83,7 +83,11 @@ namespace txml {
 
       void printKeysAndValues( string const& fn, size_t w = 60 )const;
       void printXmlGenerator( string const& fn_keys, string const& fn_out )const;
-      void create( string const& key, string const& value );
+
+      // creates a node with default value
+      // uses getAt()
+      void create( string const& key, string const& value = string() );
+
       xml_document const* document()const {
          return &_doc;
       }
@@ -91,10 +95,11 @@ namespace txml {
 
    private:
       string _filename;
+
       string root_name;
       xml_document _doc;
       bool _isparsed;
-      mutable std::vector<keyentries> collected_keys;
+      mutable std::vector<path> collected_keys;
 
       tXmlInterfaceImpl( tXmlInterfaceImpl const& );
       void operator=( tXmlInterfaceImpl const& );
@@ -102,14 +107,20 @@ namespace txml {
       void collect_element_keys( xml_node const* node )const;
       void collect_attribute_keys( xml_node const* element )const;
 
+      // gets a value from node, and/or attribute, key must be valid search string
       string getAt( string const& key )const;
+
+      // gets a value from node, and/or attribute, key must be valid search string
+      // attribute/node is created, if not present
       string getAt( string const& key, string default_ );
+
+
+      // sets a value to node, and/or attribute, key must be valid search string
       void setAt( string const& key, string const& value );
 
-      string addNotFoundNodeWithDefaultValue( xml_node* n,  keyentries remainder, string default_ );
+
+      string addNotFoundNodeWithDefaultValue( xml_node* n,  path remainder, string default_ );
       xml_node* findSmallestInsertPointForNewNode( xml_locator& p );
-
-
 
 
    };
@@ -133,8 +144,8 @@ namespace txml {
       bool loadOkay = _doc.parse_begin( l );
 
       if( !loadOkay ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::parsing_file, "Couldn't parse doc." );
+         throw Xml_exception(
+                              eEx::parse, "Couldn't parse doc." );
       }
 
       collect_element_keys( &_doc );
@@ -152,8 +163,8 @@ namespace txml {
             rlf_txtrw::t_text_read_string()( name, l );
          } catch( rlf_txtrw::bad_text_read& ex ) {
             string msg = string( "error reading XML file: " ) + ex.what();
-            throw xml_exception( tlog_lfm_,
-                                 eException::reading_file, msg );
+            throw Xml_exception(
+                                 eEx::read, msg );
          }
       }
    }
@@ -170,7 +181,7 @@ namespace txml {
    }
 
    void tXmlInterfaceImpl::parse( string const& fn ) {
-      string s = to_string( eException::document_empty ) ;
+      string s = to_string( eEx::parse ) ;
 
       if( fn.size() == 0 ) {
          return;
@@ -187,8 +198,7 @@ namespace txml {
          bool ok = _doc.parse_begin( l );
 
          if( !ok ) {
-            throw xml_exception( tlog_lfm_,
-                                 eException::parsing_file, "Couldn't parse file: '" + _filename + "'" );
+            throw Xml_exception( eEx::parse, "Couldn't parse file: '" + _filename + "'" );
          }
 
          collect_element_keys( &_doc );
@@ -200,8 +210,7 @@ namespace txml {
    string tXmlInterfaceImpl::getAt( string const& key )const {
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw xml_exception( tlog_lfm_,
-                              eException::no_parsed_document_found, msg );
+         throw Xml_exception( eEx::parse, msg );
       }
 
       xml_locator p( key );
@@ -216,7 +225,7 @@ namespace txml {
       return value;
    }
 
-   string tXmlInterfaceImpl::addNotFoundNodeWithDefaultValue( xml_node* node,  keyentries remainder, string default_ ) {
+   string tXmlInterfaceImpl::addNotFoundNodeWithDefaultValue( xml_node* node,  path remainder, string default_ ) {
 
 
       size_t size = remainder.size();
@@ -225,7 +234,7 @@ namespace txml {
 
       for( size_t i = 0; i < size; i++ ) {
 
-         keyentry key_entry = remainder[i];
+         path_element key_entry = remainder[i];
          string vs = key_entry.Element();
          xml_element* element = xml_element::create( vs );
 
@@ -256,7 +265,7 @@ namespace txml {
 
    xml_node* tXmlInterfaceImpl::findSmallestInsertPointForNewNode( xml_locator& p ) {
 
-      keyentry key_entry1 = p.lookupkeys.last();
+      path_element key_entry1 = p.lookupkeys.last();
 
       if( p.lookupkeys.size() < 2 && key_entry1.Element() != root_name ) {
          // first entry in key list is wrong == root element is not found
@@ -264,7 +273,7 @@ namespace txml {
       }
 
       while( !p.accepted() ) {
-         keyentry& key_entry = p.lookupkeys.last();
+         path_element& key_entry = p.lookupkeys.last();
 
          if( key_entry.is_attr() ) {
             key_entry.removeAttr();
@@ -272,7 +281,7 @@ namespace txml {
             _doc.accept( & p );
          } else {
             p.remainder.insert_front( p.lookupkeys.last() );
-            keyentries& kel = p.lookupkeys;
+            path& kel = p.lookupkeys;
             kel.remove_last();
             // suche 2.
             _doc.accept( & p );
@@ -290,15 +299,9 @@ namespace txml {
    }
 
    string tXmlInterfaceImpl::getAt( string const& key, string default_ ) {
-      if( default_ == "EventsGeneration" ) {
-         cout << default_ << endl;
-
-      }
-
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw xml_exception( tlog_lfm_,
-                              eException::no_parsed_document_found, msg );
+         throw Xml_exception( eEx::set, msg );
       }
 
       xml_locator locator( key );
@@ -319,16 +322,12 @@ namespace txml {
 
 
 
-      keyentry key_entry = locator.lookupkeys.last();
+      path_element key_entry = locator.lookupkeys.last();
 
       xml_node* node = findSmallestInsertPointForNewNode( locator );
 
       if( node == nullptr ) {
-         xml_exception ex( tlog_lfm_,
-                           eException::cannot_insert_root_as_default,
-                           msg_cannot_insert_root_as_default
-                           + ", missingKey = " + key );
-         throw ex;
+         throw Xml_exception( eEx::set, msg_cannot_insert_root_as_default + ", missingKey = " + key );
 
       }
 
@@ -340,14 +339,12 @@ namespace txml {
       }
 
       // rebuild internal structure
-
       rebuild();
+
       xml_locator locator2( key );
       _doc.accept( &locator2 );
       value = locator2.value();
       attr = locator2.attr();
-
-
 
       if( !attr.empty() ) {
          return attr;
@@ -396,16 +393,14 @@ namespace txml {
    void tXmlInterfaceImpl::setAt( string const& key, string const& value ) {  // key points to an element
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw xml_exception( tlog_lfm_,
-                              eException::no_parsed_document_found,  msg );
+         throw Xml_exception( eEx::set,  msg );
       }
 
       xml_locator p( key );
 
       if( p.isAttr() ) {
 
-         throw xml_exception( tlog_lfm_,
-                              eException::key_points_not_to_an_element, msg_key_points_not_to_an_element + ": '" + key + "'" );
+         throw Xml_exception( eEx::set, msg_key_points_not_to_an_element + ": '" + key + "'" );
       }
 
       _doc.accept( &p );
@@ -416,8 +411,7 @@ namespace txml {
          return;
       }
 
-      throw xml_exception( tlog_lfm_,
-                           eException::key_not_found, "key not found: '" + key + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + key + "'" );
    }
 
 
@@ -440,15 +434,13 @@ namespace txml {
    void tXmlInterfaceImpl::setAttributeAt( string const& key, string const& value ) {  // key points to an attribute
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw xml_exception( tlog_lfm_,
-                              eException::no_parsed_document_found, msg );
+         throw Xml_exception( eEx::set, msg );
       }
 
       xml_locator p( key );
 
       if( !p.isAttr() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::key_points_not_to_an_attribute, "key didn't point to an attribute: '" + key + "'" );
+         throw Xml_exception( eEx::set, "key didn't point to an attribute: '" + key + "'" );
       }
 
       _doc.accept( &p );
@@ -459,8 +451,7 @@ namespace txml {
          return;
       }
 
-      throw xml_exception( tlog_lfm_,
-                           eException::key_not_found, "key not found: '" + key + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + key + "'" );
    }
 
    void tXmlInterfaceImpl::setIntAttributeAt( string const& key, int value ) {  // key points to an attribute
@@ -475,26 +466,24 @@ namespace txml {
    void tXmlInterfaceImpl::setComment( string const& key, string const& value ) {  // key points to an element
       if( !_isparsed ) {
          string msg = "no parsed document found";
-         throw xml_exception( tlog_lfm_,
-                              eException::no_parsed_document_found, msg );
+         throw Xml_exception( eEx::set, msg );
       }
 
       // locate insert point in tree
       xml_locator p( key );
 
       if( p.isAttr() ) {
-         throw xml_exception( tlog_lfm_,
-                              eException::key_points_not_to_an_element, "key didn't point to an element: '" + key + "'" );
+         throw Xml_exception( eEx::set, "key didn't point to an element: '" + key + "'" );
       }
 
       _doc.accept( &p );
 
       if( p.accepted() ) {
          xml_element* elementfound = p.elementfound();
-         xml_comment* comment = xml_comment::create( tlog_lfm_ ) ;
+         xml_comment* comment = xml_comment::create( tlfm_ ) ;
          comment->value( value );
 
-         keyentries const& lookuppath = elementfound->lookuppath();
+         path const& lookuppath = elementfound->lookuppath();
          xml_node const* parent   = lookuppath.parentOfLast();
 
          if( parent != nullptr ) {
@@ -504,8 +493,7 @@ namespace txml {
          return;
       }
 
-      throw xml_exception( tlog_lfm_,
-                           eException::key_not_found, "key not found: '" + key + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + key + "'" );
    }
 
    void tXmlInterfaceImpl::save( string const& fn ) {
@@ -528,7 +516,7 @@ namespace txml {
       xml_element const* element = dynamic_cast<xml_element const*>( node );
 
       if( element != nullptr ) {
-         string lp = element->lookuppath().to_string();
+         string lp = element->lookuppath();
          collected_keys.push_back( element->lookuppath() );
          collect_attribute_keys( element );
       }
@@ -550,7 +538,7 @@ namespace txml {
       auto const& v = element->Attributes();
 
       for( auto const & k : v ) {
-         collected_keys.push_back( k.path );
+         collected_keys.push_back( k._path );
       }
    }
 
@@ -567,8 +555,8 @@ namespace txml {
    std::vector<string> tXmlInterfaceImpl::Keys()const {
       std::vector<string> v;
 
-      for( auto const & keyentry : collected_keys ) {
-         string temp = keyentry.to_string();
+      for( auto const & keyentries : collected_keys ) {
+         string temp = keyentries;
          v.push_back( temp );
       }
 
@@ -581,8 +569,8 @@ namespace txml {
       std::vector<string> l;
 
       for( auto const & keyentries : collected_keys ) {
-         string temp = keyentries.to_string();
-         keyentry const& pe = keyentries.last();
+         string temp = keyentries;
+         path_element const& pe = keyentries.last();
          string val = pe.toValue();
 
          if( ! val.empty() ) {
@@ -664,16 +652,16 @@ namespace txml {
       vector<string> root_attr;
       vector<lv> lines;
 
-      for( auto const & key : collected_keys ) {
+      for( auto const & keys : collected_keys ) {
 
-         string line = key.to_string();
+         string line = keys;
 
          if( root1.size() == 0 ) {
             root1 = line;
             continue;
          }
 
-         string val = key.last().toValue();
+         string val = keys.last().toValue();
          string temp_line = line;
 
          if( line.find( root1 + ":" ) != string::npos ) {
@@ -689,7 +677,7 @@ namespace txml {
 
          string txt = "  element:   ";
 
-         if( key.last().is_attr() ) {
+         if( keys.last().is_attr() ) {
             txt =     "  attribute: ";
          }
 
@@ -763,9 +751,6 @@ namespace txml {
    }
 
 
-   std::vector<string> split( string const& l, string const& pat ) {
-      return rlf_hstring::split( l, pat );
-   }
    string replace_all( string const& ins, const string& pattern, const string& replace ) {
       return rlf_hstring::replace_all( ins, pattern, replace );
    }
@@ -808,8 +793,7 @@ namespace xmlinterface {
          return boost::lexical_cast<int>( s );
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();
-         throw txml::xml_exception( tlog_lfm_,
-                                    txml::eException::bad_lexical_cast, "msg: " + msg );
+         throw txml::xml_exception( tlfm_, txml::eEx::cast, "msg: " + msg );
       }
 
    }
@@ -820,8 +804,7 @@ namespace xmlinterface {
          return b;
       } catch( boost::bad_lexical_cast& e ) {
          string msg = e.what();
-         throw txml::xml_exception( tlog_lfm_,
-                                    txml::eException::bad_lexical_cast, "string : " + s + ", msg: " + msg );
+         throw txml::xml_exception( tlfm_, txml::eEx::cast, "string : " + s + ", msg: " + msg );
       }
    }
 
@@ -968,9 +951,6 @@ namespace xmlinterface {
       return  txml::double_to_string( val );
    }
 
-   std::vector<string> split( string const& l, string const& pat ) {
-      return  txml::split( l, pat );
-   }
    string replace_all( string const& ins, const string& pattern, const string& replace ) {
       return  txml::replace_all( ins, pattern, replace );
    }

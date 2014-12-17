@@ -115,7 +115,7 @@ namespace demo {
          return;
       }
 
-      txml::xml_node::eNodeType t = pParent->type();
+      txml::xml_node::eType t = pParent->type();
       cout << getIndent( indent );
       int num;
       txml::xml_text* pText;
@@ -124,11 +124,11 @@ namespace demo {
       string temp = rlf_hstring::fillup( " ", ' ', n );
 
       switch( t ) {
-      case txml::xml_node::eNodeType::DOCUMENT:
+      case txml::xml_node::eType::DOC:
          cout << "Document";
          break;
 
-      case txml::xml_node::eNodeType::ELEMENT:
+      case txml::xml_node::eType::ELEM:
          std::cout << "Element [" <<  pParent->value() << "]";
          num = dump_attribs_to_stdout( dynamic_cast<xml_element const*>( pParent ), indent + 1 );
 
@@ -148,18 +148,18 @@ namespace demo {
 
          break;
 
-      case xml_node::eNodeType::COMMENT:
+      case xml_node::eType::COMMENT:
          cout << "Comment: [" << pParent->value() << "]";
          break;
 
-      case xml_node::eNodeType::TEXT:
+      case xml_node::eType::TEXT:
          pText = dynamic_cast<xml_text*>( const_cast<xml_node*>( pParent ) );
          v = pText->value();
          v = txml::decodeEntities( v );
          cout << "Text: [" << v << "]";
          break;
 
-      case xml_node::eNodeType::DECLARATION:
+      case xml_node::eType::DECL:
          cout << "Declaration";
          break;
 
@@ -179,15 +179,15 @@ namespace demo {
    void build_simple_doc( ) {
       // Make xml: <?xml ..><Hello>World</Hello>
       xml_document doc;
-      xml_node* decl = xml_declaration::create( tlog_lfm_ );
+      xml_node* decl = xml_declaration::create( tlfm_ );
       xml_element* element = xml_element::create( "Hello" );
-      xml_node* text = xml_text::create( tlog_lfm_, "World" );
+      xml_node* text = xml_text::create( tlfm_, "World" );
       //text->parent( &doc );
       element->link_end_child( text );
       doc.link_end_child( decl );
       doc.link_end_child( element );
       xml_element* element2 = xml_element::create( "ele2" );
-      xml_node* text2 = xml_text::create( tlog_lfm_, "World2" );
+      xml_node* text2 = xml_text::create( tlfm_, "World2" );
       element2->link_end_child( text2 );
       doc.link_end_child( element2 );
 
@@ -202,7 +202,7 @@ namespace demo {
       // as early as possible into the tree.
 
       xml_document doc;
-      xml_node* decl = xml_declaration::create( tlog_lfm_ );
+      xml_node* decl = xml_declaration::create( tlfm_ );
       //doc.linkEndChild( decl );
 
       xml_element* element = xml_element::create( "Hello" );
@@ -247,7 +247,7 @@ namespace demo {
       list<string> v;
       doc1->serialize( v );
 
-      msg = xml_element::create( tlog_lfm_, "Farewell" );
+      msg = xml_element::create( tlfm_, "Farewell" );
       msg->link_end_child( xml_text::create( "Thank you for using MyApp" ) );
       msgs->link_end_child( msg );
 
@@ -262,7 +262,7 @@ namespace demo {
       window->setAttribute( "w", "400" );
       window->setAttribute( "h", "250" );
 
-      xml_element* cxn = xml_element::create( tlog_lfm_, "Connection" );
+      xml_element* cxn = xml_element::create( tlfm_, "Connection" );
       root->link_end_child( cxn );
       cxn->setAttribute( "ip", "192.168.0.1" );
       cxn->setAttribute( "timäout", "123.456" ); // floating point attrib

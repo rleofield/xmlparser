@@ -78,11 +78,11 @@ namespace txml {
          // - Declaration: <?xml
         */
 
-   xml_node* xml_node::identify_in_doc( raw_buffer& buffer ) {
-      return identify_in_elem( buffer );
+   xml_node* xml_node::create_in_doc( raw_buffer& buffer ) {
+      return create_in_elem( buffer );
    }
 
-   xml_node* xml_node::identify_in_elem( raw_buffer& buffer ) {
+   xml_node* xml_node::create_in_elem( raw_buffer& buffer ) {
 
       buffer.skip();
 
@@ -90,18 +90,17 @@ namespace txml {
 
       if( next_open_brace != "<" ) {
          // no '<'
-         throw xml_exception( tlog_lfm_,
-                              eException::unknown_node,
+         throw Xml_exception(
+                              eEx::parse,
                               msg_unknown_node + ": " +
                               buffer.next25() );
-         //         return 0;
       }
 
       // find closing brace
       auto content = buffer.next_until( ">" ); //">"
 
       // find node type by string between < .... >
-      xml_node* n = createNode( content );
+      xml_node* n = create( content );
       n->parent( this );
       return n;
    }
@@ -116,79 +115,76 @@ namespace txml {
          }
       }
 
-   }
 
-   bool isElement( string const& s ) { // size is > 2
+
+   bool isElement( string const& s ) noexcept { // size is > 2
       if( IsAlpha( s[1] ) || s[1] == '_' || s[1] == ' ' ) {
          return true;
       }
 
       return false;
    }
-   bool isComment( string const& s ) { // size is > 2
+   bool isComment( string const& s ) noexcept { // size is > 2
       // <!-- und -->
-      if( boost::starts_with( s, comment_start )
-            && boost::ends_with( s, comment_end ) ) {
+      if( boost::starts_with( s, "<!--" )
+            && boost::ends_with( s, "-->" ) ) {
          return true;
       }
-
       return false;
    }
    bool isDeclaration( string const& s ) { // size is > 2
       // "<?xml und ?>"
-      if( boost::starts_with( s, declaration_start )
-            && boost::ends_with( s,   declaration_end ) ) {
+      if( boost::starts_with( s, "<?xml" )
+            && boost::ends_with( s,   "?>" ) ) {
          return true;
       }
 
       return false;
    }
+} // end of anon ns
 
-   xml_node* xml_node::createNode( string const& temp ) {
+   xml_node* xml_node::create( string const& temp ) {
       if( temp.size() < 2 ) { // only <> in element
-         throw xml_exception( tlog_lfm_,
-                              eException::unknown_node, msg_unknown_node + ": " + temp );
+         throw Xml_exception(
+                              eEx::parse, msg_unknown_node + ": " + temp );
          //         return 0;
       }
 
+
+
       if( isElement( temp ) ) {  // is alpha or underscore
-         xml_node* node =  xml_element::create();
+         xml_element* node =  xml_element::create();
          return node;
       }
 
       if( isComment( temp ) ) {  // <!-- und -->
-         xml_node* node = xml_comment::create();
+         xml_comment* node = xml_comment::create();
          return node;
       }
-
 
       if( isDeclaration( temp ) )  {   // "<?xml und ?>"
-         xml_node* node = xml_declaration::create( tlog_lfm_ );
+         xml_declaration* node = xml_declaration::create( tlfm_ );
          return node;
       }
 
-      throw xml_exception( tlog_lfm_,
-                           eException::unknown_node, msg_unknown_node + ": " + temp );
+      throw Xml_exception(
+                           eEx::parse, msg_unknown_node + ": " + temp );
    }
 
 
-   xml_node::xml_node( eNodeType type_ ) :
-      //acc(),
-      _lookuppath(),
+   xml_node::xml_node( eType type_ ) :
+      _path(),
       _type( type_ ),
       _nh(),
-      _parent( nullptr ),
-      _node_value(),
+      _value(),
       _rawxml() {}
 
 
-   xml_node::xml_node( eNodeType type_, string const& v ) :
-      //acc(),
-      _lookuppath(),
+   xml_node::xml_node( eType type_, string const& v ) :
+      _path(),
       _type( type_ ),
       _nh(),
-      _parent( nullptr ),
-      _node_value( v ),
+      _value( v ),
       _rawxml() {}
 
 
@@ -218,84 +214,38 @@ namespace txml {
          temp = nullptr;
       }
 
-      _nh.firstChild = nullptr;
+      _nh.first_child = nullptr;
       _nh.lastChild = nullptr;
    }
 
    const string xml_node::value() const {
-      return _node_value;
+      return _value;
    }
-   void xml_node::value( const string& _value )   {
-      _node_value = _value;
+   void xml_node::value( const string& value_ )   {
+      _value = value_;
    }
 
    const xml_node* xml_node::firstChild() const {
-      return _nh.firstChild;
+      return _nh.first_child;
    }
    xml_node* xml_node::firstChild() {
-      return _nh.firstChild;
+      return _nh.first_child;
    }
 
    string xml_node::tvalue() const {
       string t =  to_string( _type );
-      return t + ":" + _node_value;
+      return t + ":" + _value;
    }
 
-   std::string to_string( xml_node::eNodeType  _type ) {
-      if( _type == xml_node::eNodeType::DOCUMENT ) {
-         return "doc";
-      }
 
-      if( _type == xml_node::eNodeType::ELEMENT ) {
-         return "elem";
-      }
-
-      if( _type == xml_node::eNodeType::COMMENT ) {
-         return "com";
-      }
-
-      if( _type == xml_node::eNodeType::TEXT ) {
-         return "txt";
-      }
-
-      if( _type == xml_node::eNodeType::DECLARATION ) {
-         return "decl";
-      }
-
-      assert( false );
-
-   }
-
-   //vector<std::string> xml_node::acc_all ;
-
-
-   //   std::string xml_node::accs()const {
-   //      std::string s;
-
-   //      for( string a : acc ) {
-   //         s += a;
-   //      }
-
-   //      return s;
-   //   }
-   //   std::string xml_node::accs_all() {
-   //      std::string s;
-
-   //      for( string & a : acc_all ) {
-   //         s += a;
-   //      }
-
-   //      return s;
-   //   }
 
 
    xml_node* xml_node::link_end_child( xml_node* node ) {
 
       // document can't be linked
-      if( node->type() == xml_node::eNodeType::DOCUMENT ) {
+      if( node->type() == xml_node::eType::DOC ) {
          delete node; // do_delete
-         throw xml_exception( tlog_lfm_,
-                              eException::document_top_only, msg_document_top_only );
+         throw Xml_exception( eEx::link, msg_document_top_only );
       }
 
       // must have same parent or nothing
@@ -303,40 +253,17 @@ namespace txml {
       assert( node->parent() == nullptr || node_parent == this );
 
       // must have same document or nothing
-      xml_document const* node_doc = node->getDocument();
-      xml_document const* this_doc = getDocument();
+      xml_document const* node_doc = node->document();
+      xml_document const* this_doc = document();
       assert( node_doc == nullptr || node_doc == this_doc );
 
-
-//      string val  = to_string( _type );
-
-//      if( last_child() != nullptr ) {
-//         val = last_child()->tvalue();
-//      }
-
-      //string valn = node->tvalue();
-      //acc.push_back( ", a:" + val );
-      //acc_all.push_back( ", a:" + valn );
-      //LOGT_INFO( "acc_all " + accs_all() );
-      //LOGT_INFO( "acc     " + accs() );
-      //LOGT_INFO( "value   '" + node->tvalue() + "'" );
-      //LOGT_INFO( "this    '" + tvalue() + "'" );
-      //      if( parent() != nullptr )
-      //            LOGT_INFO( "parent  '" + parent()->value() + "'" );
-
-      //vector<string> vacc = acc;
-      //vector<string> vacca = acc_all;
-
-//      if( last_child() != nullptr ) {
-//         lcname = last_child()->value();
-//      }
 
       node->parent( this );
 
       if( _nh.lastChild != nullptr ) {
          _nh.lastChild->_nh.next_sibling = node;
       } else {
-         _nh.firstChild = node;   // it was an empty list.
+         _nh.first_child = node;   // it was an empty list.
       }
 
       node->_nh.prev_sibling = last_child();
@@ -371,8 +298,8 @@ namespace txml {
       if( child->_nh.prev_sibling ) {
          child->_nh.prev_sibling->_nh.next_sibling = comment;
       } else {
-         assert( _nh.firstChild == child );
-         _nh.firstChild = comment;
+         assert( _nh.first_child == child );
+         _nh.first_child = comment;
       }
 
       child->_nh.prev_sibling = comment;
@@ -432,16 +359,16 @@ namespace txml {
    }
 
 
-   xml_node::eNodeType xml_node::type() const  {
+   xml_node::eType xml_node::type() const  {
       return _type;
    }
 
    void         xml_node::parent( xml_node* p ) {
-      _parent = p;
+      _nh.parent = p;
    }
 
 
-   xml_document const* xml_node::getDocument()  {
+   xml_document const* xml_node::document()  {
       for( const xml_node* node = this; node != nullptr; node = node->parent() ) {
          xml_document const* doc =
             dynamic_cast<xml_document const*>( node ) ;

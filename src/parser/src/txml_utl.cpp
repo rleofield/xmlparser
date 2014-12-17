@@ -86,10 +86,11 @@ namespace txml {
 
    string extract( string const& s, string const& start, string const& end ) {
       if( boost::starts_with( s, start )
-            && boost::ends_with( s, end ) ) { //
-         return string( s.begin() + start.size(), s.end() - end.size() );
+            && boost::ends_with( s, end ) ) {
+         string txt ( s.begin() + start.size(), s.end() - end.size() );
+         boost::trim( txt );
+         return txt;
       }
-
       return string();
    }
 

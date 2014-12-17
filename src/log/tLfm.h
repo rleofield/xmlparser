@@ -36,40 +36,10 @@
 
 namespace rlf_tlfm {
 
-   class tLfm {
-      uint32_t _line;
-      std::string _file;
-      std::string _method;
-
-   public:
-      tLfm(): _line( 0 ), _file(), _method() {}
-
-      tLfm( uint32_t line_, std::string const& file_, std::string const& method_ )
-         : _line( line_ ), _file( file_ ), _method( method_ ) {
-      }
-      size_t line()const {
-         return _line;
-      }
-      std::string file()const {
-         return _file;
-      }
-
-      std::string method()const {
-         return _method;
-      }
-      std::string to_string()const {
-         return "File: " + file() + ", Line: " + std::to_string( line() ) + ",Method: " + method();
-      }
-
-      ~tLfm() {}
-   };
-
-   // use of parameterobject for line, file, method
-   inline tLfm Lfm( uint32_t line_, std::string const& file_, std::string const& method_ ) {
-      return tLfm( line_, file_, method_ );
-   }
 
 
+
+   // parameterobject for line, file, method
    class t_lfm {
       std::size_t _line;
       std::string _file;
@@ -101,8 +71,7 @@ namespace rlf_tlfm {
 
 }
 
-#define lfm_ Lfm( __LINE__,__FILE__,__FUNCTION__)
-#define tlog_lfm_ rlf_tlfm::tlog_lfm( __LINE__,__FILE__,__FUNCTION__)
+#define tlfm_ rlf_tlfm::tlog_lfm( __LINE__,__FILE__,__FUNCTION__)
 
 
 #endif

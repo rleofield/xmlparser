@@ -55,7 +55,7 @@ namespace txml {
    class xml_comment : public xml_node {
 
 
-      xml_comment() : xml_node( xml_node::eNodeType::COMMENT ) {}
+      xml_comment() : xml_node( eType::COMMENT ) {}
       xml_comment( const xml_comment& );
       xml_comment& operator=( const xml_comment& base );
       static void* operator new( size_t, t_lfm const& lfm );

@@ -431,13 +431,12 @@ string encodeEntities( string const& s ) {
 
    xml_text* xml_text::create( t_lfm const& lfmcIn, const string& value_ ) {
       xml_text* p = new( lfmcIn ) xml_text( value_ );
-      xml_document const* doc = p->getDocument() ;
       xml_document::pointers.add( p );
       return p;
    }
 
    xml_text* xml_text::create( const string& value_ ) {
-      return create( tlog_lfm_, value_ );
+      return create( tlfm_, value_ );
    }
 
 
@@ -447,8 +446,7 @@ string encodeEntities( string const& s ) {
    }
 
    void xml_text::parse( raw_buffer& ) {
-      throw xml_exception( tlog_lfm_,
-                           eException::parse_text, msg_parse_text );
+      throw Xml_exception( eEx::parse, msg_parse_text );
    }
 
    const string xml_text::value() const {
