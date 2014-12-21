@@ -31,16 +31,16 @@ using rlf_tlfm::t_lfm;
 namespace txml {
 
 
-   DEFINE_ENUM_WITH_STRING_CONVERSIONSnc(eEx,
-                                         (parse)
-                                          (cast)
-                                          (read)
-                                         (pathlist)
-                                         (buffer)
-                                         (visitor)
-                                         (link)
-                                         (set)
-                                         );
+   DEFINE_ENUM_WITH_STRING_CONVERSIONSnc( eEx,
+                                          ( parse )
+                                          ( cast )
+                                          ( read )
+                                          ( pathlist )
+                                          ( buffer )
+                                          ( visitor )
+                                          ( link )
+                                          ( set )
+                                        );
 
 
 

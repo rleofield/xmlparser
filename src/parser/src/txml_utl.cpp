@@ -87,10 +87,11 @@ namespace txml {
    string extract( string const& s, string const& start, string const& end ) {
       if( boost::starts_with( s, start )
             && boost::ends_with( s, end ) ) {
-         string txt ( s.begin() + start.size(), s.end() - end.size() );
+         string txt( s.begin() + start.size(), s.end() - end.size() );
          boost::trim( txt );
          return txt;
       }
+
       return string();
    }
 
@@ -108,31 +109,58 @@ namespace txml {
             return true;   // fallback to EN code, unicode is too large for checking
          }
       }
+      bool IsAlpha( uint8_t ch ) {
+         if( ch < 127 ) {
+            int b = ::isalpha( ch );
+
+            if( b ) {
+               return true;
+            }
+
+            return false;
+         } else {
+            return true;   // fallback to EN code, unicode is too large for checking
+         }
+      }
 
    }
 
    string readName( string const& temp ) {
-      string name;
-      // Names start with letters or underscores.
-      // After that, they can be letters, underscores, numbers,
-      // hyphens, or colons. (Colons are valid ony for namespaces)
-      string::const_iterator begin = temp.begin();
-      string::const_iterator end   = temp.end();
-
-      while( begin != end
-             && (
-                IsAlphaNum( ( uint8_t ) *begin )
-                || *begin == '_'
-                || *begin == '-'
-                || *begin == '.'
-                || *begin == ':'
-             )
-           ) {
-         name += *begin;
-         ++begin;
+      if( temp.size() == 0 ) {
+         return string();
       }
 
-      return name;
+      string name;
+      // names start with letters or underscores.
+      // after that, they can be letters, underscores, numbers,
+      //   hyphens, or colons. (colons are valid ony for namespaces)
+
+      auto begin = temp.begin();
+
+      // check first char
+      if( IsAlpha( ( uint8_t ) *begin ) || *begin == '_' ) {
+         name += *begin;
+         begin++;
+         // first char is letter or underscores.
+         // check next
+
+         auto end   = temp.end();
+
+         while( begin != end
+                && (
+                   IsAlphaNum( ( uint8_t ) *begin )
+                   || *begin == '_'
+                   || *begin == '-'
+                   || *begin == '.'
+                   || *begin == ':'
+                )
+              ) {
+            name += *begin;
+            ++begin;
+         }
+      }
+
+      return move( name );
    }
 
 

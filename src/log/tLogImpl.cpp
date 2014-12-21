@@ -31,9 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tLogImpl.h"
 
-#include "win32.h"
-
-
 
 
 using std::stringstream;
@@ -248,6 +245,7 @@ namespace rlf_tlog {
 
    tCat cats[9] = { _def, _rimg, _A, _B, _C, _D, _tif, _alloc };
    std::vector<tCat> tLogImpl::_cats( cats, cats + 9 );
+
    tLev levs[6] = { _DEBUG_, _INFO, _WARN, _ERROR_, _FATAL, _NONE };
    std::vector<tLev> tLogImpl::_levs( levs, levs + 6 );
 
@@ -262,7 +260,7 @@ namespace rlf_tlog {
    }
 
    string tLogImpl::to_string( eCategory cat_ ) {
-      std::vector<tCat>::const_iterator f = find( _cats.begin(), _cats.end(), cat_ );
+      auto f = find( _cats.begin(), _cats.end(), cat_ );
 
       if( f != _cats.end() ) {
          return f->name();

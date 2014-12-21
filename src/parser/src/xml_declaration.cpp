@@ -90,31 +90,35 @@ namespace txml {
       vector<string> v;
       boost::split( v, temp, boost::is_any_of( " \t\n" ) );
 
-      for( auto s : v ){
+      for( auto s : v ) {
          vector<string> a;
          boost::split( a, s, boost::is_any_of( "=" ) );
+
          if( a.size() != 2 ) {
             continue;
          }
+
          string const& s0 = a[0];
-         string & s1 = a[1];
-            if( boost::iequals( s0, attr_version ) ) {
-               boost::trim_if( s1, boost::is_any_of( "\"" ) );
-               _version = s1;
-               continue;
-            }
+         string& s1 = a[1];
 
-            if( boost::iequals( s0, attr_encoding ) ) {
-               boost::trim_if( s1, boost::is_any_of( "\"" ) );
-               _encoding = s1;
-               continue;
-            }
+         if( boost::iequals( s0, attr_version ) ) {
+            boost::trim_if( s1, boost::is_any_of( "\"" ) );
+            _version = s1;
+            continue;
+         }
 
-            if( boost::iequals( s0, attr_standalone ) ) {
-               boost::trim_if( s1, boost::is_any_of( "\"" ) );
-               _standalone = s1;
-            }
+         if( boost::iequals( s0, attr_encoding ) ) {
+            boost::trim_if( s1, boost::is_any_of( "\"" ) );
+            _encoding = s1;
+            continue;
+         }
+
+         if( boost::iequals( s0, attr_standalone ) ) {
+            boost::trim_if( s1, boost::is_any_of( "\"" ) );
+            _standalone = s1;
+         }
       }
+
       return;
    }
 
@@ -127,7 +131,8 @@ namespace txml {
 
    }
 
-   void xml_declaration::print( int , string& str ) const {
+   string xml_declaration::print( int ) const {
+      string str;
       str  += "<?xml ";
 
       if( !_version.empty() ) {
@@ -149,6 +154,7 @@ namespace txml {
       }
 
       str  += "?>";
+      return str;
    }
 
    bool xml_declaration::accept( xml_visitor* visitor ) const {

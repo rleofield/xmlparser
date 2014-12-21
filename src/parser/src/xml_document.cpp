@@ -144,7 +144,8 @@ namespace txml {
          if( node ) {
             node->_path = _path;
             node->parse( buffer );
-            if( encoding() == Encoding::UNKNOWN){
+
+            if( encoding() == Encoding::UNKNOWN ) {
                xml_declaration const* decl = dynamic_cast<xml_declaration const*>( node );
 
                if( decl != nullptr ) {
@@ -194,7 +195,7 @@ namespace txml {
       };
 
       clear();
-       raw_buffer pp( l );
+      raw_buffer pp( l );
 
       string w ;
 
@@ -235,10 +236,16 @@ namespace txml {
       return true;
    }
 
-   void xml_document::serialize( string& s ) const {
-      xml_printer p;
+   string xml_document::serialize( ) const {
+
+      string s ;
+
+      xml_printer p( "   " );
+      //p.pretty_print_off();
       this->accept( &p );
-      s = _bom + p.string_buffer();
+      s = _bom;
+      s += p.result();
+      return move( s );
    }
 
    void xml_document::serialize( list<string>& l ) const {
@@ -248,12 +255,9 @@ namespace txml {
    }
 
    void xml_document::serialize( vector<string>& v ) const {
-      string s;
-      serialize( s );
-      rlf_hstring::string_to_vector( s, v );
-
-      //      v[0] = _bom + v[0]; // add with bom
-
+      string s = serialize();
+      char trim_ch = 0;
+      rlf_hstring::string_to_vector( s, v, trim_ch );
    }
 
 
@@ -263,8 +267,9 @@ namespace txml {
       string n;
 
       if( notAccepted ) {
+         const xml_node* node = firstChild();
 
-         for( const xml_node* node = firstChild(); node != nullptr; node = node->next() ) {
+         for( ; node != nullptr; node = node->next() ) {
             notAccepted = node->accept( visitor );
             n = node->value();
 

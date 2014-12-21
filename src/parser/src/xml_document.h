@@ -76,7 +76,7 @@ namespace txml {
 
       bool parse_begin( std::string  const& );
 
-      void serialize( std::string& s ) const ;
+      std::string  serialize() const ;
       void serialize( std::list<std::string>& v ) const ;
       void serialize( std::vector<std::string>& v ) const ;
 

@@ -11,16 +11,7 @@ namespace examples {
    void set_element_attribute_values();
 
 
-   // CC
-   void CC_xml_demo();
-
-
-   // OGL demo
-   void OGL_xml_demo();
-
-   void eco_xml_demo();
-   void ls_xml_demo();
-   void ubuntu32_xml_demo();
+    void ubuntu32_xml_demo();
 
 }
 

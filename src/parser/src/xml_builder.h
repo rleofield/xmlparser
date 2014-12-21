@@ -41,13 +41,16 @@ Linux User Group Ottobrunn / München Südost (LOMSO)
 www.lug-ottobrunn.de
 */
 
+#include "xml_document.h"
+
 namespace txml {
    class xml_node;
 }
 
 namespace demo {
 
-   void xml_dump_to_stdout( txml::xml_node* pParent, unsigned int indent );
+   void node_dump( std::ostream& o, txml::xml_node const* node, unsigned int indent );
+
    void build_simple_doc( );
    void write_simple_doc2( );
    void write_app_settings_doc( );

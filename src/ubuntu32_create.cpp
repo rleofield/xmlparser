@@ -6,6 +6,8 @@
 */
 
 #include <iostream>
+#include <iomanip>
+#include <fstream>
 
 
 #include <tLog_Category_default.h>
@@ -15,6 +17,7 @@
 #include "xml_exception.h"
 
 
+#include "xml_builder.h"
 
 using namespace std;
 using namespace rlf_tlog;
@@ -82,25 +85,25 @@ namespace examples {
 
       // hier den generierten Code, 2. Teil, aus ubuntu32_keys.txt einfügen
       {
+
+
          xmlinterface::tXmlInterface instance;
          instance.parse( xmlTestOut );
-         instance.create( "domain.name", "ubuntu32" );
-         instance.create( "domain.uuid", "8aa438a7-07da-f904-6c53-96adf2c6188b" );
-         instance.create( "domain.memory", "4194304" );
-         instance.create( "domain.currentMemory", "4194304" );
-         instance.create( "domain.vcpu", "4" );
-         instance.create( "domain.os", "" );
-         instance.create( "domain.os.type", "hvm" );
-         instance.create( "domain.os.type:arch", "i686ä" );
-         instance.create( "domain.os.type:arch", "i686" );
-
-         instance.create( "domain.os.type:machine", "pc-1.0" );
-         instance.create( "domain.os.boot", "" );
-         instance.create( "domain.os.boot:dev", "hd" );
+         instance.create( "domain.name", "bbb" );
          instance.create( "domain.features", "" );
          instance.create( "domain.features.acpi", "" );
          instance.create( "domain.features.apic", "" );
          instance.create( "domain.features.pae", "" );
+         instance.create( "domain.uuid", "8aa438a7-07da-f904-6c53-96adf2c6188b" );
+         instance.create( "domain.memory", "4194304" );
+         instance.create( "domain.currentMemory", "4194304" );
+         instance.create( "domain.vcpu", "888" );
+         instance.create( "domain.os", "" );
+         instance.create( "domain.os.type", "hvm" );
+         instance.create( "domain.os.type:arch", "i686ä" );
+         instance.create( "domain.os.type:machine", "pc-1.0" );
+         instance.create( "domain.os.boot", "" );
+         instance.create( "domain.os.boot:dev", "hd" );
          instance.create( "domain.clock", "" );
          instance.create( "domain.clock:offset", "set_element_attribute_values(), test, new test clock, seond try" );
          instance.create( "domain.on_poweroff", "destroy" );
@@ -204,14 +207,22 @@ namespace examples {
          instance.create( "domain.devices.memballoon.address:slot", "0x06" );
          instance.create( "domain.devices.memballoon.address:function", "0x0" );
          instance.save();
+         txml::xml_node const* n =  instance.document();
+
+         std::ofstream fp( "ubuntu32_dump.txt", std::ios_base::app );
+
+         if( fp.bad() ) {
+            string s = "logfile: ";// + _file + " not found." ;
+            std::cout << s << std::endl;
+            return ;
+         }
+
+         demo::node_dump( fp, instance.document(), 2 );
+
 
       }
       LOGT_INFO( "" );
    }
-
-
-
-
 
 } // end of ns examples
 

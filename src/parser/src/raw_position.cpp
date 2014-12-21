@@ -65,22 +65,22 @@ namespace txml {
       _next = "";
    }
    void raw_buffer::next100( int2type<true> )const {
-      vector8_t::const_iterator istart = _position;
-      vector8_t::const_iterator iend = _position;
+      auto start = _position;
+      auto iend = _position;
 
-      while( iend < _rawxml.end() && ( iend - istart ) < 100 ) {
+      while( iend < _rawxml.end() && ( iend - start ) < 100 ) {
          iend++;
       }
 
-      _next.assign( istart, iend );
+      _next.assign( start, iend );
    }
    string raw_buffer::next25()const {
       return next25( int2type<useNext100>() );
    }
 
    string raw_buffer::next25( int2type<true> )const {
-      vector8_t::const_iterator istart = _position;
-      vector8_t::const_iterator iend = _position;
+      auto istart = _position;
+      auto iend = _position;
 
       while( iend < _rawxml.end() && ( iend - istart ) < 25 ) {
          iend++;
@@ -152,7 +152,7 @@ namespace txml {
    }
 
    std::string raw_buffer::next_until( std::string const& s )const {
-      vector8_t::const_iterator vi = find( s );
+      auto vi = find( s );
 
       if( vi == end() ) {
          return std::string();
@@ -166,7 +166,7 @@ namespace txml {
 
       if( _position > _rawxml.end() ) {
          throw Xml_exception(
-                              eEx::buffer, msg_operator_plus_at_or_after_end );
+            eEx::buffer, msg_operator_plus_at_or_after_end );
       }
 
       next100();
@@ -178,12 +178,12 @@ namespace txml {
 
       if( diff < offset ) {
          throw Xml_exception(
-                              eEx::buffer, msg_operator_plus_at_or_after_end );
+            eEx::buffer, msg_operator_plus_at_or_after_end );
       }
 
       if( _position > _rawxml.end() ) {
          throw Xml_exception(
-                              eEx::buffer, msg_operator_plus_at_or_after_end );
+            eEx::buffer, msg_operator_plus_at_or_after_end );
       }
 
       _position += offset;
@@ -194,7 +194,7 @@ namespace txml {
 
       if( i < _position - _rawxml.begin() ) {
          throw Xml_exception(
-                              eEx::buffer, msg_operator_minus_at_or_after_end );
+            eEx::buffer, msg_operator_minus_at_or_after_end );
       }
 
       _position -= i;
@@ -211,15 +211,15 @@ namespace txml {
       return _position;
    }
 
-     size_t raw_buffer::size()const {
+   size_t raw_buffer::size()const {
       return _rawxml.size();
    }
    vector8_t::const_iterator raw_buffer::find( int8_t ch )const {
-      vector8_t::const_iterator i = std::find( _position, _rawxml.end(), ch );
+      auto i = std::find( _position, _rawxml.end(), ch );
       return i ;
    }
    vector8_t::const_iterator raw_buffer::find( string const& s )const {
-      vector8_t::const_iterator i = search( _position, _rawxml.end(), s.begin(), s.end() );
+      auto i = search( _position, _rawxml.end(), s.begin(), s.end() );
       return i;
    }
 

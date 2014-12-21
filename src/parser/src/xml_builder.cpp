@@ -80,29 +80,29 @@ namespace demo {
       }
 
 
-      int dump_attribs_to_stdout( txml::xml_element const* pElement, unsigned int indent ) {
-         if( !pElement ) {
+      int dump_attribs_to_stdout( std::ostream& o, txml::xml_element const* node, unsigned int indent ) {
+         if( !node ) {
             return 0;
          }
 
-         vector<xml_attribute> const& v = pElement->Attributes();
+         vector<xml_attribute> const& v = node->Attributes();
          vector<xml_attribute>::const_iterator begin = v.begin();
          vector<xml_attribute>::const_iterator end = v.end();
 
-         int count = static_cast<int>( end - begin );
-         string pIndent = getIndent( indent );
-         cout << endl;
+         string s_indent = getIndent( indent );
+         o << std::endl;
 
          while( begin != end ) {
-            cout << pIndent << begin->name() << ": value=[" <<  begin->value() << "]";
-            cout << " int=" << xmlinterface::to_int( begin->value() );
-            cout << " d=";
-            cout << fixed;
-            cout << setprecision( 1 ) << xmlinterface::to_double( begin->value() ) << endl;
-            cout << endl;
+            o << s_indent << begin->name() << ": value=[" <<  begin->value() << "]";
+            o << " int=" << begin->value();
+            o << " d=";
+            o << fixed;
+            o << setprecision( 1 ) << begin->value() << endl;
+            o << endl;
             ++begin;
          }
 
+         int count = static_cast<int>( v.size() );
          return count;
       }
 
@@ -110,14 +110,14 @@ namespace demo {
 
 
    // writes simple readable format of to cout (no xml)
-   void xml_dump_to_stdout( txml::xml_node const* pParent, unsigned int indent ) {
-      if( !pParent ) {
+   void node_dump( std::ostream& o, txml::xml_node const* node, unsigned int indent ) {
+      if( node == nullptr ) {
          return;
       }
 
-      txml::xml_node::eType t = pParent->type();
-      cout << getIndent( indent );
-      int num;
+      xml_node::eType t = node->type();
+      o << getIndent( indent );
+
       txml::xml_text* pText;
       string v;
       size_t n = indent * NUM_INDENTS_PER_SPACE;
@@ -125,53 +125,55 @@ namespace demo {
 
       switch( t ) {
       case txml::xml_node::eType::DOC:
-         cout << "Document";
+         o << "Document";
          break;
 
-      case txml::xml_node::eType::ELEM:
-         std::cout << "Element [" <<  pParent->value() << "]";
-         num = dump_attribs_to_stdout( dynamic_cast<xml_element const*>( pParent ), indent + 1 );
+      case txml::xml_node::eType::ELEM: {
+         o << "Element [" <<  node->value() << "]";
+         vector<xml_attribute> const& v1 = dynamic_cast<xml_element const*>( node )->Attributes();
+         int s = v1.size();
+         int num = dump_attribs_to_stdout( o, dynamic_cast<xml_element const*>( node ), indent + 1 );
 
          switch( num ) {
          case 0:
-            cout << " (No attributes)" ;
+            o << " (No attributes)" ;
             break;
 
          case 1:
-            cout << temp << "1 attribute";
+            o << temp << "1 attribute";
             break;
 
          default:
-            cout << temp << num <<  " attributes";
+            o << temp << num <<  " attributes";
             break;
          }
-
-         break;
+      }
+      break;
 
       case xml_node::eType::COMMENT:
-         cout << "Comment: [" << pParent->value() << "]";
+         o << "Comment: [" << node->value() << "]";
          break;
 
       case xml_node::eType::TEXT:
-         pText = dynamic_cast<xml_text*>( const_cast<xml_node*>( pParent ) );
+         pText = dynamic_cast<xml_text*>( const_cast<xml_node*>( node ) );
          v = pText->value();
          v = txml::decodeEntities( v );
-         cout << "Text: [" << v << "]";
+         o << "Text: [" << v << "]";
          break;
 
       case xml_node::eType::DECL:
-         cout << "Declaration";
+         o << "Declaration";
          break;
 
       default:
          break;
       }
 
-      cout << endl;
+      o << endl;
       xml_node const* pChild;
 
-      for( pChild = pParent->firstChild(); pChild != 0; pChild = pChild->next() ) {
-         xml_dump_to_stdout( pChild, indent + 1 );
+      for( pChild = node->firstChild(); pChild != 0; pChild = pChild->next() ) {
+         node_dump( o, pChild, indent + 1 );
       }
    }
 
@@ -256,18 +258,17 @@ namespace demo {
 
       xml_element* window = xml_element::create( "Window" );
       windows->link_end_child( window );
-      window->setAttribute( "name", "MainFrame" );
-      window->setAttribute( "x", "5" );
-      window->setAttribute( "y", "15" );
-      window->setAttribute( "w", "400" );
-      window->setAttribute( "h", "250" );
+      window->attribute( "name", "MainFrame" );
+      window->attribute( "x", "5" );
+      window->attribute( "y", "15" );
+      window->attribute( "w", "400" );
+      window->attribute( "h", "250" );
 
       xml_element* cxn = xml_element::create( tlfm_, "Connection" );
       root->link_end_child( cxn );
-      cxn->setAttribute( "ip", "192.168.0.1" );
-      cxn->setAttribute( "timäout", "123.456" ); // floating point attrib
+      cxn->attribute( "ip", "192.168.0.1" );
+      cxn->attribute( "timäout", "123.456" ); // floating point attrib
 
-      //xmlinterface::tXmlInterface t;
 
       t.rebuild( doc );
       t.save( "appsettings_old.xml" );

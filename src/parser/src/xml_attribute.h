@@ -66,8 +66,9 @@ namespace txml {
       xml_attribute& operator=( const xml_attribute& attr ) {
          if( this != &attr ) {
             this->~xml_attribute();
-            new (this) xml_attribute(attr);
+            new( this ) xml_attribute( attr );
          }
+
          return *this;
       }
 
@@ -95,9 +96,9 @@ namespace txml {
          return _name > a._name;
       }
 
-      void parse( raw_buffer&  );
+      void parse( raw_buffer& );
 
-      void print( std::string& str ) const;
+      std::string print() const;
 
 
       path _path;

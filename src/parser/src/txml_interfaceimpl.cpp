@@ -138,14 +138,13 @@ namespace txml {
    void tXmlInterfaceImpl::rebuild( xml_document const& doc ) {
 
       _isparsed = false;
-      string l;
-      doc.serialize( l );
+      string l = doc.serialize();
       collected_keys.clear();
       bool loadOkay = _doc.parse_begin( l );
 
       if( !loadOkay ) {
          throw Xml_exception(
-                              eEx::parse, "Couldn't parse doc." );
+            eEx::parse, "Couldn't parse doc." );
       }
 
       collect_element_keys( &_doc );
@@ -164,7 +163,7 @@ namespace txml {
          } catch( rlf_txtrw::bad_text_read& ex ) {
             string msg = string( "error reading XML file: " ) + ex.what();
             throw Xml_exception(
-                                 eEx::read, msg );
+               eEx::read, msg );
          }
       }
    }
@@ -333,7 +332,7 @@ namespace txml {
 
       if( key_entry.is_attr() ) {
          xml_element* elem = dynamic_cast<xml_element*>( node );
-         elem->setAttribute( key_entry.attr(), default_ );
+         elem->attribute( key_entry.attr(), default_ );
       } else {
          v = addNotFoundNodeWithDefaultValue( node, locator.remainder, default_ );
       }
@@ -407,7 +406,7 @@ namespace txml {
 
       if( p.accepted() ) {
          xml_element* e = p.elementfound();
-         e->setText( value );
+         e->text( value );
          return;
       }
 

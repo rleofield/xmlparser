@@ -89,7 +89,7 @@ namespace txml {
       }
 
       void to_upper_in_place( string& s ) {
-         string::iterator start = s.begin();
+         auto start = s.begin();
 
          while( start != s.end() ) {
             *start = ( char )::toupper( *start );

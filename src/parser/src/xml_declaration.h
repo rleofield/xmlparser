@@ -93,8 +93,9 @@ namespace txml {
       }
 
       virtual void parse( raw_buffer& pos );
-      virtual void print( int depth, std::string& str ) const;
       virtual bool accept( xml_visitor* visitor ) const;
+
+      std::string  print( int depth ) const;
 
    protected:
       //void copy( xml_declaration& target ) const;

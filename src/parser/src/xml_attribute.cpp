@@ -96,37 +96,38 @@ namespace txml {
             ++i;
          }
 
-         return temp;
+         return move( temp );
       }
-namespace{
-      class selectInQuotes {
-         raw_buffer& _pos;
-         string _value;
+      namespace {
+         class selectInQuotes {
+            raw_buffer& _pos;
+            string _value;
 
-      public:
-         selectInQuotes( raw_buffer& pos ) : _pos( pos ), _value() {}
+         public:
+            selectInQuotes( raw_buffer& pos ) : _pos( pos ), _value() {}
 
-         void operator()( string const& quote ) {
-            size_t pos = _pos.position();
-            if( quote.empty() || pos >= _pos.size() ) {
-               return;
+            void operator()( string const& quote ) {
+               size_t pos = _pos.position();
+
+               if( quote.empty() || pos >= _pos.size() ) {
+                  return;
+               }
+
+               if( _pos.value() != quote[0] ) {
+                  return;
+               }
+
+               ++_pos; // skip quote
+               auto const& p = _pos.next( _pos.find( quote ) );
+               _pos += p.size();
+               ++_pos; // skip quote
+               _value = readText( p );
             }
-
-            if( _pos.value() != quote[0] ) {
-               return;
+            string const& value()const {
+               return _value;
             }
-
-            ++_pos; // skip quote
-            auto const& p = _pos.next( _pos.find( quote ) );
-            _pos += p.size();
-            ++_pos; // skip quote
-            _value = readText( p );
-         }
-         string const& value()const {
-            return _value;
-         }
-      };
-   }
+         };
+      }
    } // end of anon ns
 
 
@@ -134,7 +135,7 @@ namespace{
    void xml_attribute::parse( raw_buffer& pos ) {
 
       try {
-         vector8_t::const_iterator i = pos.find( '=' );
+         auto i = pos.find( '=' );
 
          // Read the name, the '=' and the value.
          string temp = pos.next( i );
@@ -164,22 +165,26 @@ namespace{
 
 
 
-   void xml_attribute::print( string& str ) const {
-
+   string  xml_attribute::print() const {
       string n = encode( _name );
       string v = encode( _value );
 
       if( _value.find( '\"' ) == string::npos ) {
+         string str;
          str += n;
          str += "=\"";
          str += v;
          str += "\"";
-      } else {
-         str += n;
-         str += "='";
-         str += v;
-         str += "'";
+         return move( str );
       }
+
+      string str;
+      str += n;
+      str += "='";
+      str += v;
+      str += "'";
+
+      return  move( str );
    }
 
 

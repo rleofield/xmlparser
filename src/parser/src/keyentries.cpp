@@ -74,17 +74,13 @@ namespace txml {
             return false;
          }
 
-         string::const_iterator bb = str.begin();
-         string::const_iterator ee = str.end();
-
-         while( bb != ee ) {
-            if( !isdigit( *bb ) ) {
+         for( auto ch : str ) {
+            if( !isdigit( ch ) ) {
                return false;
             }
-
-            ++bb;
          }
 
+         // has only digits
          return true;
       }
    }
@@ -198,9 +194,9 @@ namespace txml {
    bool path_element::is_attr()const {
       return !_attr.empty();
    }
-//   string const& keyentry::value()const {
-//      return _value;
-//   }
+   //   string const& keyentry::value()const {
+   //      return _value;
+   //   }
    void path_element::value( string const& v ) {
       _value = v;
    }
@@ -293,9 +289,9 @@ namespace txml {
    void path::addEmpty() {
       _keyentries.push_back( path_element() );
    }
-      void path::add( path_element const& ke ) {
-         _keyentries.push_back( ke );
-      }
+   void path::add( path_element const& ke ) {
+      _keyentries.push_back( ke );
+   }
    void path::insert_front( path_element const& ke ) {
       _keyentries.insert( _keyentries.begin(),  ke );
    }
@@ -397,7 +393,7 @@ namespace txml {
    path_element const& path::operator[]( size_t i )const {
       if( _keyentries.empty() ) {
          throw Xml_exception(
-                              eEx::pathlist, msg_list_is_empty );
+            eEx::pathlist, msg_list_is_empty );
       }
 
       return _keyentries[i];

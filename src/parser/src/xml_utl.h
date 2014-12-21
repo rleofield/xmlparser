@@ -69,18 +69,18 @@ namespace txml {
    };
 
 
-//   const std::string comment_start = "<!--";
-//   const std::string comment_end = "-->";
+   //   const std::string comment_start = "<!--";
+   //   const std::string comment_end = "-->";
 
-//   const std::string declaration_start = "<?xml";
-//   const std::string declaration_end =  "?>";
+   //   const std::string declaration_start = "<?xml";
+   //   const std::string declaration_end =  "?>";
 
-//   const std::string element_start = "<";
-//   const std::string element_end =  ">";
-//   const std::string element_close =  "/>";
+   //   const std::string element_start = "<";
+   //   const std::string element_end =  ">";
+   //   const std::string element_close =  "/>";
 
-//   const std::string element_exit_start =  "</";
-//   const std::string element_exit_end =  element_end;
+   //   const std::string element_exit_start =  "</";
+   //   const std::string element_exit_end =  element_end;
 
    const std::string SINGLE_QUOTE = "\'";
    const std::string DOUBLE_QUOTE = "\"";

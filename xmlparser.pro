@@ -65,10 +65,6 @@ SOURCES += src/main.cpp \
     src/log/tLog.cpp \
     src/demo.cpp \
     src/ubuntu32_create.cpp \
-    src/CC_create.cpp \
-    src/eco_create.cpp \
-    src/ls_create.cpp \
-    src/OGL_create.cpp \
     src/other_demo.cpp \
     src/log/alloccheck.cpp
 
@@ -102,10 +98,6 @@ HEADERS += \
     src/log/tLogCategories.h \
     src/log/tLog.h \
     src/log/tLog_Category_default.h \
-    src/log/tLog_Category_D.h \
-    src/log/tLog_Category_C.h \
-    src/log/tLog_Category_B.h \
-    src/log/tLog_Category_A.h \
     src/log/tLfmCL.h \
     src/log/tLfm.h \
     src/txtrw/wList.h \

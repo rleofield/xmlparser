@@ -43,10 +43,12 @@ www.lug-ottobrunn.de
 #define RLF_PRINTER_H
 
 #include <string>
+#include <sstream>
+
 #include <list>
 
 #include "xml_visitor.h"
-
+#include "tLog_Category_default.h"
 
 
 
@@ -64,7 +66,7 @@ namespace txml {
     */
    class xml_printer : public xml_visitor {
    public:
-      xml_printer( std::string const& t = tab ) : _depth( 0 ), simpleTextPrint( false ),
+      xml_printer( std::string const& t = tab ) : _depth( 0 ), _element_text_prints_inline( false ),
          _buffer(), _indent( t ), _lineBreak( "\n" ) {}
 
 
@@ -75,42 +77,24 @@ namespace txml {
       virtual bool visit( const xml_text& text );
       virtual bool visit( const xml_comment& comment );
 
-      void SetIndent( std::string const& indent_ )         {
-         _indent = indent_;
-      }
-      std::string const& Indent()  const    {
-         return _indent;
-      }
-      void SetLineBreak( std::string const& lineBreak_ )     {
-         _lineBreak = lineBreak_;
-      }
-      std::string const& LineBreak()        const          {
-         return _lineBreak;
-      }
-
-      void SetStreamPrinting()                  {
+      void pretty_print_off() {
          _indent = "";
          _lineBreak = "";
       }
-      size_t Size()                          {
-         return _buffer.size();
-      }
 
-      const std::string& string_buffer()                  {
-         return _buffer;
+      const std::string result() const   {
+         //std::string t = _buffer.str();
+         return move( _buffer.str() );
       }
 
 
    private:
-      void indent()   {
-         for( int i = 0; i < _depth; ++i ) {
-            _buffer += _indent;
-         }
-      }
+      std::string indent() const;
+
 
       int _depth;
-      bool simpleTextPrint;
-      std::string _buffer;
+      bool _element_text_prints_inline;
+      std::ostringstream _buffer;
       std::string _indent;
       std::string _lineBreak;
    };

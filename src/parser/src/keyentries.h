@@ -34,7 +34,7 @@ namespace txml {
    // path_elements for search in xml doc
    // contains element names and attributename
    class path_element {
-         std::string to_string()const;
+      std::string to_string()const;
 
    public:
       path_element();
@@ -88,7 +88,7 @@ namespace txml {
       std::string  to_string()const;
    public:
       path();
-      path( std::string const& key );
+      explicit path( std::string const& key );
       bool operator>( path const& ke )const;
       bool operator==( path const& k )const;
       path& operator=( std::string const& key );

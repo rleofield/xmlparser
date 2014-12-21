@@ -75,24 +75,15 @@ namespace txml {
       virtual ~xml_element();
 
       std::string attribute( const std::string& name ) const;
-      std::string attributeByKey( const std::string& key ) const;
-      std::vector<xml_attribute>::const_iterator AttributeObj( const std::string& name ) const;
+      std::string attribute_by_path( const path& key ) const;
       std::vector<xml_attribute> const& Attributes() const;
 
-      void setAttribute( const std::string& name, const std::string& _value );
-      void removeAttribute( const std::string& name ) ;
+      // change or set an attribute
+      void attribute( const std::string& name, const std::string& _value );
 
-      std::vector<xml_attribute>::const_iterator firstAttribute() const;
-      std::vector<xml_attribute>::iterator firstAttribute();
+      const std::string unencoded_text() const;
+      void text( std::string const& s );
 
-      std::vector<xml_attribute>::const_iterator lastAttribute()const;
-      std::vector<xml_attribute>::iterator lastAttribute();
-
-      const std::string getText() const;
-      void setText( std::string const& s );
-
-
-      //virtual xml_node* clone() const;
 
       virtual void parse( raw_buffer& pos );
       virtual bool accept( xml_visitor* visitor ) const;

@@ -90,10 +90,11 @@ namespace txml {
 
 
       bool isEmptyTextNode( string const& s )  {
-         for( unsigned i = 0; i < s.size(); i++ )
-            if( !char_is_white_space( s[i] ) ) {
+         for( auto ch : s ) {
+            if( !char_is_white_space( ch ) ) {
                return false;
             }
+         }
 
          return true;
       }
@@ -133,33 +134,12 @@ namespace txml {
       }
    }
 
-
-
-   class keycompare {
-      string _key;
-   public:
-      keycompare( string const& name ): _key( name ) {}
-      bool operator()( xml_attribute const& a )const {
-         if( a._path == _key ) {
-            return true;
-         }
-
-         return false;
-      }
-   };
-
-   class namecompare {
-      string _name;
-   public:
-      namecompare( string const& name ): _name( name ) {}
-      bool operator()( xml_attribute const& a )const {
-         return a.name() == _name;
-      }
-   };
-
    string xml_element::attribute( const string& name ) const {
 
-      vector<xml_attribute>::const_iterator v = find_if( _attributes.begin(), _attributes.end(), namecompare( name ) );
+      auto v = find_if( _attributes.begin(), _attributes.end(),
+      [&name]( xml_attribute const & a ) {
+         return a.name() == name;
+      } );
 
       if( v != _attributes.end() ) {
          return v->value();
@@ -167,8 +147,11 @@ namespace txml {
 
       return string();
    }
-   string xml_element::attributeByKey( const string& name ) const {
-      vector<xml_attribute>::const_iterator v = find_if( _attributes.begin(), _attributes.end(), keycompare( name ) );
+   string xml_element::attribute_by_path( const path& n ) const {
+      auto v = find_if( _attributes.begin(), _attributes.end(),
+      [&]( xml_attribute const & a ) {
+         return a._path == n;
+      } );
 
       if( v != _attributes.end() ) {
          return v->value();
@@ -176,18 +159,17 @@ namespace txml {
 
       return string();
    }
-   vector<xml_attribute>::const_iterator xml_element::AttributeObj( const string& name ) const {
-      vector<xml_attribute>::const_iterator v = find_if( _attributes.begin(), _attributes.end(), namecompare( name ) );
-      return v;
-   }
 
 
-   void xml_element::setAttribute( const string& name, const string& val ) {
-      vector<xml_attribute>::iterator v = find_if( _attributes.begin(), _attributes.end(), namecompare( name ) );
+
+   void xml_element::attribute( const string& name, const string& val ) {
+      auto v = find_if( _attributes.begin(), _attributes.end(),
+      [&name]( xml_attribute const & a ) {
+         return a.name() == name;
+      } );
 
       if( v == _attributes.end() ) {
-         xml_attribute attrib = xml_attribute( name, val );
-         _attributes.push_back( attrib );
+         _attributes.push_back( xml_attribute( name, val ) );
       } else {
          v->value( val );
       }
@@ -220,7 +202,8 @@ namespace txml {
 
 
 
-   const string xml_element::getText() const {
+   // text is first child
+   const string xml_element::unencoded_text() const {
       const xml_node* child = this->firstChild();
 
       if( child ) {
@@ -235,7 +218,7 @@ namespace txml {
       return string();
    }
 
-   void xml_element::setText( string const& s )  {
+   void xml_element::text( string const& s )  {
       xml_node* child = this->firstChild();
 
       if( child ) {
@@ -253,7 +236,7 @@ namespace txml {
       string val;
 
       if( n != nullptr ) {
-         val =  n->getText();
+         val =  n->unencoded_text();
          string a = attr();
 
          if( !a.empty() ) {
@@ -266,15 +249,15 @@ namespace txml {
 
    void xml_element::parse( raw_buffer& pos ) {
 
-       pos.skip();
+      pos.skip();
 
       if( pos.is_end() ) {
          throw Xml_exception(
-                              eEx::parse, msg_parsing_element + ", unexpected end reached" );
+            eEx::parse, msg_parsing_element + ", unexpected end reached" );
       }
 
 
-      vector8_t::const_iterator vi = pos.find( string( ">" ) ); // ">"
+      auto vi = pos.find( string( ">" ) ); // ">"
 
       // get element name + attributes
       string temp = pos.next( vi + 1 ); // skip >
@@ -292,7 +275,7 @@ namespace txml {
 
       if( inner.empty() ) {
          throw Xml_exception(
-                              eEx::parse, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
+            eEx::parse, msg_failed_to_read_element_name +  " at: '" + temp + "'" );
       }
 
       // look for start tag, shouldn't be here
@@ -300,13 +283,13 @@ namespace txml {
 
       if( si != string::npos ) {
          throw Xml_exception(
-                              eEx::parse,
-                              msg_failed_to_read_element_closing_tag +  " at: '" + temp + "'" );
+            eEx::parse,
+            msg_failed_to_read_element_closing_tag +  " at: '" + temp + "'" );
       }
 
       //  read name and attributes
       _value = readName( inner );
-      LOGT_DEBUG( _value );
+      //LOGT_DEBUG( _value );
 
       string lp = _path;
 
@@ -314,8 +297,8 @@ namespace txml {
 
       if( pos.is_end() && !isclosed_Element ) {
          throw Xml_exception(
-                              eEx::parse,
-                              msg_failed_to_read_element_name +  " at: '" + pos.next25() + "'" );
+            eEx::parse,
+            msg_failed_to_read_element_name +  " at: '" + pos.next25() + "'" );
       }
 
       path_element ke;
@@ -371,8 +354,8 @@ namespace txml {
 
             // parse attributes
             // txt contains _node_value or attributes
-            string::const_iterator begin = attributepart.begin();
-            string::const_iterator end   = attributepart.end();
+            auto begin = attributepart.begin();
+            auto end   = attributepart.end();
             vector8_t vectorattributes( begin, end );
             rawattributes = vectorattributes;
             // result must be empty or contains the last '/' after attributes
@@ -396,10 +379,10 @@ namespace txml {
                // if at '<' then is element value
                if( txt1 != string( "<" ) ) { // not at '<'
                   xml_text* textNode = xml_text::create( tlfm_ ) ;
-                  string text = pos.next( pos.find( string( "<" ) ) );
-                  pos += text.size();
+                  string text1 = pos.next( pos.find( string( "<" ) ) );
+                  pos += text1.size();
                   ++pos;
-                  textNode->parseText( text );
+                  textNode->parseText( text1 );
 
                   if( isEmptyTextNode( textNode->value() ) ) {
                      delete textNode; // do_delete
@@ -423,7 +406,7 @@ namespace txml {
 
                   if( node == 0 ) {
                      throw Xml_exception(
-                                          eEx::parse, msg_unknown_node + ": " + pos.next( 10 ) );
+                        eEx::parse, msg_unknown_node + ": " + pos.next( 10 ) );
                   }
 
                   if( node ) {
@@ -470,28 +453,6 @@ namespace txml {
 
    std::vector<xml_attribute> const& xml_element::Attributes() const {
       return _attributes;
-   }
-
-   vector<xml_attribute>::const_iterator xml_element::firstAttribute() const {
-      return _attributes.begin();
-   }
-   vector<xml_attribute>::iterator xml_element::firstAttribute()             {
-      return _attributes.begin();
-   }
-
-   vector<xml_attribute>::const_iterator xml_element::lastAttribute()  const {
-      if( _attributes.empty() ) {
-         return _attributes.begin();
-      }
-
-      return _attributes.end() - 1 ;
-   }
-   vector<xml_attribute>::iterator xml_element::lastAttribute()              {
-      if( _attributes.size() == 0 ) {
-         return _attributes.begin();
-      }
-
-      return _attributes.end() - 1 ;
    }
 
 

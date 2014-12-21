@@ -49,7 +49,7 @@ www.lug-ottobrunn.de
 #include "xml_element.h"
 #include "xml_exception.h"
 #include "stringhelper.h"
-
+#include "tLog_Category_default.h"
 
 using namespace std;
 
@@ -61,32 +61,38 @@ namespace txml {
 
 
    bool xml_printer::enter( const xml_element& element ) {
-      indent();
-      _buffer += "<";
-      _buffer += element.value();
-      std::vector<xml_attribute> v = element.Attributes();
+      string val = element.value();
 
-      for( vector<xml_attribute>::const_iterator attrib = v.begin(); attrib != v.end(); ++attrib ) {
-         _buffer += " ";
-         attrib->print( _buffer );
+      _buffer << indent();
+      _buffer << "<";
+      _buffer << element.value();
+
+      for( auto & a :   element.Attributes() ) {
+         _buffer << " ";
+         _buffer <<  a.print( );
       }
 
-      if( !element.firstChild() ) {
-         _buffer += string(" ") + ">";
-         _buffer += _lineBreak;
+      xml_node const* ch = element.firstChild();
+
+      if( ch == nullptr ) {
+         _buffer << string( " " ) + "/>"; // closed element, no childs
+         _buffer << _lineBreak;
       } else {
-         _buffer += ">";
+         _buffer << ">"; // element end
          xml_text const* text = dynamic_cast<xml_text const*>( element.firstChild() );
+
+         bool b = element.last_child() == element.firstChild();
 
          if( text != nullptr && element.last_child() == element.firstChild()
            ) {
-            simpleTextPrint = true;
-            // no DoLineBreak()!
+            _element_text_prints_inline = true;
+            // no _lineBreak
          } else {
-            _buffer += _lineBreak;
+            _buffer << _lineBreak;
          }
       }
 
+      // LOGT_DEBUG( _buffer );
       ++_depth;
       return true;
    }
@@ -95,19 +101,26 @@ namespace txml {
    bool xml_printer::exit( const xml_element& element ) {
       --_depth;
 
-      if( !element.firstChild() ) {
-         // nothing.
+      xml_node const* ch = element.firstChild();
+
+      if( ch == nullptr ) {
+         return true;
       } else {
-         if( simpleTextPrint ) {
-            simpleTextPrint = false;
+         if( _element_text_prints_inline ) {
+            _element_text_prints_inline = false;
          } else {
-            indent();
+            _buffer << indent();
+
          }
 
-         _buffer += "</";
-         _buffer += element.value();
-         _buffer += ">";
-         _buffer += _lineBreak;
+         std::string t = _buffer.str();
+         LOGT_DEBUG( t );
+
+         _buffer << "</";
+         string v = element.value();
+         _buffer << v;
+         _buffer << ">";
+         _buffer << _lineBreak;
       }
 
       return true;
@@ -115,31 +128,45 @@ namespace txml {
 
 
    bool xml_printer::visit( const xml_text& text ) {
-      if( simpleTextPrint ) {
-         _buffer += text.value();
+      if( _element_text_prints_inline ) {
+         _buffer << text.value();
          return true;
       }
 
-      indent();
-      _buffer += ( text.value() + _lineBreak );
+      _buffer << indent();
+      string v = text.value();
+      _buffer <<  v << _lineBreak ;
       return true;
    }
 
 
    bool xml_printer::visit( const xml_declaration& declaration ) {
-      indent();
+      _buffer << indent();
 
-      declaration.print( 0, _buffer );
-      _buffer += _lineBreak;
+      _buffer <<  declaration.print( 0 );
+      _buffer << _lineBreak;
       return true;
    }
 
 
    bool xml_printer::visit( const xml_comment& comment ) {
-      indent();
-      _buffer += comment.print();
-      _buffer += _lineBreak;
+      _buffer << indent();
+      _buffer << comment.print();
+      _buffer << _lineBreak;
       return true;
+   }
+
+   std::string xml_printer::indent() const  {
+      std::string str;
+      uint32_t d = _depth;
+
+      for( int i = 0; i < _depth; ++i ) {
+         str += _indent;
+      }
+
+      std::string tmp = std::move( str );
+      LOGT_DEBUG( "indent: \'" + tmp + "\"" );
+      return tmp;
    }
 
 }

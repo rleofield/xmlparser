@@ -91,9 +91,9 @@ namespace txml {
       if( next_open_brace != "<" ) {
          // no '<'
          throw Xml_exception(
-                              eEx::parse,
-                              msg_unknown_node + ": " +
-                              buffer.next25() );
+            eEx::parse,
+            msg_unknown_node + ": " +
+            buffer.next25() );
       }
 
       // find closing brace
@@ -117,36 +117,37 @@ namespace txml {
 
 
 
-   bool isElement( string const& s ) noexcept { // size is > 2
-      if( IsAlpha( s[1] ) || s[1] == '_' || s[1] == ' ' ) {
-         return true;
-      }
+      bool isElement( string const& s ) noexcept { // size is > 2
+         if( IsAlpha( s[1] ) || s[1] == '_' || s[1] == ' ' ) {
+            return true;
+         }
 
-      return false;
-   }
-   bool isComment( string const& s ) noexcept { // size is > 2
-      // <!-- und -->
-      if( boost::starts_with( s, "<!--" )
-            && boost::ends_with( s, "-->" ) ) {
-         return true;
+         return false;
       }
-      return false;
-   }
-   bool isDeclaration( string const& s ) { // size is > 2
-      // "<?xml und ?>"
-      if( boost::starts_with( s, "<?xml" )
-            && boost::ends_with( s,   "?>" ) ) {
-         return true;
-      }
+      bool isComment( string const& s ) noexcept { // size is > 2
+         // <!-- und -->
+         if( boost::starts_with( s, "<!--" )
+         && boost::ends_with( s, "-->" ) ) {
+            return true;
+         }
 
-      return false;
-   }
-} // end of anon ns
+         return false;
+      }
+      bool isDeclaration( string const& s ) { // size is > 2
+         // "<?xml und ?>"
+         if( boost::starts_with( s, "<?xml" )
+               && boost::ends_with( s,   "?>" ) ) {
+            return true;
+         }
+
+         return false;
+      }
+   } // end of anon ns
 
    xml_node* xml_node::create( string const& temp ) {
       if( temp.size() < 2 ) { // only <> in element
          throw Xml_exception(
-                              eEx::parse, msg_unknown_node + ": " + temp );
+            eEx::parse, msg_unknown_node + ": " + temp );
          //         return 0;
       }
 
@@ -168,7 +169,7 @@ namespace txml {
       }
 
       throw Xml_exception(
-                           eEx::parse, msg_unknown_node + ": " + temp );
+         eEx::parse, msg_unknown_node + ": " + temp );
    }
 
 
@@ -277,6 +278,7 @@ namespace txml {
       if( !comment ) {
          return ;
       }
+
       if( child == nullptr ) {
          return;
       }

@@ -95,8 +95,6 @@ namespace txml {
 
       virtual bool accept( xml_visitor* content ) const;
 
-   protected :
-      //void copy( xml_node& target ) const;
    };
 
 
