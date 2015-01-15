@@ -40,7 +40,7 @@ namespace txml {
                                           ( visitor )
                                           ( link )
                                           ( set )
-                                        );
+                                        )
 
 
 
@@ -65,15 +65,12 @@ namespace txml {
 #define Xml_exception( v0, v1 )   xml_exception( tlfm_, v0, v1 );
 
 
-   const std::string msg_failed_to_read_element_name( "read element name" );
-   const std::string msg_failed_to_read_element_closing_tag( "read element name, closing bracket " );
-   const std::string msg_reading_endtag( "read end tag" );
+
    const std::string msg_parsing_comment( "parse comment" );
    const std::string msg_parsing_element( "parse element" );
    const std::string msg_parse_text( "use parse text() in" );
 
-   const std::string msg_document_empty( "document empty" );
-   const std::string msg_document_top_only( "xml_document added to document, because xml_document can only be at the root" );
+   const std::string msg_document( "document" );
    const std::string msg_cannot_insert_root_as_default( "Cant't insert root as default" );
 
    const std::string msg_key_points_not_to_an_element( "key points not to an element" );
@@ -83,11 +80,6 @@ namespace txml {
    const std::string msg_list_is_empty( "list is empty" );
    const std::string msg_keylist_in_visitor_has_length_zero( "keylist in visitor has length zero" );
    const std::string msg_operator_plus_at_or_after_end( "operator += at or after end" );
-   const std::string msg_operator_minus_at_or_after_end( "operator -= at or before end" );
-
-
-
-
 
 } // end of namespace txml
 

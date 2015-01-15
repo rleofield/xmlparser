@@ -68,9 +68,9 @@ namespace txml {
    namespace {
 
       // http://de.wikipedia.org/wiki/Byte_Order_Mark
-      const char bom_utf8[3]     = {( char )0xEF, ( char )0xBB, ( char )0xBF};
-      const char bom_utf16_big_endian[2] = {( char )0xFE, ( char )0xFF };
-      const char bom_utf16_lower_endian[2] = {( char )0xFF, ( char )0xFE };
+      const char bom_utf8[3]     = {static_cast<char>(0xEF), static_cast<char>(0xBB), static_cast<char>(0xBF)};
+      const char bom_utf16_big_endian[2] = {static_cast<char>(0xFE), static_cast<char>(0xFF) };
+      const char bom_utf16_lower_endian[2] = {static_cast<char>(0xFF), static_cast<char>(0xFE) };
 
 
       const string string_bom_utf8 = string( bom_utf8, sizeof( bom_utf8 ) );
@@ -116,8 +116,8 @@ namespace txml {
 
    void xml_document::parse( raw_buffer& buffer ) {
 
-      if( buffer.is_end() ) {
-         throw Xml_exception( eEx::parse, msg_document_empty );
+      if( buffer.is_at_end() ) {
+         throw Xml_exception( eEx::parse, msg_document );
       }
 
       encoding( Encoding::UTF8 );
@@ -130,15 +130,15 @@ namespace txml {
       if( s == string_bom_utf8 ) {
          encoding( Encoding::UTF8 );
          _bom = string_bom_utf8;
-         buffer += string_bom_utf8.size();
+         buffer.advance( string_bom_utf8.size() );
       }
 
       if( buffer.value() == 0 ) {
-         throw Xml_exception( eEx::parse, msg_document_empty );
+         throw Xml_exception( eEx::parse, msg_document );
       }
 
 
-      while( !buffer.is_end() ) {
+      while( !buffer.is_at_end() ) {
          xml_node* node = create_in_doc( buffer );
 
          if( node ) {
@@ -165,8 +165,8 @@ namespace txml {
          buffer.skip();
       }
 
-      if( firstChild() == 0 ) {
-         throw Xml_exception( eEx::parse, msg_document_empty );
+      if( first_child() == nullptr ) {
+         throw Xml_exception( eEx::parse, msg_document );
       }
 
    }
@@ -195,7 +195,9 @@ namespace txml {
       };
 
       clear();
-      raw_buffer pp( l );
+      // add space at end of file content,
+      //  to prevent eof in buffer if parser is at end
+      raw_buffer pp( l + " ");
 
       string w ;
 
@@ -221,8 +223,9 @@ namespace txml {
 
    bool xml_document::save( string const& filename ) const {
 
+      bool pretty_print = true;
       std::vector<string> text;
-      serialize( text );
+      serialize( text, "   ", pretty_print );
       bool overwrite = true;
 
       try {
@@ -236,44 +239,45 @@ namespace txml {
       return true;
    }
 
-   string xml_document::serialize( ) const {
+   string xml_document::serialize( string indent,     bool pretty_print ) const {
 
       string s ;
 
-      xml_printer p( "   " );
-      //p.pretty_print_off();
-      this->accept( &p );
+      xml_printer pr( indent );
+      if(  !pretty_print )
+         pr.pretty_print_off();
+      this->accept( &pr );
       s = _bom;
-      s += p.result();
+      s += pr.result();
       return move( s );
    }
 
-   void xml_document::serialize( list<string>& l ) const {
-      vector<string> vec;
-      serialize( vec );
-      l.assign( vec.begin(), vec.end() );
+   void xml_document::serialize( list<string>& l, string indent,     bool pretty_print ) const {
+      string s = serialize(indent, pretty_print);
+      rlf_hstring::string_to_list( s, l, 0 );
    }
 
-   void xml_document::serialize( vector<string>& v ) const {
-      string s = serialize();
+   void xml_document::serialize( vector<string>& v, string indent,     bool pretty_print ) const {
+      string s = serialize(indent,pretty_print);
       char trim_ch = 0;
       rlf_hstring::string_to_vector( s, v, trim_ch );
    }
 
 
-   bool xml_document::accept( xml_visitor* visitor ) const {
-      bool notAccepted = visitor->enter( *this );
+   v_ret xml_document::accept( visitor_base* visitor ) const {
+      v_ret ret = visitor->enter( *this );
 
       string n;
 
-      if( notAccepted ) {
-         const xml_node* node = firstChild();
+      if( ret.recurse()) {
+         const xml_node* node = first_child();
 
          for( ; node != nullptr; node = node->next() ) {
-            notAccepted = node->accept( visitor );
             n = node->value();
 
-            if( !notAccepted ) {
+            ret = node->accept( visitor );
+
+            if( ret.stop() ) {
                break;
             }
          }

@@ -31,6 +31,37 @@ namespace txml {
 
    class xml_node;
 
+
+      class path_attr {
+         std::string to_string()const{ return _name; }
+
+      public:
+         path_attr():_name(){}
+         path_attr( std::string const& str ):_name(str){}
+         path_attr( path_attr const& a ):_name(a._name){}
+
+         path_attr& operator=( path_attr const& a ){
+            if( this != & a ){
+               _name = a._name;
+            }
+            return *this;
+         }
+
+         bool operator==( path_attr const& a )const {
+            return _name == a._name;
+         }
+
+         std::string name()const { return *this ;}
+
+         operator std::string()const {
+            return to_string();
+         }
+         bool empty()const{ return _name.size() == 0;}
+      private:
+         std::string _name;
+
+      };
+
    // path_elements for search in xml doc
    // contains element names and attributename
    class path_element {
@@ -43,19 +74,19 @@ namespace txml {
 
       path_element& operator=( path_element const& keyentry_ );
 
-      // compares elements only
+      // compares elements only nad childcount
       bool operator==( path_element const& keyentry_ )const ;
       int childcount()const ;
       void childcount( int childcount_ ) ;
 
-      std::string const& attr()const ;
-      void attr( std::string const& a ) ;
-      bool is_attr()const ;
-      //std::string const& value()const ;
-      void value( std::string const& v ) ;
+      path_attr attr()const ;
+      void attr( path_attr const& a ) ;
+      bool points_to_attr()const ;
 
-      std::string Element()const ;
-      void Element( std::string element ) ;
+      void value( std::string const& v ) ; // txt and attr
+
+      std::string elementname()const ;
+      void elementname( std::string element ) ;
 
 
       operator std::string()const {
@@ -70,18 +101,23 @@ namespace txml {
 
       std::string toValue()const;
 
+      static const std::string element_count_left_bracket;
+      static const std::string element_count_right_bracket;
+      static const std::string element_attr_separator;
+      static const std::string element_separator;
+
    private:
       std::string _element;
-      std::string _attr;
+      path_attr _attr;
       int _childcount;
       std::string _value;
-      static std::string left_bracket;
-      static std::string right_bracket;
-      static std::string double_colon;
       xml_node* _node;
 
 
    };
+
+
+
 
    class path {
       std::vector<path_element> _keyentries;
@@ -99,7 +135,8 @@ namespace txml {
       }
 
 
-      void toPatterns( std::string const& key );
+      bool points_to_attr()const;
+
       bool empty()const ;
       void addEmpty() ;
       void add( path_element const& ke );
@@ -119,6 +156,9 @@ namespace txml {
 
       bool compareByElement( path const& v1 )const ;
       bool compareByChildCount( path const& v1 ) const ;
+
+      std::string toElementText()const;
+
 
    };
 

@@ -56,24 +56,21 @@ namespace txml {
 
    class xml_element : public xml_node {
 
-      int x;
       explicit xml_element( const std::string& _value );
       xml_element( const xml_element& );
       xml_element& operator=( const xml_element& base );
       static void operator delete( void* );
       static void* operator new( size_t, t_lfm const& lfm );
 
-      std::string getAttributes( vector8_t const& temp );
-
+      std::string parse_attributes( std::string const& temp );
       std::vector<xml_attribute> _attributes;
-      vector8_t rawattributes;
-
 
    public:
       static xml_element* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() );
       static xml_element* create( const std::string& value_ = std::string() );
       virtual ~xml_element();
 
+      // add empty attribute
       std::string attribute( const std::string& name ) const;
       std::string attribute_by_path( const path& key ) const;
       std::vector<xml_attribute> const& Attributes() const;
@@ -83,12 +80,11 @@ namespace txml {
 
       const std::string unencoded_text() const;
       void text( std::string const& s );
+      xml_text const* text() const ;
 
-
+      bool isClosed()const ;
       virtual void parse( raw_buffer& pos );
-      virtual bool accept( xml_visitor* visitor ) const;
-   protected:
-      //void copy( xml_element& target ) const;
+      virtual v_ret accept( visitor_base* visitor ) const;
 
    };
 

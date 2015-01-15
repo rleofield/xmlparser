@@ -49,7 +49,6 @@ www.lug-ottobrunn.de
 #include "stringhelper.h"
 
 
-using namespace std;
 using std::string;
 
 namespace txml {
@@ -65,24 +64,20 @@ namespace txml {
       _next = "";
    }
    void raw_buffer::next100( int2type<true> )const {
-      auto start = _position;
-      auto iend = _position;
-
-      while( iend < _rawxml.end() && ( iend - start ) < 100 ) {
-         iend++;
-      }
-
-      _next.assign( start, iend );
+      _next = next_n( 100 );
    }
    string raw_buffer::next25()const {
       return next25( int2type<useNext100>() );
    }
 
    string raw_buffer::next25( int2type<true> )const {
+      return next_n( 25 );
+   }
+   string raw_buffer::next_n( size_t n )const {
       auto istart = _position;
       auto iend = _position;
 
-      while( iend < _rawxml.end() && ( iend - istart ) < 25 ) {
+      while( iend < _rawxml.end() && ( iend - istart ) < static_cast<ptrdiff_t>( n ) ) {
          iend++;
       }
 
@@ -96,15 +91,15 @@ namespace txml {
       _next() {
    }
 
-   raw_buffer::raw_buffer( std::string const& v ) :
+   raw_buffer::raw_buffer( string const& v ) :
       _rawxml( v.begin(), v.end() ),
       _position( _rawxml.begin() ),
       _next() {
    }
 
 
-   bool raw_buffer::starts_with( std::string const& s ) {
-      std::string temp = next( s.size() );
+   bool raw_buffer::starts_with( string const& s ) {
+      string temp = next( s.size() );
 
       if( temp == s ) {
          return true;
@@ -116,8 +111,7 @@ namespace txml {
       return  _position < p._position;
    }
 
-   bool raw_buffer::is_end()const {
-      next100();
+   bool raw_buffer::is_at_end()const {
       return _position == end();
    }
    vector8_t::const_iterator raw_buffer::end()const {
@@ -132,11 +126,11 @@ namespace txml {
          temp = diff;
       }
 
-      return std::string( _position,  _position + temp );
+      return string( _position,  _position + temp );
    }
 
 
-   std::string raw_buffer::next( vector8_t::const_iterator it ) const {
+   string raw_buffer::next( vector8_t::const_iterator it ) const {
       if( it < _position ) {
          vector8_t::difference_type pos = it - _position;
          throw Xml_exception( eEx::buffer, msg_iterator_underflow + rlf_hstring::toString( pos ) );
@@ -144,36 +138,36 @@ namespace txml {
 
       // check against end() = one char after end of string
       if( it > _rawxml.end() ) {
-         return std::string();
+         return string();
       }
 
-      string ret = std::string( _position,  it );
+      string ret = string( _position,  it );
       return ret;
    }
 
-   std::string raw_buffer::next_until( std::string const& s )const {
-      auto vi = find( s );
+   string raw_buffer::next_until( string const& s )const {
+      auto vi = find_next( s );
 
       if( vi == end() ) {
-         return std::string();
+         return string();
       }
 
       return next( vi + s.size() );
    }
 
-   raw_buffer& raw_buffer::operator++() {
-      ++_position;
+//   raw_buffer raw_buffer::operator++( int ) {
+//      _position++;
 
-      if( _position > _rawxml.end() ) {
-         throw Xml_exception(
-            eEx::buffer, msg_operator_plus_at_or_after_end );
-      }
+//      if( _position > _rawxml.end() ) {
+//         throw Xml_exception(
+//            eEx::buffer, msg_operator_plus_at_or_after_end );
+//      }
 
-      next100();
-      return *this;
-   }
+//      next100();
+//      return *this;
+//   }
 
-   void raw_buffer::operator+=( int32_t offset )const {
+   void raw_buffer::advance( ptrdiff_t offset )const {
       auto diff = remainder();
 
       if( diff < offset ) {
@@ -190,17 +184,6 @@ namespace txml {
       next100();
 
    }
-   void raw_buffer::operator-=( int32_t i )const {
-
-      if( i < _position - _rawxml.begin() ) {
-         throw Xml_exception(
-            eEx::buffer, msg_operator_minus_at_or_after_end );
-      }
-
-      _position -= i;
-      next100();
-
-   }
    vector8_t::difference_type raw_buffer::position()const {
       return _position - _rawxml.begin();
    }
@@ -214,11 +197,7 @@ namespace txml {
    size_t raw_buffer::size()const {
       return _rawxml.size();
    }
-   vector8_t::const_iterator raw_buffer::find( int8_t ch )const {
-      auto i = std::find( _position, _rawxml.end(), ch );
-      return i ;
-   }
-   vector8_t::const_iterator raw_buffer::find( string const& s )const {
+   vector8_t::const_iterator raw_buffer::find_next( string const& s )const {
       auto i = search( _position, _rawxml.end(), s.begin(), s.end() );
       return i;
    }
@@ -226,17 +205,6 @@ namespace txml {
 
 
 
-   bool raw_buffer::is_white_space()const {
-      if( _position == _rawxml.end() ) {
-         return false;
-      }
-
-      if( isspace( *_position ) > 0 ) {
-         return true;
-      }
-
-      return false;
-   }
 
    void raw_buffer::skip()const {
       if( _position == _rawxml.end() ) {

@@ -55,8 +55,8 @@ namespace txml {
 /*
 
 Txml kann einen XML File parsen und Werte ändern.
-Der Zugriff auf ein einzelnes XML Elment erfolgt mit Keys, die Xpath angelehnt sind, aber viel einfacher
-als Xpath zu handhaben sind.
+Der Zugriff auf ein einzelnes XML Elment erfolgt mit Keys, die Xpath angelehnt sind,
+aber viel einfacher als Xpath zu handhaben sind.
 
 
 */
@@ -106,7 +106,7 @@ namespace xmlinterface {
       void set_double( std::string const& key, double value );
 
 
-      // schreibe Wert eines Attributes
+      // write attribute
       // der Key muss auf ein Attribut zeigen
       // nach dem Parsen
       void set_attribute( std::string const& key, std::string const& value );
@@ -114,29 +114,26 @@ namespace xmlinterface {
       void set_double_attribute( std::string const& key, double value );
 
       // set comment before element marked by key
-      // nach dem Parsen
+      // doc or fiile must parsed before
       void setComment( std::string const& key, std::string const& comment );
 
-      // Parser, XMl is File,
+      // parse xml file, filename is stored internally
       void parse( std::string const& fn );
 
-      // lese Xml-Document, welches mit txml aufgebaut wurde
-      // Parse() baut zusätzliche interne Strukturen auf
+      // parse document to internal structure
       void rebuild( txml::xml_document const& doc );
 
-      // write XML out
+      // write to file
       void save( std::string const& fn );
+      // write to file, uses internal name
       void save();
 
 
 
-      // schreibe eine Liste aller Keys, mit Childcounter, für Elemente und Attribute
+      // list of all keys, with childnumber, für elements and attributes
       void print_keys( std::string const& fn )const;
 
-      // Liste aller keys für die eigene Verwendung
-      std::vector<std::string> Keys()const;
-
-      // dto. mit den Werten
+      // keys and values
       void print_keys_and_values( std::string const& fn, size_t w = 60 )const;
 
       // dto. als C++ source code to generate a new file with defaults
@@ -148,6 +145,7 @@ namespace xmlinterface {
 
       // create an element with default
       void create( std::string const& key, std::string const& value );
+      void attr( std::string const& key, std::string const& value );
 
 
       txml::xml_document const* document()const;

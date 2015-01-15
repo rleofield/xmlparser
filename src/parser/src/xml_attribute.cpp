@@ -63,7 +63,7 @@ namespace txml {
          string temp;
 
          while( i < str.size() ) {
-            uint8_t c = ( uint8_t ) str[i];
+            uint8_t c = static_cast< uint8_t >( str[i] );
 
             if( c == '&'
                   && i < ( str.length() - 2 )
@@ -92,7 +92,7 @@ namespace txml {
                continue;
             }
 
-            temp += ( char ) c;
+            temp += static_cast< char> ( c );
             ++i;
          }
 
@@ -117,10 +117,10 @@ namespace txml {
                   return;
                }
 
-               ++_pos; // skip quote
-               auto const& p = _pos.next( _pos.find( quote ) );
-               _pos += p.size();
-               ++_pos; // skip quote
+               _pos.advance( 1 ); // skip quote
+               auto const& p = _pos.next( _pos.find_next( quote ) );
+               _pos.advance( p.size() );
+               _pos.advance( 1 ); // skip quote
                _value = readText( p );
             }
             string const& value()const {
@@ -135,15 +135,15 @@ namespace txml {
    void xml_attribute::parse( raw_buffer& pos ) {
 
       try {
-         auto i = pos.find( '=' );
+         auto i = pos.find_next( "=" );
 
          // Read the name, the '=' and the value.
          string temp = pos.next( i );
          _name = readName( temp );
-         pos += _name.size();
+         pos.advance( _name.size() );
 
          pos.skip();
-         ++pos;  // skip '='
+         pos.advance( 1 );  // skip '='
          pos.skip();
 
          // value is quoted

@@ -64,18 +64,25 @@ namespace txml {
       -# Control formatting (line endings, etc.)
 
     */
-   class xml_printer : public xml_visitor {
+   class xml_printer : public visitor_base {
    public:
       xml_printer( std::string const& t = tab ) : _depth( 0 ), _element_text_prints_inline( false ),
          _buffer(), _indent( t ), _lineBreak( "\n" ) {}
 
 
-      virtual bool enter( const xml_element& element );
-      virtual bool exit( const xml_element& element );
+      v_ret enter( const xml_document& )   override final     {
+         return v_ret::eRet::RECURSE;
+      }
+      v_ret exit( const xml_document& )    override final     {
+         return v_ret::eRet::RECURSE;
+      }
 
-      virtual bool visit( const xml_declaration& declaration );
-      virtual bool visit( const xml_text& text );
-      virtual bool visit( const xml_comment& comment );
+
+      v_ret enter( const xml_element& element ) override final;
+      v_ret exit( const xml_element& element ) override final;
+      v_ret visit( const xml_declaration& declaration ) override final;
+      v_ret visittext( const xml_text& text ) override final;
+      v_ret visit( const xml_comment& comment ) override final;
 
       void pretty_print_off() {
          _indent = "";

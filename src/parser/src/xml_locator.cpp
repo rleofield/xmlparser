@@ -49,12 +49,21 @@ www.lug-ottobrunn.de
 
 using namespace std;
 
+
 namespace txml {
 
 
    xml_locator::xml_locator( string const& key ):
-      xml_visitor(),
-      lookupkeys( key ),
+      visitor_base(),
+      _path( key ),
+      remainder(),
+      _elementfound( nullptr ),
+      _value(),
+      _attr() {
+   }
+   xml_locator::xml_locator( path const& key ):
+      visitor_base(),
+      _path( key ),
       remainder(),
       _elementfound( nullptr ),
       _value(),
@@ -62,24 +71,24 @@ namespace txml {
    }
 
 
-   bool xml_locator::enter( const xml_element& element ) {
-      if( accepted() ) {
-         return false;
+   v_ret xml_locator::enter( const xml_element& element ) {
+      if( _elementfound != nullptr ) {
+         return v_ret::eRet::STOP;
       }
 
-      if( lookupkeys.empty() ) {
-         return false;
+      if( _path.empty() ) {
+         return v_ret::eRet::STOP;
       }
 
-      string keys_element = element.lookupPathString();
-      string strLookupkeys = lookupkeys;
+      string keys_element = element.lookuppath();
+      string strLookupkeys = _path;
 
       // search depth reached
-      if( element.lookuppath().size() == lookupkeys.size() ) {
+      if( element.lookuppath().size() == _path.size() ) {
          if( strLookupkeys !=  keys_element ) {
             _value = element.unencoded_text();
             _elementfound = nullptr;
-            //return false;
+            //return v_ret::eType::STOP;
          }
       }
 
@@ -87,39 +96,39 @@ namespace txml {
          _value = element.unencoded_text();
          xml_node const* n = element.lookuppath().last().node();
          _elementfound = const_cast<xml_element*>( dynamic_cast<xml_element const*>( n ) );
-         return false;
+         return v_ret::eRet::STOP;
       }
 
       //string lookupkey = lookupkeys;
-      string a = element.attribute_by_path( lookupkeys );
+      string a = element.attribute_by_path( _path );
 
       if( !a.empty() ) {
          this->attr( a );
          xml_node const* n = element.lookuppath().last().node();
          _elementfound = const_cast<xml_element*>( dynamic_cast<xml_element const*>( n ) );
-         return false;
+         return v_ret::eRet::STOP;
       }
 
 
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
 
-   bool xml_locator::visitExit( const xml_element& ) {
-      if( accepted() ) {
-         return false;
+   v_ret xml_locator::exit( const xml_element& ) {
+      if( _elementfound != nullptr ) {
+         return v_ret::eRet::STOP;
       }
 
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
 
-   bool xml_locator::visit( const xml_text& ) {
-      if( accepted() ) {
-         return false;
+   v_ret xml_locator::visittext( const xml_text& ) {
+      if( _elementfound != nullptr ) {
+         return v_ret::eRet::STOP;
       }
 
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
    void xml_locator::setElementAttr( string const& value_ ) {
@@ -127,16 +136,16 @@ namespace txml {
          return ;
       }
 
-      path_element const& last = lookupkeys.last();
+      path_element const& last = _path.last();
       _elementfound->attribute( last.attr(), value_ );
    }
 
    bool xml_locator::isAttr()const {
-      if( lookupkeys.empty() ) {
+      if( _path.empty() ) {
          return false;
       }
 
-      path_element const& last = lookupkeys.last();
+      path_element const& last = _path.last();
       return !last.attr().empty();
    }
 

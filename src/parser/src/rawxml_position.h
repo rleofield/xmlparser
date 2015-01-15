@@ -52,6 +52,7 @@ namespace txml {
 
       raw_buffer( raw_buffer const& pos );
       void operator=( raw_buffer const& pos );
+      std::string next_n( size_t n )const;
 
    public :
       raw_buffer( vector8_t const& v );
@@ -71,36 +72,38 @@ namespace txml {
 
       bool operator<( raw_buffer const& p )const;
 
-      bool is_end()const;
+      bool is_at_end()const;
       vector8_t::const_iterator end()const;
 
+      // remaining number of chars in buffer
       vector8_t::difference_type remainder()const;
+
       vector8_t::difference_type position()const;
       size_t size()const;
 
       // iterator at current position
       vector8_t::const_iterator running()const;
 
+      // string from current to pos
 
+      // pos is given
       std::string next( ptrdiff_t size )const;
+      // an interator is given
       std::string next( vector8_t::const_iterator it )const;
+      // ends after place of s in buffer
       std::string next_until( std::string const& s )const;
 
 
-      raw_buffer& operator++();
-
-      void operator+=( int32_t offset )const;
-      void operator-=( int32_t i )const;
-
+      //raw_buffer operator++( int );
+      //void operator+=( ptrdiff_t offset )const;
+      void advance( ptrdiff_t offset )const;
 
 
-      //operator int8_t const* ()const;
+      // value at current pos
       uint8_t value()const;
 
-      vector8_t::const_iterator find( int8_t ch )const;
-      vector8_t::const_iterator find( std::string const& s )const;
-
-      bool is_white_space()const;
+      // find next string in buffer
+      vector8_t::const_iterator find_next( std::string const& s )const;
 
       // skip ' ', '\n', '\t'
       void skip()const;

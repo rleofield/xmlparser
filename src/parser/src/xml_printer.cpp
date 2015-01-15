@@ -60,33 +60,37 @@ namespace txml {
 
 
 
-   bool xml_printer::enter( const xml_element& element ) {
+   v_ret xml_printer::enter( const xml_element& element ) {
       string val = element.value();
 
       _buffer << indent();
       _buffer << "<";
       _buffer << element.value();
 
+
       for( auto & a :   element.Attributes() ) {
          _buffer << " ";
          _buffer <<  a.print( );
       }
+      if( element.Attributes().size() > 0 ){
+         //_buffer << " ";
+      }
 
-      xml_node const* ch = element.firstChild();
 
-      if( ch == nullptr ) {
+      if( element.isClosed() ) {
          _buffer << string( " " ) + "/>"; // closed element, no childs
          _buffer << _lineBreak;
       } else {
          _buffer << ">"; // element end
-         xml_text const* text = dynamic_cast<xml_text const*>( element.firstChild() );
+         xml_text const* text = element.text();
 
-         bool b = element.last_child() == element.firstChild();
+         bool b = element.last_child() == element.first_child();
 
-         if( text != nullptr && element.last_child() == element.firstChild()
+         if( text != nullptr && b
            ) {
-            _element_text_prints_inline = true;
+            // has only text, no other childs
             // no _lineBreak
+            _element_text_prints_inline = true;
          } else {
             _buffer << _lineBreak;
          }
@@ -94,17 +98,17 @@ namespace txml {
 
       // LOGT_DEBUG( _buffer );
       ++_depth;
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
 
-   bool xml_printer::exit( const xml_element& element ) {
+   v_ret xml_printer::exit( const xml_element& element ) {
       --_depth;
 
-      xml_node const* ch = element.firstChild();
+      xml_node const* ch = element.first_child();
 
       if( ch == nullptr ) {
-         return true;
+         return v_ret::eRet::RECURSE;
       } else {
          if( _element_text_prints_inline ) {
             _element_text_prints_inline = false;
@@ -123,37 +127,37 @@ namespace txml {
          _buffer << _lineBreak;
       }
 
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
 
-   bool xml_printer::visit( const xml_text& text ) {
+   v_ret xml_printer::visittext( const xml_text& text ) {
       if( _element_text_prints_inline ) {
          _buffer << text.value();
-         return true;
+         return v_ret::eRet::RECURSE;
       }
 
       _buffer << indent();
       string v = text.value();
       _buffer <<  v << _lineBreak ;
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
 
-   bool xml_printer::visit( const xml_declaration& declaration ) {
+   v_ret xml_printer::visit( const xml_declaration& declaration ) {
       _buffer << indent();
 
       _buffer <<  declaration.print( 0 );
       _buffer << _lineBreak;
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
 
-   bool xml_printer::visit( const xml_comment& comment ) {
+   v_ret xml_printer::visit( const xml_comment& comment ) {
       _buffer << indent();
       _buffer << comment.print();
       _buffer << _lineBreak;
-      return true;
+      return v_ret::eRet::RECURSE;
    }
 
    std::string xml_printer::indent() const  {

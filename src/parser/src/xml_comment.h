@@ -70,7 +70,7 @@ namespace txml {
       virtual void parse( raw_buffer& );
 
       std::string print()const;
-      virtual bool accept( xml_visitor* visitor ) const;
+      v_ret accept( visitor_base* visitor ) const override final;
 
    protected:
 

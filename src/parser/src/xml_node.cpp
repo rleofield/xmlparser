@@ -176,24 +176,33 @@ namespace txml {
    xml_node::xml_node( eType type_ ) :
       _path(),
       _type( type_ ),
-      _nh(),
+      p(nullptr),
+      fc(nullptr),
+      lc(nullptr),
+      ps(nullptr),
+      ns(nullptr),
       _value(),
       _rawxml() {}
 
 
    xml_node::xml_node( eType type_, string const& v ) :
+
       _path(),
       _type( type_ ),
-      _nh(),
+      p(nullptr),
+      fc(nullptr),
+      lc(nullptr),
+      ps(nullptr),
+      ns(nullptr),
       _value( v ),
       _rawxml() {}
 
 
    xml_node::~xml_node() {
       if( !usePointerContainer ) {
-         xml_node* node = firstChild();
+         xml_node* node = first_child();
 
-         while( node != 0 ) {
+         while( node != nullptr ) {
             xml_node* temp = node;
             node = node->next();
             delete temp; // do delete
@@ -202,7 +211,7 @@ namespace txml {
    }
 
    void xml_node::clear() {
-      xml_node* node = firstChild();
+      xml_node* node = first_child();
 
       while( node != nullptr ) {
          xml_node* temp = node;
@@ -215,8 +224,8 @@ namespace txml {
          temp = nullptr;
       }
 
-      _nh.first_child = nullptr;
-      _nh.lastChild = nullptr;
+      fc = nullptr;
+      lc = nullptr;
    }
 
    const string xml_node::value() const {
@@ -226,11 +235,11 @@ namespace txml {
       _value = value_;
    }
 
-   const xml_node* xml_node::firstChild() const {
-      return _nh.first_child;
+   const xml_node* xml_node::first_child() const {
+      return fc;
    }
-   xml_node* xml_node::firstChild() {
-      return _nh.first_child;
+   xml_node* xml_node::first_child() {
+      return fc;
    }
 
    string xml_node::tvalue() const {
@@ -246,7 +255,7 @@ namespace txml {
       // document can't be linked
       if( node->type() == xml_node::eType::DOC ) {
          delete node; // do_delete
-         throw Xml_exception( eEx::link, msg_document_top_only );
+         throw Xml_exception( eEx::link, msg_document );
       }
 
       // must have same parent or nothing
@@ -261,16 +270,16 @@ namespace txml {
 
       node->parent( this );
 
-      if( _nh.lastChild != nullptr ) {
-         _nh.lastChild->_nh.next_sibling = node;
+      if( lc != nullptr ) {
+         lc->ns = node;
       } else {
-         _nh.first_child = node;   // it was an empty list.
+         fc = node;   // it was an empty list.
       }
 
-      node->_nh.prev_sibling = last_child();
-      node->_nh.next_sibling = nullptr;
+      node->ps = last_child();
+      node->ns = nullptr;
 
-      _nh.lastChild = node;
+      lc = node;
       return node;
    }
 
@@ -294,25 +303,25 @@ namespace txml {
 
       comment->parent( this );
 
-      comment->_nh.next_sibling = child;
-      comment->_nh.prev_sibling = child->prev();
+      comment->ns = child;
+      comment->ps = child->prev();
 
-      if( child->_nh.prev_sibling ) {
-         child->_nh.prev_sibling->_nh.next_sibling = comment;
+      if( child->ps ) {
+         child->ps->ns = comment;
       } else {
-         assert( _nh.first_child == child );
-         _nh.first_child = comment;
+         assert( fc == child );
+         fc = comment;
       }
 
-      child->_nh.prev_sibling = comment;
+      child->ps = comment;
    }
 
 
    xml_node* xml_node::last_child()  {
-      return _nh.lastChild;
+      return lc;
    }
    const xml_node* xml_node::last_child()const {
-      return _nh.lastChild;
+      return lc;
    }
 
 
@@ -348,16 +357,16 @@ namespace txml {
 
 
    const xml_node* xml_node::prev() const {
-      return _nh.prev_sibling;
+      return ps;
    }
    xml_node* xml_node::prev()  {
-      return _nh.prev_sibling;
+      return ps;
    }
    const xml_node* xml_node::next() const {
-      return _nh.next_sibling;
+      return ns;
    }
    xml_node* xml_node::next() {
-      return _nh.next_sibling;
+      return ns;
    }
 
 
@@ -365,8 +374,8 @@ namespace txml {
       return _type;
    }
 
-   void         xml_node::parent( xml_node* p ) {
-      _nh.parent = p;
+   void         xml_node::parent( xml_node* p1 ) {
+      p = p1;
    }
 
 

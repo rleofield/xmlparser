@@ -42,6 +42,8 @@ www.lug-ottobrunn.de
 #ifndef RLF_VISITOR_H
 #define RLF_VISITOR_H
 
+#include "visitor_ret.h"
+
 
 namespace txml {
 
@@ -53,46 +55,46 @@ namespace txml {
    class xml_text;
    class xml_comment;
 
+
+
    /**
 
       (Document, Element) called with a VisitEnter/VisitExit pair.
-      leaves are called with Visit().
-      'true' == recursive parsing
-      'false' == no children of this node visited
-      Accept() is called on the xml_document, although all nodes suppert Visiting.
-   Visitor lets you define a new operation without changing the classes of the elements on which it operates.
-      @sa xml_node::Accept()
+      'v_ret::eType::RECURSE' == recursive parsing
+      'v_ret::eType::STOP'    == no children of this node visited, current is accepted
+      accept() is called on the xml_document, although all nodes suppert Visiting.
+
    */
-   class xml_visitor {
+   class visitor_base {
 
    public:
-      xml_visitor() {}
-      virtual ~xml_visitor() {}
+      visitor_base() {}
+      virtual ~visitor_base() {}
 
       // recursive objects, enter and exit
-      virtual bool enter( const xml_document& )        {
-         return true;
+      virtual v_ret enter( const xml_document& )        {
+         return v_ret::eRet::RECURSE;
       }
-      virtual bool exit( const xml_document& )         {
-         return true;
+      virtual v_ret exit( const xml_document& )         {
+         return v_ret::eRet::RECURSE;
       }
 
-      virtual bool enter( const xml_element& )  {
-         return true;
+      virtual v_ret enter( const xml_element& )  {
+         return v_ret(v_ret::eRet::RECURSE);
       }
-      virtual bool exit( const xml_element& )      {
-         return true;
+      virtual v_ret exit( const xml_element& )      {
+         return v_ret(v_ret::eRet::RECURSE);
       }
 
       // non recursive objects
-      virtual bool visit( const xml_declaration& )  {
-         return true;
+      virtual v_ret visittext( const xml_text& )             {
+         return v_ret(v_ret::eRet::RECURSE);
       }
-      virtual bool visit( const xml_text& )             {
-         return true;
+      virtual v_ret visit( const xml_declaration& )  {
+         return v_ret(v_ret::eRet::RECURSE);
       }
-      virtual bool visit( const xml_comment& )       {
-         return true;
+      virtual v_ret visit( const xml_comment& )       {
+         return v_ret(v_ret::eRet::RECURSE);
       }
    };
 

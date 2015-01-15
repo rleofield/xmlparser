@@ -76,15 +76,15 @@ namespace txml {
 
       bool parse_begin( std::string  const& );
 
-      std::string  serialize() const ;
-      void serialize( std::list<std::string>& v ) const ;
-      void serialize( std::vector<std::string>& v ) const ;
+      std::string  serialize( std::string indent, bool pretty_print ) const ;
+      void serialize( std::list<std::string>& v, std::string indent, bool pretty_print   ) const ;
+      void serialize( std::vector<std::string>& v, std::string indent, bool pretty_print   ) const ;
 
       void parse( raw_buffer& pos );
       //      const XmlElement* rootElement() const;
       //      XmlElement* rootElement();
 
-      bool accept( xml_visitor* content ) const;
+      v_ret accept( visitor_base* v ) const override;
 
       static Encoding encoding() ;
       static void encoding( Encoding e );

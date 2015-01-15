@@ -93,7 +93,7 @@ namespace txml {
       }
 
       virtual void parse( raw_buffer& pos );
-      virtual bool accept( xml_visitor* visitor ) const;
+      virtual v_ret accept( visitor_base* visitor ) const  override final;
 
       std::string  print( int depth ) const;
 

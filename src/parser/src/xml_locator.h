@@ -52,13 +52,31 @@ namespace txml {
 
    /** Locate element value in tree
    */
-   class xml_locator : public xml_visitor {
+   class xml_locator : public visitor_base {
    public:
       xml_locator( std::string const& key );
+      xml_locator( txml::path const& key );
 
-      virtual bool enter( const xml_element& );
-      virtual bool visitExit( const xml_element& );
-      virtual bool visit( const xml_text& text );
+      v_ret enter( const xml_document& )  override final     {
+         return v_ret::eRet::RECURSE;
+      }
+      v_ret exit( const xml_document& )    override final    {
+         return v_ret::eRet::RECURSE;
+      }
+
+
+      v_ret enter( const xml_element& ) override final;
+      v_ret exit( const xml_element& ) override final;
+
+
+      v_ret visit( const xml_declaration& ) override final  {
+         return v_ret::eRet::RECURSE;
+      }
+      v_ret visit( const xml_comment& )    override final    {
+         return v_ret::eRet::RECURSE;
+      }
+
+      v_ret visittext( const xml_text& text ) override final;
 
       std::string const& value()  const    {
          return _value;
@@ -75,11 +93,11 @@ namespace txml {
       xml_element* elementfound()const {
          return _elementfound;
       }
-      bool accepted() {
+      bool accepted1() {
          return _elementfound != nullptr;
       }
 
-      path lookupkeys;
+      path _path;
       path remainder;
 
    private:

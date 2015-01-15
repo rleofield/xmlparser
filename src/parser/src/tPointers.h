@@ -55,6 +55,12 @@ namespace txml {
 
    const bool usePointerContainer = true;
 
+   class node_handle {
+   public:
+      xml_node* _ptr;
+      size_t h;
+
+   };
 
 
    class tPointers {

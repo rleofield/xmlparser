@@ -138,7 +138,7 @@ namespace txml {
       auto begin = temp.begin();
 
       // check first char
-      if( IsAlpha( ( uint8_t ) *begin ) || *begin == '_' ) {
+      if( IsAlpha( static_cast< uint8_t >( *begin ) ) || *begin == '_' ) {
          name += *begin;
          begin++;
          // first char is letter or underscores.
@@ -148,7 +148,7 @@ namespace txml {
 
          while( begin != end
                 && (
-                   IsAlphaNum( ( uint8_t ) *begin )
+                   IsAlphaNum( static_cast< uint8_t >(  *begin ) )
                    || *begin == '_'
                    || *begin == '-'
                    || *begin == '.'

@@ -131,7 +131,7 @@ namespace demo {
       case txml::xml_node::eType::ELEM: {
          o << "Element [" <<  node->value() << "]";
          vector<xml_attribute> const& v1 = dynamic_cast<xml_element const*>( node )->Attributes();
-         int s = v1.size();
+         size_t s = v1.size();
          int num = dump_attribs_to_stdout( o, dynamic_cast<xml_element const*>( node ), indent + 1 );
 
          switch( num ) {
@@ -172,7 +172,7 @@ namespace demo {
       o << endl;
       xml_node const* pChild;
 
-      for( pChild = node->firstChild(); pChild != 0; pChild = pChild->next() ) {
+      for( pChild = node->first_child(); pChild != nullptr; pChild = pChild->next() ) {
          node_dump( o, pChild, indent + 1 );
       }
    }
@@ -181,9 +181,9 @@ namespace demo {
    void build_simple_doc( ) {
       // Make xml: <?xml ..><Hello>World</Hello>
       xml_document doc;
-      xml_node* decl = xml_declaration::create( tlfm_ );
+      xml_declaration* decl = xml_declaration::create( tlfm_ );
       xml_element* element = xml_element::create( "Hello" );
-      xml_node* text = xml_text::create( tlfm_, "World" );
+      xml_text* text = xml_text::create( tlfm_, "World" );
       //text->parent( &doc );
       element->link_end_child( text );
       doc.link_end_child( decl );
@@ -247,7 +247,8 @@ namespace demo {
       t.rebuild( doc );
       xml_document const* doc1 = t.document();
       list<string> v;
-      doc1->serialize( v );
+      bool pretty_print = true;
+      doc1->serialize( v, "        ", pretty_print );
 
       msg = xml_element::create( tlfm_, "Farewell" );
       msg->link_end_child( xml_text::create( "Thank you for using MyApp" ) );

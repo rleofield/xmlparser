@@ -65,11 +65,10 @@ namespace txml {
 
 
    namespace {
-      class tEntity {
-      public:
-         tEntity( string s, char ch ): str( s ), chr( ch ) {}
+      struct tEntity {
+         tEntity( string const& s, char ch ): str( s ), chr( ch ) {}
          string    str;
-         char         chr;
+         char      chr;
       };
 
 
@@ -81,16 +80,16 @@ namespace txml {
                                  ( tEntity( "&apos;", '\'' ) );
 
 
-      char findEntity( string const& s_ ) {
+      char from_entity( string const& s ) {
          for( auto const & e : entities ) {
-            if( e.str == s_ ) {
+            if( e.str == s ) {
                return e.chr;
             }
          }
 
          return 0;
       }
-      string findEntity( char ch ) {
+      string to_entity( char ch ) {
          for( auto const & e : entities ) {
             if( e.chr == ch ) {
                return e.str;
@@ -152,22 +151,22 @@ namespace txml {
          switch( length ) {
          case 4:
             --p;
-            *p = ( char )( ( input | BYTE_MARK ) & BYTE_MASK );
+            *p = static_cast< char >(( ( input | BYTE_MARK ) & BYTE_MASK ));
             input >>= 6;
 
          case 3:
             --p;
-            *p = ( char )( ( input | BYTE_MARK ) & BYTE_MASK );
+            *p = static_cast< char >(( ( input | BYTE_MARK ) & BYTE_MASK ));
             input >>= 6;
 
          case 2:
             --p;
-            *p = ( char )( ( input | BYTE_MARK ) & BYTE_MASK );
+            *p = static_cast< char >(( ( input | BYTE_MARK ) & BYTE_MASK ));
             input >>= 6;
 
          case 1:
             --p;
-            *p = ( char )( input | FIRST_BYTE_MARK[length] );
+            *p = static_cast< char >(( input | FIRST_BYTE_MARK[length] ));
          }
 
          return &buf[0];
@@ -264,23 +263,30 @@ namespace txml {
          return string( pos, last + 1 );
       }
 
-      string decode_utf( string const& p1,  Encoding encoding ) {
+      string decode_utf( string const& s,  Encoding encoding ) {
          // example for an entity
+         // ampersand chars semicolon
          // &abcabcabca;
-         raw_buffer pp( vector8_t ( p1.begin() + 1, p1.end() - 1 ) ); // no & at start, no ; at end
+         if( s.size() < 2 ) {
+            return s;
+         }
 
+         // extract chars
+         raw_buffer pp( vector8_t ( s.begin() + 1, s.end() - 1 ) ); // no & at start, no ; at end
+
+         // num code starts with #
          if( pp.value() == '#' ) {
-            ++pp; // skip #
+            pp.advance( 1 ); // skip #
             uint32_t unicode = 0;
 
+            // hexcode starts with x
             if( pp.value() == 'x' ) {
-               // Hexadecimal
-               ++pp; // skip 'x'
-               string s = pp.next( pp.remainder() );
-               unicode = hex_to_size_t( s );
+               // hexadecimal
+               pp.advance( 1 ); // skip 'x'
+               unicode = static_cast<uint32_t>( hex_to_size_t( string( pp.running(), pp.end() ) ) );
             } else {
-               string s = pp.next( pp.remainder() );
-               unicode = boost::lexical_cast<uint32_t>( s );
+               // decimal
+               unicode = boost::lexical_cast<uint32_t>( string( pp.running(), pp.end() ) );
             }
 
             if( encoding == Encoding::UTF8 ) {
@@ -288,23 +294,26 @@ namespace txml {
             }
 
             // not utf8, use simple char
-            return string() + ( char )unicode;
+            return string() + static_cast<char>( unicode );
          }
 
-         char ch = findEntity( p1 );
+         // no number code, try an entity, ch must be > 0, if in entity list
+         char ch = from_entity( s );
 
          if( ch > 0 ) {
             return string() + ch;
          }
 
-         return p1; // couldn't decode
+         assert( false );
+         return ""; // couldn't decode
       }
 
 
 
       // Get a character, while interpreting entities
       // The length can be from 1 to 4 bytes
-      string next_char( raw_buffer& pos, Encoding encoding ) {
+      string next_char( raw_buffer& pos ) {
+         Encoding encoding = xml_document::encoding();
          int length = 1;
          uint8_t index = 0;
 
@@ -320,22 +329,22 @@ namespace txml {
                string p1 = getUntilNextSemicolon( p.begin(), p.end() );
 
                if( p1.size() < MIN_ENTITY_SIZE ) {
-                  pos += 1; // skip & and return
+                  pos.advance( 1 ); // skip & and return
                   return string();
                }
 
-               pos += p1.size();
+               pos.advance( p1.size() );
                return decode_utf( p1, encoding );
             }
 
-            string value( 1, ( char ) pos.value() ) ;
-            ++pos;
+            string value( 1, static_cast< char >(  pos.value() ) ) ;
+            pos.advance( 1 );
             return value;
          }
 
-         // length > 1, simple copy
+         // length > 1, do a simple copy
          string v = pos.next( length );
-         pos += length;
+         pos.advance( length );
          return v;
       }
 
@@ -348,9 +357,9 @@ namespace txml {
          while( buffer.running() < buffer.end() ) {
             // MAX_ENTITY_SIZE = 8
             raw_buffer next( buffer.next( MAX_ENTITY_SIZE ) );
-            string ch  = next_char( next, xml_document::encoding() );
+            string ch  = next_char( next );
             text.append( ch );
-            buffer += next.position();
+            buffer.advance( next.position() );
          }
 
          return text;
@@ -362,9 +371,9 @@ namespace txml {
          string text;
 
          while( buffer.running() < buffer.end() ) {
-            if( buffer.is_white_space() ) {
+            if( isspace( buffer.value() ) > 0 ) {
                text += buffer.value();
-               ++buffer;
+               buffer.advance( 1 );
                continue;
             }
 
@@ -372,9 +381,9 @@ namespace txml {
             // entity or utf8
             raw_buffer next( buffer.next( MAX_ENTITY_SIZE ) );
             // maybe is utf8
-            string nextchar = next_char( next, xml_document::encoding() );
+            string nextchar = next_char( next );
             text.append( nextchar );
-            buffer += next.position();
+            buffer.advance( next.position() );
 
          }
 
@@ -389,8 +398,7 @@ namespace txml {
    string decodeEntities( string const& s ) {
       string temp = s;
 
-      for( size_t i = 0;  i < entities.size(); i++ ) {
-         tEntity e = entities[i];
+      for( auto const & e : entities ) {
          size_t p = temp.find( e.str );
 
          while( p != string::npos ) {
@@ -409,7 +417,7 @@ namespace txml {
       string temp;
 
       for( auto ch : s ) {
-         temp += findEntity( ch );
+         temp += to_entity( ch );
       }
 
       return temp;
@@ -442,8 +450,8 @@ namespace txml {
    }
 
 
-   void xml_text::parseText( string const& p ) {
-      string const& temp = readText( p );
+   void xml_text::parseText( string const& s ) {
+      string const& temp = readText( s );
       xml_node::value( temp );
    }
 
@@ -451,11 +459,14 @@ namespace txml {
       throw Xml_exception( eEx::parse, msg_parse_text );
    }
 
-   const string xml_text::value() const {
+   void xml_text::value( std::string const& v ) { // set value
+      xml_node::value( v );
+   }
+   string xml_text::value() const {
       string nv = xml_node::value();
       return encodeEntities( nv );
    }
-   const string xml_text::unencoded_value() const {
+   string xml_text::unencoded_value() const {
       string nv = xml_node::value();
       return nv;
    }
@@ -463,8 +474,8 @@ namespace txml {
 
 
 
-   bool xml_text::accept( xml_visitor* visitor ) const {
-      return visitor->visit( *this );
+   v_ret xml_text::accept( visitor_base* visitor ) const {
+      return visitor->visittext( *this );
    }
 
 

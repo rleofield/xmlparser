@@ -51,7 +51,7 @@ namespace txml {
 
 
 
-   class xml_visitor;
+   class visitor_base;
    class xml_element;
    class xml_document;
    class xml_comment;
@@ -87,13 +87,15 @@ namespace txml {
       static xml_text* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() ) ;
       static xml_text* create( const std::string& value_ ) ;
 
-      const std::string value() const; // encoded value
-      const std::string unencoded_value() const; // encoded value
+      void value( std::string const& v ); // set value
+
+      std::string value() const; // encoded value
+      std::string unencoded_value() const; // encoded value
 
       void parse( raw_buffer& );
       void parseText( std::string const& p );
 
-      virtual bool accept( xml_visitor* content ) const;
+      virtual v_ret accept( visitor_base* content ) const;
 
    };
 

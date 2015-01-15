@@ -43,8 +43,6 @@ www.lug-ottobrunn.de
 #define RLF_NODE_H
 
 
-
-
 #include <map>
 #include <string>
 
@@ -54,14 +52,13 @@ www.lug-ottobrunn.de
 #include "xml_exception.h"
 
 #include "keyentries.h"
+#include "visitor_ret.h"
 
-
-
-
+using std::vector;
 
 
 namespace txml {
-   class xml_visitor;
+   class visitor_base;
    class xml_element;
    class xml_document;
    class xml_comment;
@@ -72,17 +69,17 @@ namespace txml {
    class raw_buffer;
 
    // nodeholder
-   class nodeh {
-   public:
-      xml_node*     parent;
+//   class nodeh {
+//   public:
+//      xml_node*     parent;
 
-      xml_node*     first_child;
-      xml_node*     lastChild;
+//      xml_node*     first_child;
+//      xml_node*     lastChild;
 
-      xml_node*      prev_sibling;
-      xml_node*      next_sibling;
-      nodeh(): parent( nullptr ), first_child( nullptr ), lastChild( nullptr ), prev_sibling( nullptr ), next_sibling( nullptr ) {}
-   };
+//      xml_node*      prev_sibling;
+//      xml_node*      next_sibling;
+//      nodeh(): parent( nullptr ), first_child( nullptr ), lastChild( nullptr ), prev_sibling( nullptr ), next_sibling( nullptr ) {}
+//   };
 
 
    class xml_node {
@@ -111,10 +108,12 @@ namespace txml {
 
       void clear();
 
-      const xml_node* firstChild()const;
-      xml_node* firstChild();
+      const xml_node* first_child()const;
+      xml_node* first_child();
       const xml_element* firstChildElement( const std::string& _value ) const   ;
       xml_element* firstChildElement( const std::string& _value )            ;
+
+      vector<xml_node*> childs();
 
 
       const xml_node* last_child()const;
@@ -138,16 +137,15 @@ namespace txml {
 
 
 
-      //virtual xml_node* clone() const = 0;
-
-      virtual bool accept( xml_visitor* visitor ) const = 0;
+      // returns true, if not accepted, means go recurse to next
+      virtual v_ret accept( visitor_base* visitor ) const = 0;
 
 
       xml_node const*  parent( )const {
-         return _nh.parent;
+         return p;
       }
       xml_node*   parent( ) {
-         return _nh.parent;
+         return p;
       }
       std::string lookupPathString()const {
          return _path;
@@ -177,7 +175,13 @@ namespace txml {
 
       eType     _type;
 
-      nodeh _nh;
+      //nodeh _nh;
+            xml_node*     p;
+            xml_node*     fc;
+            xml_node*     lc;
+
+            xml_node*      ps;
+            xml_node*      ns;
 
 
       std::string _value;

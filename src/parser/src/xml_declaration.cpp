@@ -124,7 +124,7 @@ namespace txml {
 
    void xml_declaration::parse( raw_buffer& pos ) {
       string temp = pos.next_until( "?>" );
-      pos += temp.size();
+      pos.advance( temp.size() );
       temp = extract( temp, "<?xml", "?>" );
       attributes( temp );
       return ;
@@ -157,7 +157,7 @@ namespace txml {
       return str;
    }
 
-   bool xml_declaration::accept( xml_visitor* visitor ) const {
+   v_ret xml_declaration::accept( visitor_base* visitor ) const {
       return visitor->visit( *this );
    }
 

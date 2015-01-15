@@ -90,7 +90,7 @@ namespace txml {
                <!-- declarations for <head> & <body> -->
          */
       string comment = extract( temp, "<!--", "-->" );
-      pos += temp.size();
+      pos.advance( temp.size() );
       value( comment );
       return;
    }
@@ -106,7 +106,7 @@ namespace txml {
       return *this;
    }
 
-   bool xml_comment::accept( xml_visitor* visitor ) const {
+   v_ret xml_comment::accept( visitor_base* visitor ) const {
       return visitor->visit( *this );
    }
 
