@@ -8,9 +8,14 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 
 
-#include <tLog_Category_default.h>
+#include "tLog_Category_default.h"
+
+
+#include "wList.h"
+#include "stringhelper.h"
 
 // demos
 #include "xml_interface.h"
@@ -29,6 +34,7 @@ namespace examples {
    void ubuntu32_create_test();
 
 
+   //const string xmlTest = "utf8test.xml"; //ubuntu32.xml";
    const string xmlTest = "ubuntu32.xml";
    const string xmlPrintOut = "ubuntu32_print.xml";
    const string xmlTestOut = "ubuntu32_out.xml";
@@ -87,126 +93,138 @@ namespace examples {
       {
 
 
+
          xmlinterface::tXmlInterface instance;
          instance.parse( xmlTestOut );
-         instance.create( "domain.name", "bbb" );
+         instance.create( "domain.name", "ubuntu32" );
+         instance.create( "domain.uuid", "8aa438a7-07da-f904-6c53-96adf2c6188b" );
+         instance.create( "domain.memory", "4194304" );
+         instance.create( "domain.currentMemory", "4194304" );
+         instance.create( "domain.vcpu", "4" );
+         instance.create( "domain.os", "" );
+         instance.create( "domain.os.type", "hvm" );
+         instance.  attr( "domain.os.type:arch", "i686" );
+         instance.  attr( "domain.os.type:machine", "pc-1.0" );
+         instance.create( "domain.os.boot", "" );
+         instance.  attr( "domain.os.boot:dev", "hd" );
          instance.create( "domain.features", "" );
          instance.create( "domain.features.acpi", "" );
          instance.create( "domain.features.apic", "" );
          instance.create( "domain.features.pae", "" );
-         instance.create( "domain.uuid", "8aa438a7-07da-f904-6c53-96adf2c6188b" );
-         instance.create( "domain.memory", "4194304" );
-         instance.create( "domain.currentMemory", "4194304" );
-         instance.create( "domain.vcpu", "888" );
-         instance.create( "domain.os", "" );
-         instance.create( "domain.os.type", "hvm" );
-         instance.create( "domain.os.type:arch", "i686ä" );
-         instance.create( "domain.os.type:machine", "pc-1.0" );
-         instance.create( "domain.os.boot", "" );
-         instance.create( "domain.os.boot:dev", "hd" );
+         instance.create( "domain.features[1]", "" );
+         instance.create( "domain.features[1].acpi", "" );
+         instance.create( "domain.features[1].apic", "" );
+         instance.create( "domain.features[1].pae", "" );
+         instance.create( "domain.features[2]", "" );
+         instance.create( "domain.features[2].acpi", "" );
+         instance.create( "domain.features[2].apic", "" );
+         instance.create( "domain.features[2].pae", "" );
          instance.create( "domain.clock", "" );
-         instance.create( "domain.clock:offset", "set_element_attribute_values(), test, new test clock, seond try" );
+         instance.  attr( "domain.clock:offset", "utc" );
          instance.create( "domain.on_poweroff", "destroy" );
          instance.create( "domain.on_reboot", "restart" );
          instance.create( "domain.on_crash", "restart" );
          instance.create( "domain.devices", "" );
          instance.create( "domain.devices.emulator", "/usr/bin/kvm" );
          instance.create( "domain.devices.disk", "" );
-         instance.create( "domain.devices.disk:type", "file" );
-         instance.create( "domain.devices.disk:device", "disk" );
+         instance.  attr( "domain.devices.disk:type", "file" );
+         instance.  attr( "domain.devices.disk:device", "disk" );
          instance.create( "domain.devices.disk.driver", "" );
-         instance.create( "domain.devices.disk.driver:name", "qemu" );
-         instance.create( "domain.devices.disk.driver:type", "raw" );
+         instance.  attr( "domain.devices.disk.driver:name", "qemu" );
+         instance.  attr( "domain.devices.disk.driver:type", "raw" );
          instance.create( "domain.devices.disk.source", "" );
-         instance.create( "domain.devices.disk.source:file", "/home/qemu/ubuntu32/ubuntu32.raw" );
+         instance.  attr( "domain.devices.disk.source:file", "/home/qemu/ubuntu32/ubuntu32.raw" );
          instance.create( "domain.devices.disk.target", "" );
-         instance.create( "domain.devices.disk.target:dev", "vda" );
-         instance.create( "domain.devices.disk.target:bus", "virtio" );
+         instance.  attr( "domain.devices.disk.target:dev", "vda" );
+         instance.  attr( "domain.devices.disk.target:bus", "virtio" );
          instance.create( "domain.devices.disk.address", "" );
-         instance.create( "domain.devices.disk.address:type", "pci" );
-         instance.create( "domain.devices.disk.address:domain", "0x0000" );
-         instance.create( "domain.devices.disk.address:bus", "0x00" );
-         instance.create( "domain.devices.disk.address:slot", "0x05" );
-         instance.create( "domain.devices.disk.address:function", "0x0" );
+         instance.  attr( "domain.devices.disk.address:type", "pci" );
+         instance.  attr( "domain.devices.disk.address:domain", "0x0000" );
+         instance.  attr( "domain.devices.disk.address:bus", "0x00" );
+         instance.  attr( "domain.devices.disk.address:slot", "0x05" );
+         instance.  attr( "domain.devices.disk.address:function", "0x0" );
          instance.create( "domain.devices.controller", "" );
-         instance.create( "domain.devices.controller:type", "virtio-serial" );
-         instance.create( "domain.devices.controller:index", "0" );
+         instance.  attr( "domain.devices.controller:type", "virtio-serial" );
+         instance.  attr( "domain.devices.controller:index", "0" );
          instance.create( "domain.devices.controller.address", "" );
-         instance.create( "domain.devices.controller.address:type", "pci" );
-         instance.create( "domain.devices.controller.address:domain", "0x0000" );
-         instance.create( "domain.devices.controller.address:bus", "0x00" );
-         instance.create( "domain.devices.controller.address:slot", "0x08" );
-         instance.create( "domain.devices.controller.address:function", "0x0" );
+         instance.  attr( "domain.devices.controller.address:type", "pci" );
+         instance.  attr( "domain.devices.controller.address:domain", "0x0000" );
+         instance.  attr( "domain.devices.controller.address:bus", "0x00" );
+         instance.  attr( "domain.devices.controller.address:slot", "0x08" );
+         instance.  attr( "domain.devices.controller.address:function", "0x0" );
          instance.create( "domain.devices.interface", "" );
-         instance.create( "domain.devices.interface:type", "bridge" );
+         instance.  attr( "domain.devices.interface:type", "bridge" );
          instance.create( "domain.devices.interface.mac", "" );
-         instance.create( "domain.devices.interface.mac:address", "52:54:00:6c:77:77" );
+         instance.  attr( "domain.devices.interface.mac:address", "52:54:00:6c:77:77" );
          instance.create( "domain.devices.interface.source", "" );
-         instance.create( "domain.devices.interface.source:bridge", "br0" );
+         instance.  attr( "domain.devices.interface.source:bridge", "br0" );
          instance.create( "domain.devices.interface.model", "" );
-         instance.create( "domain.devices.interface.model:type", "virtio" );
+         instance.  attr( "domain.devices.interface.model:type", "virtio" );
          instance.create( "domain.devices.interface.address", "" );
-         instance.create( "domain.devices.interface.address:type", "pci" );
-         instance.create( "domain.devices.interface.address:domain", "0x0000" );
-         instance.create( "domain.devices.interface.address:bus", "0x00" );
-         instance.create( "domain.devices.interface.address:slot", "0x03" );
-         instance.create( "domain.devices.interface.address:function", "0x0" );
+         instance.  attr( "domain.devices.interface.address:type", "pci" );
+         instance.  attr( "domain.devices.interface.address:domain", "0x0000" );
+         instance.  attr( "domain.devices.interface.address:bus", "0x00" );
+         instance.  attr( "domain.devices.interface.address:slot", "0x03" );
+         instance.  attr( "domain.devices.interface.address:function", "0x0" );
          instance.create( "domain.devices.interface[1]", "" );
-         instance.create( "domain.devices.interface[1]:type", "bridge" );
+         instance.  attr( "domain.devices.interface[1]:type", "bridge" );
          instance.create( "domain.devices.interface[1].mac", "" );
-         instance.create( "domain.devices.interface[1].mac:address", "52:54:00:01:96:02" );
+         instance.  attr( "domain.devices.interface[1].mac:address", "52:54:00:01:96:02" );
          instance.create( "domain.devices.interface[1].source", "" );
-         instance.create( "domain.devices.interface[1].source:bridge", "br1" );
+         instance.  attr( "domain.devices.interface[1].source:bridge", "br1" );
          instance.create( "domain.devices.interface[1].address", "" );
-         instance.create( "domain.devices.interface[1].address:type", "pci" );
-         instance.create( "domain.devices.interface[1].address:domain", "0x0000" );
-         instance.create( "domain.devices.interface[1].address:bus", "0x00" );
-         instance.create( "domain.devices.interface[1].address:slot", "0x07" );
-         instance.create( "domain.devices.interface[1].address:function", "0x0" );
+         instance.  attr( "domain.devices.interface[1].address:type", "pci" );
+         instance.  attr( "domain.devices.interface[1].address:domain", "0x0000" );
+         instance.  attr( "domain.devices.interface[1].address:bus", "0x00" );
+         instance.  attr( "domain.devices.interface[1].address:slot", "0x07" );
+         instance.  attr( "domain.devices.interface[1].address:function", "0x0" );
          instance.create( "domain.devices.serial", "" );
-         instance.create( "domain.devices.serial:type", "pty" );
+         instance.  attr( "domain.devices.serial:type", "pty" );
          instance.create( "domain.devices.serial.target", "" );
-         instance.create( "domain.devices.serial.target:port", "0" );
+         instance.  attr( "domain.devices.serial.target:port", "0" );
          instance.create( "domain.devices.console", "" );
-         instance.create( "domain.devices.console:type", "pty" );
+         instance.  attr( "domain.devices.console:type", "pty" );
          instance.create( "domain.devices.console.target", "" );
-         instance.create( "domain.devices.console.target:type", "serial" );
-         instance.create( "domain.devices.console.target:port", "0" );
+         instance.  attr( "domain.devices.console.target:type", "serial" );
+         instance.  attr( "domain.devices.console.target:port", "0" );
          instance.create( "domain.devices.input", "" );
-         instance.create( "domain.devices.input:type", "mouse" );
-         instance.create( "domain.devices.input:bus", "ps2" );
+         instance.  attr( "domain.devices.input:type", "mouse" );
+         instance.  attr( "domain.devices.input:bus", "ps2" );
          instance.create( "domain.devices.graphics", "" );
-         instance.create( "domain.devices.graphics:type", "vnc" );
-         instance.create( "domain.devices.graphics:port", "-1" );
-         instance.create( "domain.devices.graphics:autoport", "yes" );
+         instance.  attr( "domain.devices.graphics:type", "vnc" );
+         instance.  attr( "domain.devices.graphics:port", "-1" );
+         instance.  attr( "domain.devices.graphics:autoport", "yes" );
          instance.create( "domain.devices.sound", "" );
-         instance.create( "domain.devices.sound:model", "ich6" );
+         instance.  attr( "domain.devices.sound:model", "ich6" );
          instance.create( "domain.devices.sound.address", "" );
-         instance.create( "domain.devices.sound.address:type", "pci" );
-         instance.create( "domain.devices.sound.address:domain", "0x0000" );
-         instance.create( "domain.devices.sound.address:bus", "0x00" );
-         instance.create( "domain.devices.sound.address:slot", "0x04" );
-         instance.create( "domain.devices.sound.address:function", "0x0" );
+         instance.  attr( "domain.devices.sound.address:type", "pci" );
+         instance.  attr( "domain.devices.sound.address:domain", "0x0000" );
+         instance.  attr( "domain.devices.sound.address:bus", "0x00" );
+         instance.  attr( "domain.devices.sound.address:slot", "0x04" );
+         instance.  attr( "domain.devices.sound.address:function", "0x0" );
          instance.create( "domain.devices.video", "" );
          instance.create( "domain.devices.video.model", "" );
-         instance.create( "domain.devices.video.model:type", "cirrus" );
-         instance.create( "domain.devices.video.model:vram", "9216" );
-         instance.create( "domain.devices.video.model:heads", "1" );
+         instance.  attr( "domain.devices.video.model:type", "cirrus" );
+         instance.  attr( "domain.devices.video.model:vram", "9216" );
+         instance.  attr( "domain.devices.video.model:heads", "1" );
          instance.create( "domain.devices.video.address", "" );
-         instance.create( "domain.devices.video.address:type", "pci" );
-         instance.create( "domain.devices.video.address:domain", "0x0000" );
-         instance.create( "domain.devices.video.address:bus", "0x00" );
-         instance.create( "domain.devices.video.address:slot", "0x02" );
-         instance.create( "domain.devices.video.address:function", "0x0" );
+         instance.  attr( "domain.devices.video.address:type", "pci" );
+         instance.  attr( "domain.devices.video.address:domain", "0x0000" );
+         instance.  attr( "domain.devices.video.address:bus", "0x00" );
+         instance.  attr( "domain.devices.video.address:slot", "0x02" );
+         instance.  attr( "domain.devices.video.address:function", "0x0" );
          instance.create( "domain.devices.memballoon", "" );
-         instance.create( "domain.devices.memballoon:model", "virtio" );
+         instance.  attr( "domain.devices.memballoon:model", "virtio" );
          instance.create( "domain.devices.memballoon.address", "" );
-         instance.create( "domain.devices.memballoon.address:type", "pci" );
-         instance.create( "domain.devices.memballoon.address:domain", "0x0000" );
-         instance.create( "domain.devices.memballoon.address:bus", "0x00" );
-         instance.create( "domain.devices.memballoon.address:slot", "0x06" );
-         instance.create( "domain.devices.memballoon.address:function", "0x0" );
+         instance.  attr( "domain.devices.memballoon.address:type", "pci" );
+         instance.  attr( "domain.devices.memballoon.address:domain", "0x0000" );
+         instance.  attr( "domain.devices.memballoon.address:bus", "0x00" );
+         instance.  attr( "domain.devices.memballoon.address:slot", "0x06" );
+         instance.  attr( "domain.devices.memballoon.address:function", "0x0" );
          instance.save();
+
+
+
          txml::xml_node const* n =  instance.document();
 
          std::ofstream fp( "ubuntu32_dump.txt", std::ios_base::app );
@@ -217,7 +235,22 @@ namespace examples {
             return ;
          }
 
-         demo::node_dump( fp, instance.document(), 2 );
+         std::ostringstream o;
+         demo::node_dump( o, instance.document(), 2 );
+         string ret = o.str();
+         list<string> text;
+         rlf_hstring::string_to_list( ret, text, 0 );
+
+         bool overwrite = true;
+
+         try {
+            rlf_txtrw::t_write_ascii_list()( "ubuntu32_dump.txt", text, overwrite );
+         } catch( rlf_txtrw::bad_text_write& ex ) {
+            string w =  ex.what();
+            LOGT_ERROR( "ex: " + w );
+            return ;
+         }
+
 
 
       }

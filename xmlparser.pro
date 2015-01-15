@@ -5,6 +5,7 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -gdwarf-3
 
+
 QMAKE_CXXFLAGS_DEBUG += -O0
 QMAKE_CXXFLAGS_DEBUG += -std=c++0x
 QMAKE_CXXFLAGS_DEBUG += -Wparentheses
@@ -12,20 +13,64 @@ QMAKE_CXXFLAGS_DEBUG += -Wreturn-type
 QMAKE_CXXFLAGS_DEBUG += -Wshadow
 QMAKE_CXXFLAGS_DEBUG += -Wextra
 QMAKE_CXXFLAGS_DEBUG += -Wunused-parameter
-QMAKE_CXXFLAGS_DEBUG -= -Wwrite-strings
+
+QMAKE_CXXFLAGS_DEBUG += -Wwrite-strings
 QMAKE_CXXFLAGS_DEBUG += -Wno-unused-variable
+QMAKE_CXXFLAGS_DEBUG += -Wpedantic
+QMAKE_CXXFLAGS_DEBUG += -Wno-unused-but-set-variable
+QMAKE_CXXFLAGS_DEBUG += -Werror
+QMAKE_CXXFLAGS_DEBUG += -Wall
+QMAKE_CXXFLAGS_DEBUG += -Wcast-align
+QMAKE_CXXFLAGS_DEBUG += -Wcast-qual
+QMAKE_CXXFLAGS_DEBUG += -Woverloaded-virtual
+QMAKE_CXXFLAGS_DEBUG += -Wzero-as-null-pointer-constant
+QMAKE_CXXFLAGS_DEBUG += -Wwrite-strings
+QMAKE_CXXFLAGS_DEBUG += -Wconversion
+QMAKE_CXXFLAGS_DEBUG += -Wold-style-cast
+QMAKE_CXXFLAGS_DEBUG += -Wdisabled-optimization
 QMAKE_CXXFLAGS_DEBUG += -Weffc++
 
-QMAKE_CXXFLAGS_RELEASE += -O2
+
+
+#gcc -Werror -Wall -Wextra -Wpedantic -Wcast-align
+#-Wcast-qual -Wconversion -Wctor-dtor-privacy
+#-Wdisabled-optimization -Wdouble-promotion
+#-Wfloat-equal -Wformat=2 -Winit-self -Winvalid-
+#pch -Wlogical-op -Wmissing-declarations
+#-Wmissing-include-dirs -Wnoexcept -Wold-style-
+#cast -Woverloaded-virtual -Wredundant-decls
+#-Wshadow -Wsign-conversion -Wsign-promo
+#-Wstrict-null-sentinel -Wstrict-overflow=5
+#-Wtrampolines -Wundef -Wunsafe-loop-
+#optimizations -Wvector-operation-performance
+#-Wzero-as-null-pointer-constant
+
+
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
 QMAKE_CXXFLAGS_RELEASE += -std=c++0x
 QMAKE_CXXFLAGS_RELEASE += -Wparentheses
 QMAKE_CXXFLAGS_RELEASE += -Wreturn-type
 QMAKE_CXXFLAGS_RELEASE += -Wshadow
 QMAKE_CXXFLAGS_RELEASE += -Wextra
 QMAKE_CXXFLAGS_RELEASE += -Wunused-parameter
-QMAKE_CXXFLAGS_RELEASE -= -Wwrite-strings
+QMAKE_CXXFLAGS_RELEASE += -Wwrite-strings
 QMAKE_CXXFLAGS_RELEASE += -Wno-unused-variable
-QMAKE_CXXFLAGS_RELEASE += -Weffc++
+
+QMAKE_CXXFLAGS_RELEASE += -Wpedantic
+QMAKE_CXXFLAGS_RELEASE += -Wno-unused-but-set-variable
+QMAKE_CXXFLAGS_RELEASE += -Werror
+QMAKE_CXXFLAGS_RELEASE += -Wall
+QMAKE_CXXFLAGS_RELEASE += -Wcast-align
+QMAKE_CXXFLAGS_RELEASE += -Wcast-qual
+QMAKE_CXXFLAGS_RELEASE += -Woverloaded-virtual
+QMAKE_CXXFLAGS_RELEASE += -Wzero-as-null-pointer-constant
+QMAKE_CXXFLAGS_RELEASE += -Wwrite-strings
+QMAKE_CXXFLAGS_RELEASE += -Wconversion
+QMAKE_CXXFLAGS_RELEASE += -Wold-style-cast
+QMAKE_CXXFLAGS_RELEASE += -Wdisabled-optimization
+
+#QMAKE_CXXFLAGS_RELEASE += -Weffc++
 QMAKE_CXXFLAGS_RELEASE += -msse
 
 #DESTDIR += bin
@@ -48,7 +93,6 @@ SOURCES += src/main.cpp \
     src/parser/src/txml_interfaceimpl.cpp \
     src/parser/src/txml_fs.cpp \
     src/parser/src/raw_position.cpp \
-    src/parser/src/keyentries.cpp \
     src/parser/src/xml_element.cpp \
     src/parser/src/xml_comment.cpp \
     src/parser/src/xml_declaration.cpp \
@@ -66,7 +110,10 @@ SOURCES += src/main.cpp \
     src/demo.cpp \
     src/ubuntu32_create.cpp \
     src/other_demo.cpp \
-    src/log/alloccheck.cpp
+    src/log/alloccheck.cpp \
+    src/parser/src/element_locator.cpp \
+    src/parser/src/key_path.cpp \
+    src/parser/src/key_path_element.cpp
 
 
 HEADERS += \
@@ -104,13 +151,15 @@ HEADERS += \
     src/txtrw/rList.h \
     src/log/alloccheck.h \
     src/parser/src/tPointers.h \
-    src/parser/src/enum_macro.h
+    src/parser/src/enum_macro.h \
+    src/parser/src/element_locator.h \
+    src/parser/src/visitor_ret.h
 
 
 
 LIBS += -lpthread
-LIBS += -lboost_system #-lboost_system-mt
-LIBS += -lboost_filesystem #-lboost_filesystem-mt
+LIBS += -lboost_system
+LIBS += -lboost_filesystem
 
 cache()
 
@@ -123,17 +172,8 @@ INCLUDEPATH += $$PWD/src/parser/interface
 INCLUDEPATH += $$PWD/src/parser/src
 INCLUDEPATH += $$PWD/src/txtrw
 
-
-#LIBS += -L$$PWD/../libtxml/ -ltxml
-#LIBS += /usr/lib/libboost_system-mt.a
-#LIBS += /usr/lib/libboost_filesystem-mt.a
-
 LIBS = -lboost_system -lboost_filesystem
 
-#INCLUDEPATH += $$PWD/../libtxml
-#DEPENDPATH += $$PWD/../libtxml
-
-#PRE_TARGETDEPS += $$PWD/../libtxml/libtxml.a
 
 OTHER_FILES += \
     appsettings.xml \

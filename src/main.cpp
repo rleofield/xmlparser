@@ -61,23 +61,13 @@ void cpp11_value_initialization() {
 }
 
 
-
 int main() {
-
-
-
-   //  int16_t a1 = 0;
-   //  int32_t b1 = 0;
-   //  blub( static_cast<tLayerID>(b1));
-   //tLayerID lid =  static_cast<tLayerID>(b1);
-
-   //size_t st = static_cast<int16_t>(lid);
 
 
 
    cout << "started" << endl;
 
-   string logfile = "log_old";
+   string logfile = "log";
    bool b = logger().setLogfile( logfile );
 
    if( b == false ) {
@@ -86,11 +76,6 @@ int main() {
 
    logger().setLogLevel( eLevel::LDEBUG, eCategory::_default );
    logger().setLogLevel( eLevel::LDEBUG, eCategory::Cat_A );
-
-
-
-   //size_t buflen = static_cast<uint16_t>(-1);
-
 
 
    LOGT_INFO( " Start1  " );
@@ -103,7 +88,6 @@ int main() {
       //demo::write_simple_doc2();
 
       examples::ubuntu32_xml_demo();
-      //examples::ls_xml_demo();
       // demo create xml file, please comment out unwanted tests
 
 

@@ -11,7 +11,7 @@ namespace examples {
    void set_element_attribute_values();
 
 
-    void ubuntu32_xml_demo();
+   void ubuntu32_xml_demo();
 
 }
 
