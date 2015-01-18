@@ -60,14 +60,31 @@ void cpp11_value_initialization() {
    int v {};
 }
 
+int mai(){
+   [](){
+      []()
+        {[](){}();
+        }();
+      }();
+         return 0;
+         }
 
 int main() {
 
 
 
+   //  int16_t a1 = 0;
+   //  int32_t b1 = 0;
+   //  blub( static_cast<tLayerID>(b1));
+   //tLayerID lid =  static_cast<tLayerID>(b1);
+
+   //size_t st = static_cast<int16_t>(lid);
+
+
+
    cout << "started" << endl;
 
-   string logfile = "log";
+   string logfile = "log_old";
    bool b = logger().setLogfile( logfile );
 
    if( b == false ) {
@@ -88,6 +105,7 @@ int main() {
       //demo::write_simple_doc2();
 
       examples::ubuntu32_xml_demo();
+      //examples::ls_xml_demo();
       // demo create xml file, please comment out unwanted tests
 
 

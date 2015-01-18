@@ -102,29 +102,26 @@ SOURCES += src/main.cpp \
     src/parser/src/xml_node.cpp \
     src/parser/src/xml_printer.cpp \
     src/parser/src/xml_text.cpp \
+    src/parser/src/element_locator.cpp \
+    src/parser/src/key_path.cpp \
+    src/parser/src/key_path_element.cpp \
     src/filefn/t_filename.cpp \
     src/hstring/stringhelper.cpp \
     src/hstring/gettokens.cpp \
     src/log/tLogImpl.cpp \
     src/log/tLog.cpp \
+    src/log/alloccheck.cpp \
     src/demo.cpp \
     src/ubuntu32_create.cpp \
-    src/other_demo.cpp \
-    src/log/alloccheck.cpp \
-    src/parser/src/element_locator.cpp \
-    src/parser/src/key_path.cpp \
-    src/parser/src/key_path_element.cpp
+    src/other_demo.cpp
 
 
 HEADERS += \
-    src/examples.h \
     src/parser/interface/xml_interface.h \
+    src/parser/interface/xml_exception.h \
     src/parser/src/xml_utl.h \
     src/parser/src/xml_fs.h \
     src/parser/src/xml_builder.h \
-    src/parser/src/win32.h \
-    src/parser/src/rawxml_position.h \
-    src/parser/src/keyentries.h \
     src/parser/src/xml_element.h \
     src/parser/src/xml_attribute.h \
     src/parser/src/xml_comment.h \
@@ -135,7 +132,13 @@ HEADERS += \
     src/parser/src/xml_printer.h \
     src/parser/src/xml_text.h \
     src/parser/src/xml_visitor.h \
-    src/parser/interface/xml_exception.h \
+    src/parser/src/rawxml_position.h \
+    src/parser/src/tPointers.h \
+    src/parser/src/enum_macro.h \
+    src/parser/src/element_locator.h \
+    src/parser/src/visitor_ret.h \
+    src/parser/src/path.h \
+    src/parser/src/path_element.h \
     src/filefn/t_filename.h \
     src/filefn/boost_cstdint.h \
     src/hstring/stringhelper.h \
@@ -143,18 +146,14 @@ HEADERS += \
     src/log/tLogImpl.h \
     src/log/tLogEnum.h \
     src/log/tLogCategories.h \
-    src/log/tLog.h \
     src/log/tLog_Category_default.h \
+    src/log/tLog.h \
     src/log/tLfmCL.h \
     src/log/tLfm.h \
     src/txtrw/wList.h \
     src/txtrw/rList.h \
     src/log/alloccheck.h \
-    src/parser/src/tPointers.h \
-    src/parser/src/enum_macro.h \
-    src/parser/src/element_locator.h \
-    src/parser/src/visitor_ret.h
-
+    src/examples.h
 
 
 LIBS += -lpthread

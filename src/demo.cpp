@@ -159,7 +159,7 @@ namespace examples {
          {
             // add a comment before element
             const string domain_devices = "domain.devices";  //   element:    = '';  //   element:    = 'devices'
-            t.setComment( domain_devices, "this is the device" );
+            t.set_comment( domain_devices, "this is the device" );
 
             // save to disk
             t.save( xml_ubuntu32_DemoOut );
@@ -168,7 +168,7 @@ namespace examples {
          // set second comment
          {
             const string domain_devices_interface__1 = "domain.devices.interface[1]";  //   element:    = '860'
-            t.setComment( domain_devices_interface__1, "text at 2.position of element 'interface'" );
+            t.set_comment( domain_devices_interface__1, "text at 2.position of element 'interface'" );
             t.save( xml_ubuntu32_DemoOut );
          }
       } catch( txml::xml_exception& ex ) {
@@ -221,7 +221,8 @@ namespace examples {
          // test reading an element, with default and unknown key
          // the unknown node is inserted at end of node 'domain'
          const string domain_on_reboot_new = "domain.on_reboot_new";
-         element1 = t.get_string( domain_on_reboot_new, "offfff" );
+         element1 = t.get_string( domain_on_reboot_new );
+         t.set_string( domain_on_reboot_new, "00000domain" );
 
          // save changes
          t.save( xml_ubuntu32_DemoOut );

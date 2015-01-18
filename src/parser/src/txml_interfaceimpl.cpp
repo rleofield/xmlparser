@@ -1,7 +1,4 @@
 
-
-
-
 #include <string>
 #include <vector>
 #include <sstream>
@@ -31,7 +28,7 @@
 
 #include "stringhelper.h"
 #include "alloccheck.h"
-
+#include "path.h"
 
 using std::vector;
 using std::string;
@@ -40,9 +37,6 @@ using std::endl;
 
 namespace txml {
 
-
-
-
    class tXmlInterfaceImpl {
 
    public:
@@ -50,35 +44,25 @@ namespace txml {
       ~tXmlInterfaceImpl();
 
       void create_root( string const& name, string const& root );
-
-      string getString( string const& key )const;
-      int get_int( string const& key )const;
-      double getDouble( string const& key )const;
-
       // creates a node with default value
       // uses getAt()
-      void create( string const& key, string const& value = string() );
-      void attr( string const& key, string const& value = string() );
+      void create( path const& key, string const& value = string() );
+      void attr( path const& key, string const& value = string() );
 
 
-      string get_string( string const& key, string default_ );
-      int get_int( string const& key, int default_ );
-      double getDoubleAt( string const& key, double default_ );
+      string get_element_text( path const& key )const;
+      int get_int( path const& key )const;
+      double get_double( path const& key )const;
 
-      void setElementTextStringAt( string const& key, string const& value );
+      void set_element_text( path const& key, string const& value );
+      void set_int( path const& key, int value );
+      void set_double( path const& key, double value );
 
-      void setIntAt( string const& key, int value );
-      void setDoubleAt( string const& key, double value );
+      void set_attribute( path const& key, string const& value );
+      void set_int_attribute( path const& key, int value );
+      void set_double_attribute( path const& key, double value );
 
-      void writeString( string const& key, string const& value );
-      void writeInt( string const& key, int value );
-      void writeDouble( string const& key, double value );
-
-      void setAttributeAt( string const& key, string const& value );
-      void setIntAttributeAt( string const& key, int value );
-      void setDoubleAttributeAt( string const& key, double value );
-
-      void setComment( string const& key, string const& comment );
+      void set_comment( path const& key, string const& comment );
 
       void parse( string const& fn );
       void rebuild( xml_document const& doc );
@@ -117,7 +101,9 @@ namespace txml {
       // gets a value from node, and/or attribute, key must be valid search string
       // attribute/node is created, if not present
       string getAt_and_set_default( string const& key, string default_ );
-      string getStringAt( string const& key )const;
+      //string getElementTxtAt_( string const& key )const;
+      string getElementTxtAtIntern( path const& key )const;
+      string getAttrAtIntern( path const& key )const;
 
 
       void createAt( path const& key, string val );
@@ -344,22 +330,38 @@ namespace txml {
 
    }
 
-   string tXmlInterfaceImpl::getStringAt( string const& key )const {
+   string tXmlInterfaceImpl::getElementTxtAtIntern( path const& key )const {
       if( !_isparsed ) {
          string msg = "no parsed document found";
          throw Xml_exception( eEx::parse, msg );
       }
 
-      xml_locator p( key );
-      _doc.accept( &p );
-      string value = p.value();
-      string attr1 = p.attr();
+      path pa( key );
+      if( pa.points_to_attr() ){
+         string a = getAttrAtIntern(pa);
+         return a;
+      }
+      string txt = pa.toElementText(_doc);
+      return txt;
+   }
 
+   string tXmlInterfaceImpl::getAttrAtIntern( path const& pa )const {
+      if( !_isparsed ) {
+         string msg = "no parsed document found";
+         throw Xml_exception( eEx::parse, msg );
+      }
+     if( !pa.points_to_attr() ){
+        string msg = "no attr in lement found: " + static_cast<string>(pa);
+        throw Xml_exception( eEx::parse, msg );
+     }
+
+      xml_locator p( pa );
+      _doc.accept( &p );
+      string attr1 = p.attr();
       if( !attr1.empty() ) {
          return attr1;
       }
-
-      return value;
+      return "";
    }
 
 
@@ -458,7 +460,7 @@ namespace txml {
       }
 
 
-      path_element const& key_to_add = locator.lookup_path.last();
+      path_element  key_to_add = locator.lookup_path.last();
       string skey_to_add = locator.lookup_path.last();
 
       findSmallestInsertPointForNewNode( locator );
@@ -533,42 +535,19 @@ namespace txml {
 
 
 
-   string tXmlInterfaceImpl::getString( string const& key )const {
-      return getStringAt( key );
+   string tXmlInterfaceImpl::get_element_text( path const& key )const {
+      return getElementTxtAtIntern( key );
    }
 
-   int tXmlInterfaceImpl::get_int( string const& key )const {
-      string s = getString( key );
+   int tXmlInterfaceImpl::get_int( path const& key )const {
+      string s = get_element_text( key );
       return xmlinterface::to_int( s );
    }
-   double tXmlInterfaceImpl::getDouble( string const& key )const {
-      string s = getString( key );
+   double tXmlInterfaceImpl::get_double( path const& key )const {
+      string s = get_element_text( key );
       double a = xmlinterface::to_double( s );
       return a;
    }
-   // with defaults
-
-   string tXmlInterfaceImpl::get_string( string const& key, string default_ ) {
-      //setElementTextAt( key, default_ );
-      string s = getAt_and_set_default( key, default_ );
-      return s;
-   }
-
-
-   int tXmlInterfaceImpl::get_int( string const& key, int default_ ) {
-      string sdefault_ = std::to_string( default_ );
-      string sf = get_string( key, sdefault_ );
-      return xmlinterface::to_int( sf );
-   }
-
-
-   double tXmlInterfaceImpl::getDoubleAt( string const& key, double default_ ) {
-      string sdefault_ = std::to_string( default_ );
-      string sd = get_string( key, sdefault_ );
-      double a = xmlinterface::to_double( sd );
-      return a;
-   }
-
 
    void tXmlInterfaceImpl::setElementTextAt( string const& key, string const& value ) {  // key points to an element
       if( !_isparsed ) {
@@ -595,23 +574,23 @@ namespace txml {
    }
 
 
-   void tXmlInterfaceImpl::setElementTextStringAt( string const& key, string const& value ) {  // key points to an element
+   void tXmlInterfaceImpl::set_element_text( path const& key, string const& value ) {  // key points to an element
       setElementTextAt( key, value );
    }
 
-   void tXmlInterfaceImpl::setIntAt( string const& key, int value ) {  // key points to an element
+   void tXmlInterfaceImpl::set_int( path const& key, int value ) {  // key points to an element
       string s = rlf_hstring::toString( value );
       setElementTextAt( key, s );
    }
 
-   void tXmlInterfaceImpl::setDoubleAt( string const& key, double value ) { // key points to an element
+   void tXmlInterfaceImpl::set_double( path const& key, double value ) { // key points to an element
       string s = rlf_hstring::toString( value );
       setElementTextAt( key, s );
    }
 
 
 
-   void tXmlInterfaceImpl::setAttributeAt( string const& key, string const& value ) {  // key points to an attribute
+   void tXmlInterfaceImpl::set_attribute( path const& key, string const& value ) {  // key points to an attribute
       if( !_isparsed ) {
          string msg = "no parsed document found";
          throw Xml_exception( eEx::set, msg );
@@ -620,7 +599,7 @@ namespace txml {
       xml_locator p( key );
 
       if( !p.isAttr() ) {
-         throw Xml_exception( eEx::set, "key didn't point to an attribute: '" + key + "'" );
+         throw Xml_exception( eEx::set, "key didn't point to an attribute: '" + static_cast<string>(key) + "'" );
       }
 
       _doc.accept( &p );
@@ -631,19 +610,19 @@ namespace txml {
          return;
       }
 
-      throw Xml_exception( eEx::set, "key not found: '" + key + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + static_cast<string>(key) + "'" );
    }
 
-   void tXmlInterfaceImpl::setIntAttributeAt( string const& key, int value ) {  // key points to an attribute
-      setAttributeAt( key, rlf_hstring::toString( value ) );
+   void tXmlInterfaceImpl::set_int_attribute( path const& key, int value ) {  // key points to an attribute
+      set_attribute( key, rlf_hstring::toString( value ) );
    }
 
-   void tXmlInterfaceImpl::setDoubleAttributeAt( string const& key, double value ) {  // key points to an attribute
-      setAttributeAt( key, rlf_hstring::toString( value ) );
+   void tXmlInterfaceImpl::set_double_attribute( path const& key, double value ) {  // key points to an attribute
+      set_attribute( key, rlf_hstring::toString( value ) );
    }
 
 
-   void tXmlInterfaceImpl::setComment( string const& key, string const& value ) {  // key points to an element
+   void tXmlInterfaceImpl::set_comment( path const& key, string const& value ) {  // key points to an element
       if( !_isparsed ) {
          string msg = "no parsed document found";
          throw Xml_exception( eEx::set, msg );
@@ -653,7 +632,7 @@ namespace txml {
       xml_locator p( key );
 
       if( p.isAttr() ) {
-         throw Xml_exception( eEx::set, "key didn't point to an element: '" + key + "'" );
+         throw Xml_exception( eEx::set, "key didn't point to an element: '" + static_cast<string>(key) + "'" );
       }
 
       _doc.accept( &p );
@@ -673,7 +652,7 @@ namespace txml {
          return;
       }
 
-      throw Xml_exception( eEx::set, "key not found: '" + key + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + static_cast<string>(key) + "'" );
    }
 
    void tXmlInterfaceImpl::save( string const& fn ) {
@@ -900,11 +879,11 @@ namespace txml {
       rlf_txtrw::t_write_ascii()( filename, l, overwrite );
    }
 
-   void tXmlInterfaceImpl::create( string const& key, string const& value ) {
-      createAt(path(key),value);
+   void tXmlInterfaceImpl::create( path const& key, string const& value ) {
+      createAt(key,value);
    }
-   void tXmlInterfaceImpl::attr( string const& key, string const& value ) {
-      attrAt(path(key),value);
+   void tXmlInterfaceImpl::attr( path const& key, string const& value ) {
+      attrAt(key,value);
    }
 
 
@@ -1021,61 +1000,68 @@ namespace xmlinterface {
 
 
    string tXmlInterface::get_string( string const& key )const {
-      return impl->getString( key );
+      txml::path p;
+      p.from_string( key );
+      return impl->get_element_text( p );
    }
 
 
    int tXmlInterface::get_int( string const& key )const {
-      return impl->get_int( key );
+      txml::path p;
+      p.from_string(key);
+      return impl->get_int( p );
    }
 
    double tXmlInterface::get_double( string const& key )const  {
-      return impl->getDouble( key );
+      txml::path p;
+      p.from_string(key);
+      return impl->get_double( p );
    }
 
-   // with defaults
-   string tXmlInterface::get_string( string const& key, string default_ )  {
-      return impl->get_string( key, default_ );
-   }
-
-
-   int tXmlInterface::get_int( string const& key, int default_ )  {
-      return impl->get_int( key, default_ );
-   }
-
-   double tXmlInterface::get_double( string const& key, double default_ )  {
-      return impl->getDoubleAt( key, default_ );
-   }
 
    void tXmlInterface::set_string( string const& key, string const& value ) {  // key points to an element
-      impl->setElementTextStringAt( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->set_element_text( p, value );
    }
 
 
    void tXmlInterface::set_int( string const& key, int value ) {  // key points to an element
-      impl->setIntAt( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->set_int( p, value );
    }
 
    void tXmlInterface::set_double( string const& key, double value ) { // key points to an element
-      impl->setDoubleAt( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->set_double( p, value );
    }
 
 
    void tXmlInterface::set_attribute( string const& key, string const& value ) {  // key points to an attribute
-      impl->setAttributeAt( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->set_attribute( p, value );
    }
 
    void tXmlInterface::set_int_attribute( string const& key, int value ) {  // key points to an attribute
-      impl->setIntAttributeAt( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->set_int_attribute( p, value );
    }
 
    void tXmlInterface::set_double_attribute( string const& key, double value ) {  // key points to an attribute
-      impl->setDoubleAttributeAt( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->set_double_attribute( p, value );
    }
 
 
-   void tXmlInterface::setComment( string const& key, string const& value ) {  // key points to an element
-      impl->setComment( key, value );
+   void tXmlInterface::set_comment( string const& key, string const& value ) {  // key points to an element
+      txml::path p;
+      p.from_string(key);
+      impl->set_comment( p, value );
    }
 
 
@@ -1110,11 +1096,15 @@ namespace xmlinterface {
    }
    void tXmlInterface::create( string const& key, string const& value ) {
       //cout << "process: " << key << "::" << value << endl;
-      impl->create( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->create( p, value );
    }
    void tXmlInterface::attr( string const& key, string const& value ) {
       //cout << "process: " << key << "::" << value << endl;
-      impl->attr( key, value );
+      txml::path p;
+      p.from_string(key);
+      impl->attr( p, value );
    }
 
 

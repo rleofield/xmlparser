@@ -51,7 +51,7 @@ www.lug-ottobrunn.de
 
 #include "xml_exception.h"
 
-#include "keyentries.h"
+#include "path.h"
 #include "visitor_ret.h"
 
 using std::vector;

@@ -52,12 +52,15 @@ www.lug-ottobrunn.de
 
 
 #include "xml_utl.h"
-#include "keyentries.h"
+#include "path.h"
 #include "xml_node.h"
 #include "xml_fs.h"
 #include "xml_exception.h"
 #include "xml_interface.h"
 #include "xml_element.h"
+#include "xml_text.h"
+#include "element_locator.h"
+
 
 #include "stringhelper.h"
 
@@ -67,8 +70,8 @@ namespace txml {
 
 
 
-   path::path( string const& key ): _keyentries() {
-
+   void path::from_string( string const& key ){
+      _keyentries.clear();
       vector<string> elements = rlf_hstring::split( key, path_element::element_separator );
       for( auto const& entry: elements  ) {
          _keyentries.push_back( entry );
@@ -77,8 +80,7 @@ namespace txml {
 
 
    path& path::operator=( string const& key ) {
-      path p(key);
-      _keyentries = p._keyentries;
+      from_string(key);
       return *this;
    }
    path::path(): _keyentries() {}
@@ -124,7 +126,36 @@ bool path::points_to_attr()const{
    }
 
 
-   std::string path::toElementText()const{
+   std::string path::toElementText(xml_document const& _doc)const{
+
+      path key_no_attr = *this;
+      if( key_no_attr.points_to_attr() ){
+         path_element & pel = key_no_attr.last();
+         pel.attr(path_attr());
+      }// debug
+      string pathadd = key_no_attr;
+      if( pathadd == "domain.features.apic"){
+         pathadd = key_no_attr;
+      }
+
+      element_locator locator( key_no_attr );
+
+      _doc.accept( &locator );
+
+      xml_element* elem = locator.elementfound();
+      if( elem != nullptr ){
+         xml_node const* ch = elem->first_child();
+
+         if( ch == nullptr ) {
+            return "nullptr";
+         }
+
+         xml_text const* p1 = dynamic_cast<xml_text const*>( ch );
+         string txt = p1->value();
+         return txt;
+
+      }
+
 
       return "";
 

@@ -114,7 +114,8 @@ namespace examples {
          key1 = CutControl_SW_DebugMode__typpe;
 
          try {
-            element1 = t.get_string( key1, "xen" );
+            element1 = t.get_string( key1 );
+            t.set_string( key1, "xen" );
          } catch( txml::xml_exception& e ) {
             msg = e.What();
             LOGT_INFO( msg );

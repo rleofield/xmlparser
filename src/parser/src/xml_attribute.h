@@ -43,7 +43,7 @@ www.lug-ottobrunn.de
 #define RLF_ATTRIBUTE_H
 
 
-#include "keyentries.h"
+#include "path.h"
 
 
 namespace txml {

@@ -54,21 +54,19 @@ namespace txml {
 
    element_locator::element_locator( string const& key ):
       visitor_base(),
-      lookup_path( key ),
+      lookup_path(),
       remainder(),
       _elementfound( nullptr )
-      //_value(),
-      //_attr()
    {
+      lookup_path.from_string(key);
    }
    element_locator::element_locator( path const& key ):
       visitor_base(),
-      lookup_path( key ),
+      lookup_path(),
       remainder(),
       _elementfound( nullptr )
-      //_value(),
-      //_attr()
    {
+      lookup_path.from_string(key);
    }
 
 

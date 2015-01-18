@@ -42,20 +42,14 @@ www.lug-ottobrunn.de
 #ifndef RLF_INTERFACE_H
 #define RLF_INTERFACE_H
 
-#include <vector>
 #include <string>
 
 
-#include "xml_exception.h"
-
-namespace txml {
-   class xml_document;
-}
 
 /*
 
 Txml kann einen XML File parsen und Werte ändern.
-Der Zugriff auf ein einzelnes XML Elment erfolgt mit Keys, die Xpath angelehnt sind,
+Der Zugriff auf ein einzelnes XML Element erfolgt mit Keys, die Xpath angelehnt sind,
 aber viel einfacher als Xpath zu handhaben sind.
 
 
@@ -64,7 +58,9 @@ aber viel einfacher als Xpath zu handhaben sind.
 
 namespace txml {
    class tXmlInterfaceImpl;
+   class xml_document;
 }
+
 
 namespace xmlinterface {
 
@@ -80,42 +76,39 @@ namespace xmlinterface {
       tXmlInterface();
       ~tXmlInterface();
 
+      // create a root xml structure in  memory
       void create_root( std::string const& name, std::string const& root );
 
-      // read Element/attribute valuue nach dem Parsen
-      // excepio   double to_double( std::string const& s, std::locale l ) ;
-      double to_double( std::string const& s ) ;
+      // create an element with default
+      void create( std::string const& key, std::string const& value );
 
+      // create an attribute with default, the element must exist
+      void attr( std::string const& key, std::string const& value );
+
+
+
+      // get text value of an element, and get as int or get as double
       std::string get_string( std::string const& key )const ;
       int get_int( std::string const& key )const ;
       double get_double( std::string const& key )const ;
 
-      // lese Wert eines Elementes oder Attributes, wenn dieser nicht existiert, dann wird der Knoten angelegt, mit default
-      // nach dem Parsen
-      std::string get_string( std::string const& key, std::string default_ ) ;
-      int get_int( std::string const& key, int default_ ) ;
-      double get_double( std::string const& key, double default_ ) ;
 
-
-
-      // schreibe Wert eines Elementes
-      // der Key muss auf ein Element zeigen
-      // nach dem Parsen
+      // write text value if an element
+      // key must point to an element
       void set_string( std::string const& key, std::string const& value );
       void set_int( std::string const& key, int value );
       void set_double( std::string const& key, double value );
 
 
-      // write attribute
-      // der Key muss auf ein Attribut zeigen
-      // nach dem Parsen
+      // write an attribute
+      // key must point to an element
       void set_attribute( std::string const& key, std::string const& value );
       void set_int_attribute( std::string const& key, int value );
       void set_double_attribute( std::string const& key, double value );
 
       // set comment before element marked by key
       // doc or fiile must parsed before
-      void setComment( std::string const& key, std::string const& comment );
+      void set_comment( std::string const& key, std::string const& comment );
 
       // parse xml file, filename is stored internally
       void parse( std::string const& fn );
@@ -143,9 +136,6 @@ namespace xmlinterface {
 
       void print_creator( std::string const& fn_keys, std::string const& fn_out )const;
 
-      // create an element with default
-      void create( std::string const& key, std::string const& value );
-      void attr( std::string const& key, std::string const& value );
 
 
       txml::xml_document const* document()const;
@@ -156,7 +146,7 @@ namespace xmlinterface {
    void show_alloc_list();
    std::string allocliststring();
 
-   // helpers
+   // small helpers
    int to_int( std::string const& s );
    double to_double( std::string const& s );
    std::string int_to_string( int val );

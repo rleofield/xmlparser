@@ -111,14 +111,6 @@ namespace examples {
          instance.create( "domain.features.acpi", "" );
          instance.create( "domain.features.apic", "" );
          instance.create( "domain.features.pae", "" );
-         instance.create( "domain.features[1]", "" );
-         instance.create( "domain.features[1].acpi", "" );
-         instance.create( "domain.features[1].apic", "" );
-         instance.create( "domain.features[1].pae", "" );
-         instance.create( "domain.features[2]", "" );
-         instance.create( "domain.features[2].acpi", "" );
-         instance.create( "domain.features[2].apic", "" );
-         instance.create( "domain.features[2].pae", "" );
          instance.create( "domain.clock", "" );
          instance.  attr( "domain.clock:offset", "utc" );
          instance.create( "domain.on_poweroff", "destroy" );
@@ -222,6 +214,12 @@ namespace examples {
          instance.  attr( "domain.devices.memballoon.address:slot", "0x06" );
          instance.  attr( "domain.devices.memballoon.address:function", "0x0" );
          instance.save();
+
+         // get element text
+         string suuid = instance.get_string("domain.uuid");
+
+         // get attribute
+         string adresstype = instance.get_string("domain.devices.interface.address:type");
 
 
 

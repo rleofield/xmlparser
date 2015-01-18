@@ -55,19 +55,21 @@ namespace txml {
 
    xml_locator::xml_locator( string const& key ):
       visitor_base(),
-      _path( key ),
+      _path(),
       remainder(),
       _elementfound( nullptr ),
       _value(),
       _attr() {
+      _path.from_string(key);
    }
    xml_locator::xml_locator( path const& key ):
       visitor_base(),
-      _path( key ),
+      _path(),
       remainder(),
       _elementfound( nullptr ),
       _value(),
       _attr() {
+      _path.from_string(key);
    }
 
 

@@ -52,7 +52,7 @@ www.lug-ottobrunn.de
 
 
 #include "xml_utl.h"
-#include "keyentries.h"
+#include "path.h"
 #include "xml_node.h"
 #include "xml_fs.h"
 #include "xml_exception.h"
@@ -203,7 +203,7 @@ namespace txml {
       return val;
    }
 
-   // compares elements and attribute
+   // compares elements and attribute and childcount
    bool path_element::operator==( path_element const& pe )const {
       if( _element == pe._element && _attr == pe._attr && _childcount == pe._childcount) {
          return true;
