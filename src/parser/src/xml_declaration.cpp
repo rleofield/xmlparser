@@ -72,10 +72,9 @@ namespace txml {
 
    xml_declaration* xml_declaration::create( t_lfm const& lfm ) {
       xml_declaration* p = new( lfm ) xml_declaration();
-      xml_document::pointers.add( p );
       return p;
    }
-   xml_declaration* xml_declaration::create() {
+   xml_declaration* xml_declaration::create( ) {
       return create( tlfm_ );
    }
 

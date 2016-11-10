@@ -140,7 +140,7 @@ namespace txml {
       if( b1 ) {
          _childcount = xmlinterface::to_int( attr_ );
       } else {
-         _attr = path_attr(attr_);
+         _attr = path_attr( attr_ );
       }
 
       // never happens, future use
@@ -205,7 +205,7 @@ namespace txml {
 
    // compares elements and attribute and childcount
    bool path_element::operator==( path_element const& pe )const {
-      if( _element == pe._element && _attr == pe._attr && _childcount == pe._childcount) {
+      if( _element == pe._element && _attr == pe._attr && _childcount == pe._childcount ) {
          return true;
       }
 
@@ -258,6 +258,7 @@ namespace txml {
       if( _childcount > 0 ) {
          string chcount = boost::lexical_cast<string>( _childcount );
          string element1 = _element + element_count_left_bracket + chcount + element_count_right_bracket;
+
          if( _attr.empty() ) {
             // elem [ch_count]
             return element1;

@@ -77,7 +77,7 @@ namespace txml {
       void printXmlGenerator( string const& fn_keys, string const& fn_out )const;
 
 
-      xml_document const* document()const {
+      xml_document* document() {
          return &_doc;
       }
 
@@ -109,7 +109,7 @@ namespace txml {
       void createAt( path const& key, string val );
       void attrAt( path const& key, string val );
 
-      void addAttr( path const& key, string val, xml_element * elem );
+      void addAttr( path const& key, string val, xml_element* elem );
 
 
       // sets a value to node, and/or attribute, key must be valid search string
@@ -121,7 +121,7 @@ namespace txml {
       void addNotFoundElementAsNext( xml_node* n,  path_element const& elem, string default_ );
 
       xml_node* findSmallestInsertPointForNewNode( xml_locator& p );
-      void findSmallestInsertPointForNewNode( element_locator & p );
+      void findSmallestInsertPointForNewNode( element_locator& p );
 
 
    };
@@ -133,13 +133,13 @@ namespace txml {
 
 
    tXmlInterfaceImpl::~tXmlInterfaceImpl() {
-      //doc.pointers.clear();
+
    }
 
    void tXmlInterfaceImpl::rebuild( xml_document const& doc ) {
 
       _isparsed = false;
- bool pretty_print = false;
+      bool pretty_print = false;
       string l = doc.serialize( "", pretty_print );
       collected_keys.clear();
       bool loadOkay = _doc.parse_begin( l );
@@ -161,7 +161,7 @@ namespace txml {
    namespace {
       void loadFile( string&  l, string const& name ) {
          try {
-            rlf_txtrw::t_text_read_string()( name, l );
+            l = rlf_txtrw::t_text_read_string( name );
          } catch( rlf_txtrw::bad_text_read& ex ) {
             string msg = string( "error reading XML file: " ) + ex.what();
             throw Xml_exception(
@@ -178,7 +178,7 @@ namespace txml {
       text.push_back( "<"  + root + ">" );
       text.push_back( "</" + root + ">" );
       bool overwrite = true;
-      rlf_txtrw::t_write_ascii()( name, text, overwrite );
+      rlf_txtrw::t_write_text()( name, text, overwrite );
    }
 
    void tXmlInterfaceImpl::parse( string const& fn ) {
@@ -218,10 +218,11 @@ namespace txml {
 
          path_element key_entry = remainder[i];
          string vs = key_entry.elementname();
-         xml_element* element = xml_element::create( vs );
+         xml_document* d = node->document();
+         xml_element* element =  dynamic_cast<xml_element*>( d->element_create( vs ) );
 
          if( i == size - 1 ) {
-            element->text(default_);//link_end_child( xml_text::create( default_ ) );
+            element->text( default_ ); //link_end_child( xml_text::create( default_ ) );
          }
 
          if( i == 0 ) {
@@ -245,10 +246,11 @@ namespace txml {
    void tXmlInterfaceImpl::addNotFoundElementAsChild( xml_node* node,  path_element const& elem, string val ) {
 
 
-        string vs = elem.elementname();
-        xml_element* element = xml_element::create( vs );
-       element->link_end_child( xml_text::create( val ) );
-       element->text(val);//link_end_child( xml_text::create( default_ ) );
+      string vs = elem.elementname();
+      xml_document* d = document();
+      xml_element* element = dynamic_cast<xml_element*>( d->element_create( vs ) );
+      element->link_end_child( d-> text_create( val ) );
+      element->text( val ); //link_end_child( xml_text::create( default_ ) );
       node->link_end_child( element );
       vs = "";
 
@@ -256,14 +258,15 @@ namespace txml {
 
    void tXmlInterfaceImpl::addNotFoundElementAsNext( xml_node* node,  path_element const& elem, string val ) {
 
-     string vs = elem.elementname();
-        xml_element* element = xml_element::create( vs );
-       element->link_end_child( xml_text::create( val ) );
-       element->text(val);
+      string vs = elem.elementname();
+      xml_document* d = document();
+      xml_element* element = dynamic_cast<xml_element*>( d->element_create( vs ) );
+      element->link_end_child( d->text_create( val ) );
+      element->text( val );
       // xml_node *p = node->parent();
       node->link_end_child( element );
-     //string ser1 = _doc.serialize("",pretty_print);
-     vs = "";
+      //string ser1 = _doc.serialize("",pretty_print);
+      vs = "";
 
 
    }
@@ -304,7 +307,7 @@ namespace txml {
 
 
    }
-   void tXmlInterfaceImpl::findSmallestInsertPointForNewNode( element_locator & p ) {
+   void tXmlInterfaceImpl::findSmallestInsertPointForNewNode( element_locator& p ) {
 
       path_element const& key_entry1 = p.lookup_path.last();
 
@@ -315,15 +318,18 @@ namespace txml {
          throw Xml_exception( eEx::pathlist, msg );
       }
 
-      while( !p.accepted() ) {
-            p.lookup_path.remove_last();
-            // suche 2.
-            _doc.accept( & p );
+      string pp = p.lookup_path;
 
-            if( p.lookup_path.size() == 0 ) {
-               string msg = "no insert node found";
-               throw Xml_exception( eEx::pathlist, msg );
-            }
+      while( !p.accepted() ) {
+         p.lookup_path.remove_last();
+         pp = p.lookup_path;
+         // suche 2.
+         _doc.accept( & p );
+
+         if( p.lookup_path.size() == 0 ) {
+            string msg = "no insert node found";
+            throw Xml_exception( eEx::pathlist, msg );
+         }
       }
 
 
@@ -337,11 +343,13 @@ namespace txml {
       }
 
       path pa( key );
-      if( pa.points_to_attr() ){
-         string a = getAttrAtIntern(pa);
+
+      if( pa.points_to_attr() ) {
+         string a = getAttrAtIntern( pa );
          return a;
       }
-      string txt = pa.toElementText(_doc);
+
+      string txt = pa.toElementText( _doc );
       return txt;
    }
 
@@ -350,17 +358,20 @@ namespace txml {
          string msg = "no parsed document found";
          throw Xml_exception( eEx::parse, msg );
       }
-     if( !pa.points_to_attr() ){
-        string msg = "no attr in lement found: " + static_cast<string>(pa);
-        throw Xml_exception( eEx::parse, msg );
-     }
+
+      if( !pa.points_to_attr() ) {
+         string msg = "no attr in lement found: " + static_cast<string>( pa );
+         throw Xml_exception( eEx::parse, msg );
+      }
 
       xml_locator p( pa );
       _doc.accept( &p );
       string attr1 = p.attr();
+
       if( !attr1.empty() ) {
          return attr1;
       }
+
       return "";
    }
 
@@ -421,11 +432,11 @@ namespace txml {
    }
 
 
-   void tXmlInterfaceImpl::addAttr( path const& key, string val, xml_element * elem ){
+   void tXmlInterfaceImpl::addAttr( path const& key, string val, xml_element* elem ) {
       string name;
-       path_element const& el = key.last();
-       name = el.attr();
-      elem->attribute(name,val);
+      path_element const& el = key.last();
+      name = el.attr();
+      elem->attribute( name, val );
 
    }
 
@@ -434,15 +445,19 @@ namespace txml {
          string msg = "no parsed document found";
          throw Xml_exception( eEx::set, msg );
       }
+
       path key_no_attr = key;
-      if( key_no_attr.points_to_attr() ){
-         path_element & pel = key_no_attr.last();
-         pel.attr(path_attr());
+
+      if( key_no_attr.points_to_attr() ) {
+         path_element& pel = key_no_attr.last();
+         pel.attr( path_attr() );
       }// debug
-      string pathadd = key_no_attr;
-      if( pathadd == "domain.features.apic"){
-         pathadd = key_no_attr;
-      }
+
+      //      string pathadd = key_no_attr;
+
+      //      if( pathadd == "domain.features.apic" ) {
+      //         pathadd = key_no_attr;
+      //      }
 
       //look, if element already exists
       element_locator locator( key_no_attr );
@@ -450,12 +465,15 @@ namespace txml {
       _doc.accept( &locator );
 
       bool exists = false;
-      if( locator.elementfound() != nullptr ){
+
+      if( locator.elementfound() != nullptr ) {
          exists = true;
       }
+
       xml_element* elem = locator.elementfound();
-      if( key.points_to_attr() ){
-         addAttr(key,txt,elem);
+
+      if( key.points_to_attr() ) {
+         addAttr( key, txt, elem );
          return;
       }
 
@@ -465,7 +483,8 @@ namespace txml {
 
       findSmallestInsertPointForNewNode( locator );
 
-       xml_element* node = locator.elementfound();
+      xml_element* node = locator.elementfound();
+
       if( node == nullptr ) {
          throw Xml_exception( eEx::set, msg_cannot_insert_root_as_default + ", missingKey = " + static_cast<string>( key ) );
       }
@@ -473,15 +492,14 @@ namespace txml {
       string value = node->value();
       string path_found = node->lookuppath();
 
-      if(  key_no_attr.last().childcount() > 0  ){
+      if( key_no_attr.last().childcount() > 0 ) {
          addNotFoundElementAsNext( node, key_to_add, txt );
-      }
-      else{
+      } else {
          addNotFoundElementAsChild( node, key_to_add, txt );
       }
 
-       value = node->value();
-       path_found = node->lookuppath();
+      value = node->value();
+      path_found = node->lookuppath();
 
       // rebuild internal structure
       rebuild();
@@ -495,8 +513,9 @@ namespace txml {
       element_locator locator2( key_no_attr );
       _doc.accept( &locator2 );
       elem = locator2.elementfound();
-      if( elem == nullptr ){
-         throw Xml_exception( eEx::set, msg_key_points_not_to_an_element + ", missingKey = " + static_cast<string>( key ) );
+
+      if( elem == nullptr ) {
+         throw Xml_exception( eEx::set, msg_key_points_not_to_an_element + ", key to insert = " + static_cast<string>( key ) );
       }
 
 
@@ -508,13 +527,17 @@ namespace txml {
          string msg = "no parsed document found";
          throw Xml_exception( eEx::set, msg );
       }
+
       path key_no_attr = key;
-      if( key_no_attr.points_to_attr() ){
-         path_element & pel = key_no_attr.last();
-         pel.attr(path_attr());
+
+      if( key_no_attr.points_to_attr() ) {
+         path_element& pel = key_no_attr.last();
+         pel.attr( path_attr() );
       }// debug
+
       string pathadd = key_no_attr;
-      if( pathadd == "domain.features.apic"){
+
+      if( pathadd == "domain.features.apic" ) {
          pathadd = key_no_attr;
       }
 
@@ -523,8 +546,9 @@ namespace txml {
       _doc.accept( &locator );
 
       xml_element* elem = locator.elementfound();
-      if( key.points_to_attr() && elem != nullptr){
-         addAttr(key,txt,elem);
+
+      if( key.points_to_attr() && elem != nullptr ) {
+         addAttr( key, txt, elem );
          return;
       }
 
@@ -599,7 +623,7 @@ namespace txml {
       xml_locator p( key );
 
       if( !p.isAttr() ) {
-         throw Xml_exception( eEx::set, "key didn't point to an attribute: '" + static_cast<string>(key) + "'" );
+         throw Xml_exception( eEx::set, "key didn't point to an attribute: '" + static_cast<string>( key ) + "'" );
       }
 
       _doc.accept( &p );
@@ -610,7 +634,7 @@ namespace txml {
          return;
       }
 
-      throw Xml_exception( eEx::set, "key not found: '" + static_cast<string>(key) + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + static_cast<string>( key ) + "'" );
    }
 
    void tXmlInterfaceImpl::set_int_attribute( path const& key, int value ) {  // key points to an attribute
@@ -632,14 +656,14 @@ namespace txml {
       xml_locator p( key );
 
       if( p.isAttr() ) {
-         throw Xml_exception( eEx::set, "key didn't point to an element: '" + static_cast<string>(key) + "'" );
+         throw Xml_exception( eEx::set, "key didn't point to an element: '" + static_cast<string>( key ) + "'" );
       }
 
       _doc.accept( &p );
 
       if( p.accepted1() ) {
          xml_element* elementfound = p.elementfound();
-         xml_comment* comment = xml_comment::create( tlfm_ ) ;
+         xml_comment* comment =  _doc. comment_create( tlfm_ ) ;
          comment->value( value );
 
          path const& lookuppath = elementfound->lookuppath();
@@ -652,7 +676,7 @@ namespace txml {
          return;
       }
 
-      throw Xml_exception( eEx::set, "key not found: '" + static_cast<string>(key) + "'" );
+      throw Xml_exception( eEx::set, "key not found: '" + static_cast<string>( key ) + "'" );
    }
 
    void tXmlInterfaceImpl::save( string const& fn ) {
@@ -682,9 +706,12 @@ namespace txml {
 
       xml_node const* child;
 
-      for( child = node->first_child(); child != nullptr; child = child->next() ) {
-         collect_element_keys( child );
+      vector<xml_node*> const& vchilds = node->getChilds();
+
+      for( xml_node * ch : vchilds ) {
+         collect_element_keys( ch );
       }
+
    }
 
    void tXmlInterfaceImpl::collect_attribute_keys( xml_node const* node )const {
@@ -707,7 +734,7 @@ namespace txml {
       auto v = Keys();
       std::vector<string> l( v.begin(), v.end() );
       bool overwrite = true;
-      rlf_txtrw::t_write_ascii()( fn, l, overwrite );
+      rlf_txtrw::t_write_text()( fn, l, overwrite );
    }
 
 
@@ -753,7 +780,7 @@ namespace txml {
       }
 
       bool overwrite = true;
-      rlf_txtrw::t_write_ascii()( fn, l, overwrite );
+      rlf_txtrw::t_write_text()( fn, l, overwrite );
    }
 
    namespace {
@@ -799,10 +826,10 @@ namespace txml {
 
    void tXmlInterfaceImpl::printXmlGenerator( string const& filename, string const& fn_out )const {
       struct lv {
-            string prefix;
+         string prefix;
          string line;
          string val;
-         lv( string pf, string l, string v ): prefix(pf), line( l ), val( v ) {}
+         lv( string pf, string l, string v ): prefix( pf ), line( l ), val( v ) {}
       };
 
       vector<string> l;
@@ -863,7 +890,7 @@ namespace txml {
       text.push_back( "" );
 
       bool overwrite = true;
-      rlf_txtrw::t_write_ascii()( fn_out, text, overwrite );
+      rlf_txtrw::t_write_text()( fn_out, text, overwrite );
 
       l.push_back( "xmlinterface::tXmlInterface instance;" );
       l.push_back( "instance.parse( xmlTestOut );" );
@@ -876,14 +903,14 @@ namespace txml {
       }
 
       l.push_back( "instance.save();" );
-      rlf_txtrw::t_write_ascii()( filename, l, overwrite );
+      rlf_txtrw::t_write_text()( filename, l, overwrite );
    }
 
    void tXmlInterfaceImpl::create( path const& key, string const& value ) {
-      createAt(key,value);
+      createAt( key, value );
    }
    void tXmlInterfaceImpl::attr( path const& key, string const& value ) {
-      attrAt(key,value);
+      attrAt( key, value );
    }
 
 
@@ -1000,67 +1027,55 @@ namespace xmlinterface {
 
 
    string tXmlInterface::get_string( string const& key )const {
-      txml::path p;
-      p.from_string( key );
-      return impl->get_element_text( p );
+      return impl->get_element_text( key );
    }
 
 
    int tXmlInterface::get_int( string const& key )const {
-      txml::path p;
-      p.from_string(key);
-      return impl->get_int( p );
+      return impl->get_int( key );
    }
 
    double tXmlInterface::get_double( string const& key )const  {
-      txml::path p;
-      p.from_string(key);
-      return impl->get_double( p );
+      return impl->get_double( key );
    }
 
 
    void tXmlInterface::set_string( string const& key, string const& value ) {  // key points to an element
-      txml::path p;
-      p.from_string(key);
-      impl->set_element_text( p, value );
+      impl->set_element_text( key, value );
    }
 
 
    void tXmlInterface::set_int( string const& key, int value ) {  // key points to an element
-      txml::path p;
-      p.from_string(key);
-      impl->set_int( p, value );
+      impl->set_int( key, value );
    }
 
    void tXmlInterface::set_double( string const& key, double value ) { // key points to an element
-      txml::path p;
-      p.from_string(key);
-      impl->set_double( p, value );
+      impl->set_double( key, value );
    }
 
 
    void tXmlInterface::set_attribute( string const& key, string const& value ) {  // key points to an attribute
       txml::path p;
-      p.from_string(key);
+      p.from_string( key );
       impl->set_attribute( p, value );
    }
 
    void tXmlInterface::set_int_attribute( string const& key, int value ) {  // key points to an attribute
       txml::path p;
-      p.from_string(key);
+      p.from_string( key );
       impl->set_int_attribute( p, value );
    }
 
    void tXmlInterface::set_double_attribute( string const& key, double value ) {  // key points to an attribute
       txml::path p;
-      p.from_string(key);
+      p.from_string( key );
       impl->set_double_attribute( p, value );
    }
 
 
    void tXmlInterface::set_comment( string const& key, string const& value ) {  // key points to an element
       txml::path p;
-      p.from_string(key);
+      p.from_string( key );
       impl->set_comment( p, value );
    }
 
@@ -1097,18 +1112,18 @@ namespace xmlinterface {
    void tXmlInterface::create( string const& key, string const& value ) {
       //cout << "process: " << key << "::" << value << endl;
       txml::path p;
-      p.from_string(key);
+      p.from_string( key );
       impl->create( p, value );
    }
    void tXmlInterface::attr( string const& key, string const& value ) {
       //cout << "process: " << key << "::" << value << endl;
       txml::path p;
-      p.from_string(key);
+      p.from_string( key );
       impl->attr( p, value );
    }
 
 
-   txml::xml_document const* tXmlInterface::document()const {
+   txml::xml_document* tXmlInterface::document()const {
       return impl->document();
    }
 

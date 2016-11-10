@@ -44,7 +44,7 @@ www.lug-ottobrunn.de
 
 
 #include "xml_node.h"
-
+#include "tPointers.h"
 
 
 namespace txml {
@@ -59,11 +59,11 @@ namespace txml {
       xml_comment( const xml_comment& );
       xml_comment& operator=( const xml_comment& base );
       static void* operator new( size_t, t_lfm const& lfm );
+      static xml_comment* create( t_lfm const& lfm );
+      static xml_comment* create();
 
    public:
       static void operator delete( void* );
-      static xml_comment* create( t_lfm const& lfm );
-      static xml_comment* create();
 
       virtual ~xml_comment() {}
       //virtual xml_node* clone() const;
@@ -72,6 +72,7 @@ namespace txml {
       std::string print()const;
       v_ret accept( visitor_base* visitor ) const override final;
 
+      friend class xml_document;
    protected:
 
 

@@ -10,3 +10,9 @@
 /.qmake.cache
 /xmlparser
 /ubuntu32_print.xml
+*.qmake.stash
+/ubuntu32_dump.txt
+/ubuntu32_keys.txt
+/ubuntu32_out.xml
+/ef
+/pretty_print.xml

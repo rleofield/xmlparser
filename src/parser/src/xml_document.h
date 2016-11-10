@@ -67,7 +67,7 @@ namespace txml {
 
 
    public:
-      static tPointers pointers;
+      tNodes nodes;
       static std::locale loc;
       bool save( const std::string& filename ) const ;
 
@@ -77,8 +77,8 @@ namespace txml {
       bool parse_begin( std::string  const& );
 
       std::string  serialize( std::string indent, bool pretty_print ) const ;
-      void serialize( std::list<std::string>& v, std::string indent, bool pretty_print   ) const ;
-      void serialize( std::vector<std::string>& v, std::string indent, bool pretty_print   ) const ;
+      std::list<std::string> serialize_to_list( std::string indent, bool pretty_print ) const ;
+      std::vector<std::string>  serialize_to_vector( std::string indent, bool pretty_print ) const ;
 
       void parse( raw_buffer& pos );
       //      const XmlElement* rootElement() const;
@@ -90,6 +90,19 @@ namespace txml {
       static void encoding( Encoding e );
       static void preserve_white_space( bool b )    ;
       static bool preserve_white_space();
+
+      xml_comment* comment_create( t_lfm const& lfmcIn );
+      xml_comment* comment_create();
+
+      xml_element* element_create( t_lfm const& lfmcIn, const std::string& value_ = std::string() );
+      xml_element* element_create( const std::string& value_ = std::string() );
+
+      xml_text*  text_create( t_lfm const& lfmcIn, const std::string& value_ ) ;
+      xml_text*  text_create( const std::string& value_ ) ;
+
+      xml_declaration* declaration_create( t_lfm const& lfmcIn ) ;
+      xml_declaration* declaration_create( ) ;
+
 
    private:
 

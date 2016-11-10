@@ -64,7 +64,7 @@ www.lug-ottobrunn.de
 using namespace std;
 
 
-using txml::tPointers;
+using txml::tNodes;
 
 
 namespace txml {
@@ -110,9 +110,9 @@ namespace txml {
       alloccheck::checked_delete( n );
    }
 
-   xml_element* xml_element::create( t_lfm const& lfmcIn, const string& value_ ) {
+   xml_element* xml_element::create( t_lfm const& lfmcIn,  const string& value_ ) {
       xml_element* p = new( lfmcIn ) xml_element( value_ );
-      xml_document::pointers.add( p );
+      size_t s = sizeof( xml_node );
       return p;
 
    }
@@ -129,9 +129,6 @@ namespace txml {
 
 
    xml_element::~xml_element() {
-      if( !usePointerContainer ) {
-         clear();
-      }
    }
 
    string xml_element::attribute( const string& name ) const {
@@ -178,21 +175,33 @@ namespace txml {
 
    v_ret xml_element::accept( visitor_base* visitor ) const {
 
-      string n;
+
+      //      string typ = to_string( _type );
+      //      string nname = value();
+      //      string ns;
+
       // a visitor returns true, until something is found
       v_ret ret = visitor->enter( *this );
 
       if( ret.recurse() ) {
-         const xml_node* node = first_child();
 
-         for( ; node; node = node->next() ) {
-            n = node->value();
-            ret = node->accept( visitor );
+         std::vector<xml_node*>  const& childs = getChilds();
+
+         for( xml_node * n : childs ) {
+            //            ns = n->value();
+            //            LOGT_INFO( "typ:    " + typ );
+            //            LOGT_INFO( "parent: " + nname );
+            //            LOGT_INFO( "node:   " + n );
+            //            LOGT_INFO( "ntype:  " + to_string( node->_type ) );
+            //            LOGT_INFO( "path:   " +  static_cast<string>( node->lookuppath() ) );
+            //            LOGT_INFO( "childs: " +  rlf_hstring::toString( childs.size() ) );
+            ret = n->accept( visitor );
 
             if( ret.stop() ) {
                break;
             }
          }
+
       }
 
       ret = visitor->exit( *this );
@@ -227,27 +236,13 @@ namespace txml {
 
    }
 
-//   string path_element::toValue()const {
-//      xml_element const* n =  dynamic_cast<xml_element const*>( _node );
-//      string val;
 
-//      if( n != nullptr ) {
-//         val =  n->unencoded_text();
-//         string a = attr();
-
-//         if( !a.empty() ) {
-//            val = n->attribute( a );
-//         }
-//      }
-
-//      return val;
-//   }
    // <elem attr="mm" >abc</elem>  <-- normales element, chileds/.
    // <elem attr="mm" />  <-- closed element, no child, but siblings
    void xml_element::parse( raw_buffer& pos ) {
 
 
-      string ndebug = "ADVTBeziehung";
+      string ndebug = "uuid";
 
       pos.skip();
 
@@ -307,13 +302,24 @@ namespace txml {
             msg_parsing_element +  " at: '" + pos.next25() + "'" );
       }
 
-      if( _value == ndebug ){
+      string val = _value;
+
+      if( _value == ndebug ) {
          ndebug = "";
       }
+
       path_element ke( _value );
       ke.node( this );
       _path.add( ke );
 
+      string tmp = _path;
+
+      if( tmp ==  "domain.boot" ) {
+         LOGT_INFO( _path );
+
+      }
+
+      LOGT_INFO( _path );
       // look for previous child, for internal numbering
       xml_node* parent_ = parent();
       xml_node* prevChild = parent_->last_child_element( _value );
@@ -339,6 +345,7 @@ namespace txml {
 
       string attributes = inner;
       bool attr_checked = false;
+
       while( !pos.is_at_end() ) {
          size_t value_size = _value.size();
 
@@ -353,12 +360,14 @@ namespace txml {
          if( isclosed_Element &&  attributes.size() == 0 ) {
             return;
          }
+
          // get attributes, if not, go to next
          if( attributes.size() > 0 ) {  // we have an empty tag with /> and/or we have attributes
 
             // parse attributes, attributepart is empty after function call
             attributes = rlf_hstring::trim( parse_attributes( attributes ) );
             attr_checked = true;
+
             if( attributes.size() != 0 ) {
                throw Xml_exception(
                   eEx::parse, msg_parsing_element + ", attrbutepart ahs unknown parts: '" + inner + "'" );
@@ -369,14 +378,15 @@ namespace txml {
             pos.skip();
 
             // recursive loop
-             while( !pos.is_at_end() ) {
+            while( !pos.is_at_end() ) {
 
                // if at text start
                string txt1 = pos.next( string( "<" ).size() );
 
                // if not at at '<' then is element text
                if( txt1 != string( "<" ) ) { // not at '<'
-                  xml_text* textNode = xml_text::create( tlfm_ ) ;
+                  xml_document* d = document();
+                  xml_text* textNode = d->text_create( tlfm_ ) ;
                   string text1 = pos.next( pos.find_next( string( "<" ) ) );
                   pos.advance( text1.size() );
                   pos.advance( 1 ); // skip <
@@ -461,6 +471,7 @@ namespace txml {
       xml_node const* n1 = last_child();
       return ( n0 == n1 ) && ( n0 == nullptr );
    }
+
    xml_text const* xml_element::text() const {
       xml_node const* ch = first_child();
 

@@ -92,7 +92,7 @@ namespace txml {
          auto start = s.begin();
 
          while( start != s.end() ) {
-            *start = static_cast< char >(::toupper( *start ) );
+            *start = static_cast< char >( ::toupper( *start ) );
             ++start;
          }
       }
@@ -102,7 +102,7 @@ namespace txml {
          string::iterator start = s.begin();
 
          while( start != s.end() ) {
-            *start = static_cast<char>(::tolower( *start ) );
+            *start = static_cast<char>( ::tolower( *start ) );
             ++start;
          }
       }

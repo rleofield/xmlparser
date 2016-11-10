@@ -148,7 +148,7 @@ namespace txml {
 
          while( begin != end
                 && (
-                   IsAlphaNum( static_cast< uint8_t >(  *begin ) )
+                   IsAlphaNum( static_cast< uint8_t >( *begin ) )
                    || *begin == '_'
                    || *begin == '-'
                    || *begin == '.'

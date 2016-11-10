@@ -172,24 +172,29 @@ namespace demo {
       o << endl;
       xml_node const* pChild;
 
-      for( pChild = node->first_child(); pChild != nullptr; pChild = pChild->next() ) {
-         node_dump( o, pChild, indent + 1 );
+
+      std::vector<xml_node*>  const& childs = node->getChilds();
+
+      for( xml_node const * no : childs ) {
+         node_dump( o, no, indent + 1 );
       }
+
+
    }
 
 
    void build_simple_doc( ) {
       // Make xml: <?xml ..><Hello>World</Hello>
       xml_document doc;
-      xml_declaration* decl = xml_declaration::create( tlfm_ );
-      xml_element* element = xml_element::create( "Hello" );
-      xml_text* text = xml_text::create( tlfm_, "World" );
+      xml_node* decl = doc.declaration_create( tlfm_ );
+      xml_node* element = doc. element_create( "Hello" );
+      xml_node* text = doc.text_create( tlfm_, "World" );
       //text->parent( &doc );
       element->link_end_child( text );
       doc.link_end_child( decl );
       doc.link_end_child( element );
-      xml_element* element2 = xml_element::create( "ele2" );
-      xml_node* text2 = xml_text::create( tlfm_, "World2" );
+      xml_node* element2 = doc.element_create( "ele2" );
+      xml_node* text2 = doc.text_create( tlfm_, "World2" );
       element2->link_end_child( text2 );
       doc.link_end_child( element2 );
 
@@ -204,16 +209,17 @@ namespace demo {
       // as early as possible into the tree.
 
       xml_document doc;
-      xml_node* decl = xml_declaration::create( tlfm_ );
-      //doc.linkEndChild( decl );
+      xml_node* decl = doc.declaration_create( tlfm_ );
+      doc.link_end_child( decl );
 
-      xml_element* element = xml_element::create( "Hello" );
+      xml_node* element = doc.element_create( "Hello" );
       doc.link_end_child( element );
 
-      xml_node* text = xml_text::create( "World" );
+      xml_node* text = doc.text_create( "World" );
       element->link_end_child( text );
       xmlinterface::tXmlInterface t;
       t.rebuild( doc );
+      t.save( "madeByHand2.xml" );
       t.save( "madeByHand2.xml" );
    }
 
@@ -224,40 +230,42 @@ namespace demo {
 
    void write_app_settings_doc() {
       xml_document doc;
-      //xml_node* decl = xml_declaration::create( );
-      //doc.linkEndChild( decl );
 
-      xml_element* root = xml_element::create( "MyApp" );
+      xml_node* decl =  doc.declaration_create();
+      doc.link_end_child( decl );
+
+      xml_node* root = doc.element_create( "MyApp" );
       doc.link_end_child( root );
 
-      //xml_node* comment = xml_comment::create( );
-      //comment->value( " Settings for MyApp " );
-      //root->linkEndChild( comment );
+      xml_node* comment = doc.comment_create();
+      comment->value( " Settings for MyApp " );
+      root->link_end_child( comment );
 
-      xml_element* msgs = xml_element::create( "Messages" );
+      xml_node* msgs = doc.element_create( "Messages" );
       root->link_end_child( msgs );
 
-      xml_element* msg = xml_element::create( "Welcome" );
-      msg->link_end_child( xml_text::create( "Welcome to MyApp" ) );
+      xml_node* msg = doc.element_create( "Welcome" );
+      msg->link_end_child( doc.text_create( "Welcome to MyApp" ) );
       msgs->link_end_child( msg );
 
 
       //doc->saveFile( "appsettings_smart_Welcome.xml" );
       xmlinterface::tXmlInterface t;
       t.rebuild( doc );
-      xml_document const* doc1 = t.document();
+      xml_document* doc1 = t.document();
       list<string> v;
       bool pretty_print = true;
-      doc1->serialize( v, "        ", pretty_print );
+      v = doc1->serialize_to_list( "        ", pretty_print );
 
-      msg = xml_element::create( tlfm_, "Farewell" );
-      msg->link_end_child( xml_text::create( "Thank you for using MyApp" ) );
+      msg = doc1-> element_create( tlfm_, "Farewell" );
+      msg->link_end_child( doc1-> text_create( "Thank you for using MyApp" ) );
       msgs->link_end_child( msg );
 
-      xml_element* windows = xml_element::create( "Windows" );
+      xml_node* windows = doc1->element_create( "Winfffffffffffffffdows" );
       root->link_end_child( windows );
+      windows->link_end_child( doc1-> text_create( "in win" ) );
 
-      xml_element* window = xml_element::create( "Window" );
+      xml_element* window = doc1->element_create( "Window" ) ;
       windows->link_end_child( window );
       window->attribute( "name", "MainFrame" );
       window->attribute( "x", "5" );
@@ -265,7 +273,7 @@ namespace demo {
       window->attribute( "w", "400" );
       window->attribute( "h", "250" );
 
-      xml_element* cxn = xml_element::create( tlfm_, "Connection" );
+      xml_element* cxn = doc1->element_create( tlfm_, "Connection" ) ;
       root->link_end_child( cxn );
       cxn->attribute( "ip", "192.168.0.1" );
       cxn->attribute( "timäout", "123.456" ); // floating point attrib
@@ -273,6 +281,7 @@ namespace demo {
 
       t.rebuild( doc );
       t.save( "appsettings_old.xml" );
+      t.save( "appsettings_old1.xml" );
 
    }
 

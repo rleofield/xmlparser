@@ -72,7 +72,7 @@ namespace examples {
          t.parse( xmlTest );
 
          // save to disk with implicit pretty printer
-         t.save( xmlPrintOut );
+         t.save( "pretty_print.xml" );
 
          // generate the keylist of all nodes as const string
          t.print_creator( xmlKeysOut, xmlTestOut );
@@ -102,7 +102,8 @@ namespace examples {
          instance.create( "domain.currentMemory", "4194304" );
          instance.create( "domain.vcpu", "4" );
          instance.create( "domain.os", "" );
-         instance.create( "domain.os.type", "hvm" );
+         instance.create( "domain.os.boot", "" );
+         //instance.create( "domain.os.type", "hvm" );
          instance.  attr( "domain.os.type:arch", "i686" );
          instance.  attr( "domain.os.type:machine", "pc-1.0" );
          instance.create( "domain.os.boot", "" );
@@ -216,10 +217,10 @@ namespace examples {
          instance.save();
 
          // get element text
-         string suuid = instance.get_string("domain.uuid");
+         string suuid = instance.get_string( "domain.uuid" );
 
          // get attribute
-         string adresstype = instance.get_string("domain.devices.interface.address:type");
+         string adresstype = instance.get_string( "domain.devices.interface.address:type" );
 
 
 
@@ -237,12 +238,12 @@ namespace examples {
          demo::node_dump( o, instance.document(), 2 );
          string ret = o.str();
          list<string> text;
-         rlf_hstring::string_to_list( ret, text, 0 );
+         text = rlf_hstring::string_to_list( ret, static_cast<char>(0) );
 
          bool overwrite = true;
 
          try {
-            rlf_txtrw::t_write_ascii_list()( "ubuntu32_dump.txt", text, overwrite );
+            rlf_txtrw::t_write_text()( "ubuntu32_dump.txt", text, overwrite );
          } catch( rlf_txtrw::bad_text_write& ex ) {
             string w =  ex.what();
             LOGT_ERROR( "ex: " + w );

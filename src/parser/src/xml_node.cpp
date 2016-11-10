@@ -79,10 +79,15 @@ namespace txml {
         */
 
    xml_node* xml_node::create_in_doc( raw_buffer& buffer ) {
+      //std::string b1 = buffer.next25();
+      //LOGT_INFO( b1 );
       return create_in_elem( buffer );
    }
 
    xml_node* xml_node::create_in_elem( raw_buffer& buffer ) {
+
+      std::string b = buffer.next25();
+      //LOGT_INFO( b );
 
       buffer.skip();
 
@@ -100,6 +105,7 @@ namespace txml {
       auto content = buffer.next_until( ">" ); //">"
 
       // find node type by string between < .... >
+      // didn't set the string as value
       xml_node* n = create( content );
       n->parent( this );
       return n;
@@ -151,20 +157,21 @@ namespace txml {
          //         return 0;
       }
 
-
+      xml_document* d = document();
+      assert( d != nullptr );
 
       if( isElement( temp ) ) {  // is alpha or underscore
-         xml_element* node =  xml_element::create();
+         xml_node* node =  d->element_create();
          return node;
       }
 
       if( isComment( temp ) ) {  // <!-- und -->
-         xml_comment* node = xml_comment::create();
+         xml_node* node = d->comment_create();
          return node;
       }
 
       if( isDeclaration( temp ) )  {   // "<?xml und ?>"
-         xml_declaration* node = xml_declaration::create( tlfm_ );
+         xml_node* node = d->declaration_create( tlfm_ );
          return node;
       }
 
@@ -176,11 +183,8 @@ namespace txml {
    xml_node::xml_node( eType type_ ) :
       _path(),
       _type( type_ ),
-      p(nullptr),
-      fc(nullptr),
-      lc(nullptr),
-      ps(nullptr),
-      ns(nullptr),
+      _childs(),
+      _parent( nullptr ),
       _value(),
       _rawxml() {}
 
@@ -189,43 +193,24 @@ namespace txml {
 
       _path(),
       _type( type_ ),
-      p(nullptr),
-      fc(nullptr),
-      lc(nullptr),
-      ps(nullptr),
-      ns(nullptr),
+      _childs(),
+      _parent( nullptr ),
       _value( v ),
       _rawxml() {}
 
 
    xml_node::~xml_node() {
-      if( !usePointerContainer ) {
-         xml_node* node = first_child();
-
-         while( node != nullptr ) {
-            xml_node* temp = node;
-            node = node->next();
-            delete temp; // do delete
-         }
-      }
    }
 
    void xml_node::clear() {
-      xml_node* node = first_child();
 
-      while( node != nullptr ) {
-         xml_node* temp = node;
-         node = node->next();
+      std::vector<xml_node*>  const& childs = getChilds();
 
-         if( !usePointerContainer ) {
-            delete temp;
-         }
-
-         temp = nullptr;
+      for( xml_node * node : childs ) {
+         node->clear();
       }
 
-      fc = nullptr;
-      lc = nullptr;
+      _childs.clear();
    }
 
    const string xml_node::value() const {
@@ -235,17 +220,16 @@ namespace txml {
       _value = value_;
    }
 
-   const xml_node* xml_node::first_child() const {
-      return fc;
-   }
-   xml_node* xml_node::first_child() {
-      return fc;
+   xml_node* xml_node::first_child() const {
+      xml_node* n = _childs.first();
+      return n;
    }
 
-   string xml_node::tvalue() const {
-      string t =  to_string( _type );
-      return t + ":" + _value;
-   }
+
+   //   string xml_node::tvalue() const {
+   //      string t =  to_string( _type );
+   //      return t + ":" + _value;
+   //   }
 
 
 
@@ -269,17 +253,9 @@ namespace txml {
 
 
       node->parent( this );
+      _childs.append( node );
 
-      if( lc != nullptr ) {
-         lc->ns = node;
-      } else {
-         fc = node;   // it was an empty list.
-      }
 
-      node->ps = last_child();
-      node->ns = nullptr;
-
-      lc = node;
       return node;
    }
 
@@ -303,70 +279,68 @@ namespace txml {
 
       comment->parent( this );
 
-      comment->ns = child;
-      comment->ps = child->prev();
 
-      if( child->ps ) {
-         child->ps->ns = comment;
-      } else {
-         assert( fc == child );
-         fc = comment;
+   }
+
+
+   xml_node* xml_node::last_child()const  {
+      xml_node* n = _childs.last();
+      return n;
+   }
+
+
+   xml_element* xml_node::first_child_element( const string& val ) const {
+      xml_element* elem = _childs.first_element( val );
+      return elem;
+   }
+
+   xml_element* xml_node::last_child_element( const string& val ) const {
+      xml_element* elem = _childs.last_element( val );
+      return elem;
+   }
+
+
+   xml_node* xml_node::prev() const {
+      xml_node const* p = parent();
+
+      if( p == nullptr ) {
+         return nullptr;
       }
 
-      child->ps = comment;
+      tchilds const& ch = p->_childs;
+
+      xml_node* n = ch.prev( this );
+      return n;
    }
 
+   xml_node* xml_node::next() const {
 
-   xml_node* xml_node::last_child()  {
-      return lc;
-   }
-   const xml_node* xml_node::last_child()const {
-      return lc;
-   }
+      xml_node const* p = parent();
 
-
-   const xml_element* xml_node::last_child_element( const string& value_ ) const {
-      const xml_node* node;
-
-      for( node = last_child(); node != nullptr; node = node->prev() ) {
-         if( node->value() == value_ &&
-               dynamic_cast<xml_element const*>( node )
-
-           ) {
-            xml_node const* pn = node;
-            return dynamic_cast<xml_element const*>( node );
-         }
+      if( p == nullptr ) {
+         return nullptr;
       }
 
-      return nullptr;
-   }
-   xml_element* xml_node::last_child_element( const string& val ) {
+      tchilds const& ch = p->_childs;
 
-      xml_node* node;
-
-      for( node = last_child(); node != nullptr; node = node->prev() ) {
-         if( node->value() == val && dynamic_cast<xml_element const*>( node )
-           ) {
-            xml_node* pn = node;
-            return dynamic_cast<xml_element*>( node );
-         }
+      // text has no next()
+      if( _type  == eType::TEXT ) {
+         return nullptr;
       }
 
-      return nullptr;
-   }
 
+      xml_node* n = ch.next( this );
 
-   const xml_node* xml_node::prev() const {
-      return ps;
-   }
-   xml_node* xml_node::prev()  {
-      return ps;
-   }
-   const xml_node* xml_node::next() const {
-      return ns;
-   }
-   xml_node* xml_node::next() {
-      return ns;
+      if( n == nullptr ) {
+         //LOGT_INFO( "null" );
+         return nullptr;
+      }
+
+      string s = n->value();
+      // LOGT_INFO( s );
+
+      return n;
+
    }
 
 
@@ -374,15 +348,15 @@ namespace txml {
       return _type;
    }
 
-   void         xml_node::parent( xml_node* p1 ) {
-      p = p1;
+   void         xml_node::parent( xml_node* parent_ ) {
+      _parent = parent_;
    }
 
 
-   xml_document const* xml_node::document()  {
-      for( const xml_node* node = this; node != nullptr; node = node->parent() ) {
-         xml_document const* doc =
-            dynamic_cast<xml_document const*>( node ) ;
+   xml_document* xml_node::document()  {
+      for( xml_node* node = this; node != nullptr; node = node->parent() ) {
+         xml_document* doc =
+            dynamic_cast<xml_document*>( node ) ;
 
          if( doc != nullptr ) {
             assert( doc->next() == nullptr );
@@ -392,34 +366,191 @@ namespace txml {
          }
       }
 
+      assert( true );
+      return nullptr;
+   }
+   int i15 = 0;
+   tNodes::~tNodes() {
+      for( auto & p : nodes ) {
+         delete p.second;
+      }
+
+      nodes.clear();
+
+      i15 = 1;
+   }
+
+   void tNodes::clear_all() {
+
+      for( auto & p : nodes ) {
+         delete p.second;
+      }
+
+      nodes.clear();
+
+   }
+
+
+   void tNodes::add( xml_node* p ) {
+      std::map<xml_node*, xml_node*>::const_iterator it = nodes.find( p );
+      assert( it == nodes.end() );
+      nodes[p] = p;
+   }
+
+
+
+   xml_element* tchilds::first_element( std::string const& val )const {
+      if( val == "" ) {
+         return nullptr;
+      }
+
+      if( _childs.size() == 0 ) {
+         return nullptr;
+      }
+
+      for( xml_node * n : _childs ) {
+         xml_element* elem = dynamic_cast<xml_element*>( n );
+
+         if( elem != nullptr ) {
+            if( elem->value() == val ) {
+               return elem;
+            }
+         }
+      }
+
       return nullptr;
    }
 
-   void tPointers::clear() {
-
-      for( auto & p : pointers ) {
-         p.second.delete_ptr();
+   xml_element* tchilds::first_element()const {
+      if( _childs.size() == 0 ) {
+         return nullptr;
       }
 
-      pointers.clear();
+      for( xml_node * n : _childs ) {
+         xml_element* elem = dynamic_cast<xml_element*>( n );
 
-   }
-   void tPointers::delete_ptr() {
-      if( _ptr != nullptr ) {
-         delete _ptr;
-         _ptr = nullptr;
+         if( elem != nullptr ) {
+            return elem;
+         }
       }
+
+      return nullptr;
    }
 
-   void tPointers::add( xml_node* p ) {
-      if( usePointerContainer ) {
-         tPointers p0( p );
-         tPointers::pointers[p0.index()] = p0;
+   // http://goodliffe.blogspot.de/2013/05/c11-iterating-range-based-for-backwards.html
+   template <typename T>
+   class iterate_backwards {
+   public:
+      explicit iterate_backwards( const T& t_ ) : t( t_ ) {}
+      typename T::const_reverse_iterator begin() const {
+         return t.rbegin();
       }
+      typename T::const_reverse_iterator end()   const {
+         return t.rend();
+      }
+   private:
+      const T& t;
+   };
+   template <typename T>
+   iterate_backwards<T> backwards( const T& t ) {
+      return iterate_backwards<T>( t );
    }
 
-   std::map<xml_node*, tPointers> tPointers::pointers;
+   xml_element* tchilds::last_element( std::string const& val )const {
 
+      if( _childs.size() == 0 ) {
+         return nullptr;
+      }
+
+      vector<xml_node*>::const_reverse_iterator rbegin = _childs.rbegin();
+      vector<xml_node*>::const_reverse_iterator rend = _childs.rend();
+
+      for( xml_node * n : backwards( _childs ) ) {
+         xml_element* elem = dynamic_cast<xml_element*>( n );
+
+         if( elem != nullptr ) {
+            if( elem->value() == val ) {
+               return elem;
+            }
+         }
+      }
+
+      return nullptr;
+   }
+
+   xml_element* tchilds::last_element()const {
+
+      if( _childs.size() == 0 ) {
+         return nullptr;
+      }
+
+      for( xml_node * n : backwards( _childs ) ) {
+         xml_element* elem = dynamic_cast<xml_element*>( n );
+
+         if( elem != nullptr ) {
+            return elem;
+         }
+      }
+
+      return nullptr;
+   }
+
+
+   std::vector<std::string> tchilds::values()const {
+      std::vector<std::string> v;
+
+      for( auto n : _childs ) {
+         if( n != nullptr ) {
+            std::string s = n->value();
+            v.push_back( s );
+         } else {
+            std::string s2 = "null";
+            v.push_back( s2 );
+         }
+      }
+
+      return v;
+   }
+
+
+   xml_node* tchilds::next( xml_node const* p ) const {
+      if( p == nullptr ) {
+         return nullptr;
+      }
+
+      size_t i = pos( p );
+
+      if( i == err ) {
+         return nullptr;
+      }
+
+      i++;
+
+      if( i == _childs.size() ) {
+         return nullptr;
+      }
+
+      xml_node* n = _childs[i];
+      return n;
+   }
+
+   size_t tchilds::pos( xml_node const* p ) const {
+      if( p == nullptr ) {
+         return err;
+      }
+
+      size_t index = 0;
+
+      for( xml_node * n : _childs ) {
+         if( n == p ) {
+            return index;
+         }
+
+         index++;
+      }
+
+      return err;
+   }
 
 
 }

@@ -43,7 +43,8 @@ www.lug-ottobrunn.de
 #define RLF_NODE_H
 
 
-#include <map>
+//#include <map>
+#include <list>
 #include <string>
 
 #include "enum_macro.h"
@@ -68,18 +69,84 @@ namespace txml {
 
    class raw_buffer;
 
-   // nodeholder
-//   class nodeh {
-//   public:
-//      xml_node*     parent;
 
-//      xml_node*     first_child;
-//      xml_node*     lastChild;
 
-//      xml_node*      prev_sibling;
-//      xml_node*      next_sibling;
-//      nodeh(): parent( nullptr ), first_child( nullptr ), lastChild( nullptr ), prev_sibling( nullptr ), next_sibling( nullptr ) {}
-//   };
+
+   class tchilds {
+
+      std::vector<xml_node*> _childs;
+      static const size_t err = size_t( -1 );
+   public:
+      tchilds(): _childs() {}
+      ~tchilds() {}
+
+      size_t size() const {
+         return _childs.size();
+      }
+      void append( xml_node* p ) {
+         _childs.push_back( p );
+      }
+      bool contains( xml_node const* p ) {
+         size_t pp = pos( p );
+
+         if( pp == err ) {
+            return false;
+         }
+
+         return true;
+      }
+      std::vector<xml_node*> const& childs()const {
+         return _childs;
+      }
+      std::vector<std::string> values()const;
+
+
+      size_t pos( xml_node const* p ) const;
+      xml_node* next( xml_node const* p ) const;
+
+
+      xml_node* prev( xml_node const* p ) const {
+         size_t i = pos( p );
+
+         if( i == err ) {
+            return nullptr;
+         }
+
+         if( i == 0 ) {
+            return nullptr;
+         }
+
+         i--;
+         xml_node* n = _childs[i];
+         return n;
+      }
+
+      xml_node* first() const {
+         if( _childs.size() == 0 ) {
+            return nullptr;
+         }
+
+         xml_node* n = _childs[0];
+         return n;
+      }
+      xml_node* last() const {
+         if( _childs.size() == 0 ) {
+            return nullptr;
+         }
+
+         xml_node* n = _childs[ _childs.size() - 1];
+         return n;
+      }
+      xml_element* first_element( std::string const& val )const;
+      xml_element* last_element( std::string const& val )const;
+      xml_element* first_element()const;
+      xml_element* last_element()const;
+
+      void clear() {
+         _childs.clear();
+      }
+
+   };
 
 
    class xml_node {
@@ -96,6 +163,11 @@ namespace txml {
       DEFINE_ENUM_WITH_STRING_CONVERSIONS( eType, ( DOC )( ELEM )( COMMENT )( TEXT )( DECL ) );
 
 
+      eType type() const;
+
+      // the master document
+      xml_document* document() ;
+
       /**
       in Document:   filename of the xml file
       in Element:    name of the element
@@ -104,57 +176,49 @@ namespace txml {
       */
       const std::string value() const;
       void value( const std::string& );
-      std::string tvalue() const;
 
       void clear();
 
-      const xml_node* first_child()const;
-      xml_node* first_child();
-      const xml_element* firstChildElement( const std::string& _value ) const   ;
-      xml_element* firstChildElement( const std::string& _value )            ;
+      // first/last in list
+      xml_node* first_child()const;
+      xml_node* last_child()const;
 
-      vector<xml_node*> childs();
+      // first/last in list with check if is element, no comment, no declaration, no text
+      xml_element* first_child_element( const std::string& _value )  const          ;
+      xml_element* last_child_element( const std::string& _value ) const;
+
+      // neighbour list, via parent
+      xml_node* prev() const;
+      xml_node* next() const;
 
 
-      const xml_node* last_child()const;
-      xml_node* last_child();
-      const xml_element* last_child_element( const std::string& _value ) const;
-      xml_element* last_child_element( const std::string& _value ) ;
-
-
+      // ad a child to list
       xml_node* link_end_child( xml_node* addThis );
+
+      // special for comment
       void insert_comment_before( xml_node* node, xml_comment* comment );
 
 
-      const xml_node* prev() const;
-      xml_node* prev();
-      const xml_node* next() const;
-      xml_node* next();
-
-      eType type() const;
-
-      xml_document const* document() ;
-
-
-
+      // visitor
       // returns true, if not accepted, means go recurse to next
       virtual v_ret accept( visitor_base* visitor ) const = 0;
 
 
-      xml_node const*  parent( )const {
-         return p;
-      }
-      xml_node*   parent( ) {
-         return p;
-      }
-      std::string lookupPathString()const {
-         return _path;
+      xml_node*   parent( )const {
+         return _parent;
       }
       path const& lookuppath()const {
          return _path;
       }
       path& lookuppath() {
          return _path;
+      }
+
+      std::vector<xml_node*> const& getChilds()const {
+         return _childs.childs();
+      }
+      std::vector<std::string> getChildValues()const {
+         return _childs.values();
       }
 
    protected:
@@ -168,6 +232,9 @@ namespace txml {
 
       virtual void parse( raw_buffer& ) = 0;
 
+
+
+
    private:
 
       // path to node
@@ -175,22 +242,15 @@ namespace txml {
 
       eType     _type;
 
-      //nodeh _nh;
-            xml_node*     p;
-            xml_node*     fc;
-            xml_node*     lc;
+      tchilds _childs;
 
-            xml_node*      ps;
-            xml_node*      ns;
-
+      xml_node*     _parent;
 
       std::string _value;
       std::string _rawxml;
       xml_node( const xml_node& );
       void operator=( const xml_node& base );
    };
-
-   //std::string to_string( xml_node::eNodeType  t ) ;
 
 
 } // end of namespace txml

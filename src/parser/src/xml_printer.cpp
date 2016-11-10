@@ -68,11 +68,16 @@ namespace txml {
       _buffer << element.value();
 
 
+      string s = _buffer.str();
+      //LOGT_INFO( s );
+
+
       for( auto & a :   element.Attributes() ) {
          _buffer << " ";
          _buffer <<  a.print( );
       }
-      if( element.Attributes().size() > 0 ){
+
+      if( element.Attributes().size() > 0 ) {
          //_buffer << " ";
       }
 
@@ -96,7 +101,9 @@ namespace txml {
          }
       }
 
-      // LOGT_DEBUG( _buffer );
+      s = _buffer.str();
+      //LOGT_INFO( s );
+
       ++_depth;
       return v_ret::eRet::RECURSE;
    }
@@ -118,7 +125,7 @@ namespace txml {
          }
 
          std::string t = _buffer.str();
-         LOGT_DEBUG( t );
+         //LOGT_DEBUG( t );
 
          _buffer << "</";
          string v = element.value();
@@ -127,12 +134,17 @@ namespace txml {
          _buffer << _lineBreak;
       }
 
+      string s = _buffer.str();
+      //LOGT_INFO( s );
+
       return v_ret::eRet::RECURSE;
    }
 
 
    v_ret xml_printer::visittext( const xml_text& text ) {
       if( _element_text_prints_inline ) {
+         string s = _buffer.str();
+         //LOGT_INFO( s );
          _buffer << text.value();
          return v_ret::eRet::RECURSE;
       }
@@ -140,6 +152,10 @@ namespace txml {
       _buffer << indent();
       string v = text.value();
       _buffer <<  v << _lineBreak ;
+
+      string s1 = _buffer.str();
+      //LOGT_INFO( s1 );
+
       return v_ret::eRet::RECURSE;
    }
 
@@ -169,7 +185,7 @@ namespace txml {
       }
 
       std::string tmp = std::move( str );
-      LOGT_DEBUG( "indent: \'" + tmp + "\"" );
+      //LOGT_DEBUG( "indent: \'" + tmp + "\"" );
       return tmp;
    }
 

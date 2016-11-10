@@ -92,7 +92,7 @@ namespace txml {
                continue;
             }
 
-            temp += static_cast< char> ( c );
+            temp += static_cast< char>( c );
             ++i;
          }
 

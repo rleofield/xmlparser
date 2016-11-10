@@ -80,21 +80,21 @@ namespace txml {
       }
 
       virtual v_ret enter( const xml_element& )  {
-         return v_ret(v_ret::eRet::RECURSE);
+         return v_ret( v_ret::eRet::RECURSE );
       }
       virtual v_ret exit( const xml_element& )      {
-         return v_ret(v_ret::eRet::RECURSE);
+         return v_ret( v_ret::eRet::RECURSE );
       }
 
       // non recursive objects
       virtual v_ret visittext( const xml_text& )             {
-         return v_ret(v_ret::eRet::RECURSE);
+         return v_ret( v_ret::eRet::RECURSE );
       }
       virtual v_ret visit( const xml_declaration& )  {
-         return v_ret(v_ret::eRet::RECURSE);
+         return v_ret( v_ret::eRet::RECURSE );
       }
       virtual v_ret visit( const xml_comment& )       {
-         return v_ret(v_ret::eRet::RECURSE);
+         return v_ret( v_ret::eRet::RECURSE );
       }
    };
 

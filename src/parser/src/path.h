@@ -40,7 +40,8 @@ namespace txml {
       std::string  to_string()const;
    public:
       path();
-      void from_string(std::string const& key);
+      path( std::string const& key );
+      void from_string( std::string const& key );
       bool operator>( path const& ke )const;
       bool operator==( path const& k )const;
       path& operator=( std::string const& key );
@@ -73,7 +74,7 @@ namespace txml {
       bool compareByElement( path const& v1 )const ;
       bool compareByChildCount( path const& v1 ) const ;
 
-      std::string toElementText(xml_document const& )const;
+      std::string toElementText( xml_document const& )const;
 
 
    };

@@ -44,7 +44,7 @@ www.lug-ottobrunn.de
 
 
 #include "xml_node.h"
-
+#include "tPointers.h"
 
 
 namespace txml {
@@ -71,11 +71,11 @@ namespace txml {
       std::string _version;
       std::string _encoding;
       std::string _standalone;
+      static xml_declaration* create( t_lfm const& lfmcIn ) ;
+      static xml_declaration* create() ;
 
 
    public:
-      static xml_declaration* create( t_lfm const& lfmcIn ) ;
-      static xml_declaration* create() ;
 
       virtual ~xml_declaration()   {}
 
@@ -96,6 +96,7 @@ namespace txml {
       virtual v_ret accept( visitor_base* visitor ) const  override final;
 
       std::string  print( int depth ) const;
+      friend class xml_document;
 
    protected:
       //void copy( xml_declaration& target ) const;

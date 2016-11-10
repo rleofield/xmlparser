@@ -80,7 +80,7 @@ namespace txml {
       xml_element* elementfound()const {
          return _elementfound;
       }
-      bool accepted() const{
+      bool accepted() const {
          return _elementfound != nullptr;
       }
 

@@ -32,35 +32,42 @@ namespace txml {
    class xml_node;
 
 
-      class path_attr {
-         std::string to_string()const{ return _name; }
+   class path_attr {
+      std::string to_string()const {
+         return _name;
+      }
 
-      public:
-         path_attr():_name(){}
-         path_attr( std::string const& str ):_name(str){}
-         path_attr( path_attr const& a ):_name(a._name){}
+   public:
+      path_attr(): _name() {}
+      path_attr( std::string const& str ): _name( str ) {}
+      path_attr( path_attr const& a ): _name( a._name ) {}
 
-         path_attr& operator=( path_attr const& a ){
-            if( this != & a ){
-               _name = a._name;
-            }
-            return *this;
+      path_attr& operator=( path_attr const& a ) {
+         if( this != & a ) {
+            _name = a._name;
          }
 
-         bool operator==( path_attr const& a )const {
-            return _name == a._name;
-         }
+         return *this;
+      }
 
-         std::string name()const { return *this ;}
+      bool operator==( path_attr const& a )const {
+         return _name == a._name;
+      }
 
-         operator std::string()const {
-            return to_string();
-         }
-         bool empty()const{ return _name.size() == 0;}
-      private:
-         std::string _name;
+      std::string name()const {
+         return *this ;
+      }
 
-      };
+      operator std::string()const {
+         return to_string();
+      }
+      bool empty()const {
+         return _name.size() == 0;
+      }
+   private:
+      std::string _name;
+
+   };
 
    // path_elements for search in xml doc
    // contains element names and attributename

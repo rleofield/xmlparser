@@ -70,17 +70,25 @@ namespace txml {
 
 
 
-   void path::from_string( string const& key ){
+   path::path( string const& key ): _keyentries() {
+      vector<string> elements = rlf_hstring::split( key, path_element::element_separator );
+
+      for( auto const & entry : elements ) {
+         _keyentries.push_back( entry );
+      }
+   }
+   void path::from_string( string const& key ) {
       _keyentries.clear();
       vector<string> elements = rlf_hstring::split( key, path_element::element_separator );
-      for( auto const& entry: elements  ) {
+
+      for( auto const & entry : elements ) {
          _keyentries.push_back( entry );
       }
    }
 
 
    path& path::operator=( string const& key ) {
-      from_string(key);
+      from_string( key );
       return *this;
    }
    path::path(): _keyentries() {}
@@ -103,10 +111,10 @@ namespace txml {
       return *this;
    }
 
-bool path::points_to_attr()const{
-   path_element const& el = last();
-   return el.points_to_attr();
-}
+   bool path::points_to_attr()const {
+      path_element const& el = last();
+      return el.points_to_attr();
+   }
 
    bool path::empty()const {
       return _keyentries.empty();
@@ -126,15 +134,18 @@ bool path::points_to_attr()const{
    }
 
 
-   std::string path::toElementText(xml_document const& _doc)const{
+   std::string path::toElementText( xml_document const& _doc )const {
 
       path key_no_attr = *this;
-      if( key_no_attr.points_to_attr() ){
-         path_element & pel = key_no_attr.last();
-         pel.attr(path_attr());
+
+      if( key_no_attr.points_to_attr() ) {
+         path_element& pel = key_no_attr.last();
+         pel.attr( path_attr() );
       }// debug
+
       string pathadd = key_no_attr;
-      if( pathadd == "domain.features.apic"){
+
+      if( pathadd == "domain.features.apic" ) {
          pathadd = key_no_attr;
       }
 
@@ -143,7 +154,8 @@ bool path::points_to_attr()const{
       _doc.accept( &locator );
 
       xml_element* elem = locator.elementfound();
-      if( elem != nullptr ){
+
+      if( elem != nullptr ) {
          xml_node const* ch = elem->first_child();
 
          if( ch == nullptr ) {
@@ -205,6 +217,7 @@ bool path::points_to_attr()const{
          if( v.empty() ) {
             return string();
          }
+
          struct add {
             string s;
             string const& sep;
@@ -214,6 +227,7 @@ bool path::points_to_attr()const{
                   s += str;
                   return;
                }
+
                s += sep;
                s += str;
             }
@@ -228,11 +242,11 @@ bool path::points_to_attr()const{
 
 
    }
-//   string to_string( vector<path_element> const& pev ) {
-//      vector<string> v = for_each( pev.begin(), pev.end(), pattern2vstring() ).v;
-//      return merge( v, "." );
+   //   string to_string( vector<path_element> const& pev ) {
+   //      vector<string> v = for_each( pev.begin(), pev.end(), pattern2vstring() ).v;
+   //      return merge( v, "." );
 
-//   }
+   //   }
    string  path::to_string()const {
       struct pattern2vstring {
          vector<string>  v;

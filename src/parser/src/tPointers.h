@@ -53,42 +53,16 @@ namespace txml {
    class xml_node;
    class xml_document;
 
-   const bool usePointerContainer = true;
 
-   class node_handle {
+
+
+   class tNodes {
    public:
-      xml_node* _ptr;
-      size_t h;
-
-   };
-
-
-   class tPointers {
-      xml_node* _ptr;
-
-
-      tPointers( tPointers const& ptrs ) ;
-
-   public:
-      tPointers(): _ptr( nullptr ) {
-      }
-      tPointers( xml_node* p ): _ptr( p ) {}
-      tPointers& operator=( tPointers const& p ) {
-         if( this != & p ) {
-            _ptr = p._ptr;
-         }
-
-         return *this;
-      }
-
-      xml_node* index()const {
-         return _ptr; //_index.index();
-      }
-      void delete_ptr();
-
+      tNodes(): nodes() {}
+      ~tNodes();
+      std::map<xml_node*, xml_node*> nodes;
       void add( xml_node* p );
-      static std::map<xml_node*, tPointers> pointers;
-      void clear();
+      void clear_all();
    };
 
 } // end of namespace txml

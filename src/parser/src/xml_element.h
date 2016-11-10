@@ -64,10 +64,10 @@ namespace txml {
 
       std::string parse_attributes( std::string const& temp );
       std::vector<xml_attribute> _attributes;
-
-   public:
       static xml_element* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() );
       static xml_element* create( const std::string& value_ = std::string() );
+
+   public:
       virtual ~xml_element();
 
       // add empty attribute
@@ -85,7 +85,7 @@ namespace txml {
       bool isClosed()const ;
       virtual void parse( raw_buffer& pos );
       virtual v_ret accept( visitor_base* visitor ) const;
-
+      friend class xml_document;
    };
 
 

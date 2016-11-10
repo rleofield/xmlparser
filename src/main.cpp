@@ -60,14 +60,14 @@ void cpp11_value_initialization() {
    int v {};
 }
 
-int mai(){
-   [](){
-      []()
-        {[](){}();
-        }();
+int mai() {
+   []() {
+      []() {
+         []() {}();
       }();
-         return 0;
-         }
+   }();
+   return 0;
+}
 
 int main() {
 
@@ -91,8 +91,8 @@ int main() {
       cout << "path for logging doesn't exist: '" << logfile <<  "'" << endl;
    }
 
-   logger().setLogLevel( eLevel::LDEBUG, eCategory::_default );
-   logger().setLogLevel( eLevel::LDEBUG, eCategory::Cat_A );
+   logger().log_level( eLevel::LDEBUG, eCategory::_default );
+   logger().log_level( eLevel::LDEBUG, eCategory::Cat_A );
 
 
    LOGT_INFO( " Start1  " );
@@ -112,19 +112,19 @@ int main() {
       // other demos, in demo.cpp
 
       // test of some string functions
-      // examples::string_convert();
+      //examples::string_convert();
 
       // print a nice xml format
-      //examples::pretty_print();
+      examples::pretty_print();
 
-      //examples::xml_path_to_string_const();
+      examples::xml_path_to_string_const();
 
       // insert a comment before an element
-      //examples::add_comments();
+      examples::add_comments();
 
       // read and set element values, attributes
-      //examples::get_element_attribute_values();
-      //examples::set_element_attribute_values();
+      // examples::get_element_attribute_values();
+      // examples::set_element_attribute_values();
 
    } catch( std::runtime_error& rt ) {
       LOGT_FATAL( string( "Ex rt: " ) + rt.what() );

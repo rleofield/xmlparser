@@ -46,6 +46,8 @@ www.lug-ottobrunn.de
 #include "xml_comment.h"
 #include "xml_document.h"
 
+
+
 #include "xml_utl.h"
 #include "xml_visitor.h"
 #include "xml_exception.h"
@@ -71,11 +73,10 @@ namespace txml {
 
    xml_comment* xml_comment::create( t_lfm const& lfmcIn ) {
       xml_comment* p = new( lfmcIn ) xml_comment();
-      xml_document::pointers.add( p );
       return p;
 
    }
-   xml_comment* xml_comment::create( ) {
+   xml_comment* xml_comment::create() {
       return create( tlfm_ );
    }
 
@@ -95,16 +96,16 @@ namespace txml {
       return;
    }
 
-   xml_comment::xml_comment( const xml_comment& copy ) : xml_node( eType::COMMENT ) {
-      value( copy.value() );
-   }
+   //   xml_comment::xml_comment( const xml_comment& copy ) : xml_node( eType::COMMENT ) {
+   //      value( copy.value() );
+   //   }
 
 
-   xml_comment& xml_comment::operator=( const xml_comment& from ) {
-      clear();
-      value( from.value() );
-      return *this;
-   }
+   //   xml_comment& xml_comment::operator=( const xml_comment& from ) {
+   //      //clear();
+   //      value( from.value() );
+   //      return *this;
+   //   }
 
    v_ret xml_comment::accept( visitor_base* visitor ) const {
       return visitor->visit( *this );

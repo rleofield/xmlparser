@@ -155,17 +155,17 @@ namespace txml {
       return next( vi + s.size() );
    }
 
-//   raw_buffer raw_buffer::operator++( int ) {
-//      _position++;
+   //   raw_buffer raw_buffer::operator++( int ) {
+   //      _position++;
 
-//      if( _position > _rawxml.end() ) {
-//         throw Xml_exception(
-//            eEx::buffer, msg_operator_plus_at_or_after_end );
-//      }
+   //      if( _position > _rawxml.end() ) {
+   //         throw Xml_exception(
+   //            eEx::buffer, msg_operator_plus_at_or_after_end );
+   //      }
 
-//      next100();
-//      return *this;
-//   }
+   //      next100();
+   //      return *this;
+   //   }
 
    void raw_buffer::advance( ptrdiff_t offset )const {
       auto diff = remainder();

@@ -138,7 +138,7 @@ namespace xmlinterface {
 
 
 
-      txml::xml_document const* document()const;
+      txml::xml_document* document()const;
 
    };
 

@@ -45,6 +45,12 @@ www.lug-ottobrunn.de
 
 #include "xml_declaration.h"
 #include "xml_document.h"
+
+#include "xml_comment.h"
+#include "xml_declaration.h"
+#include "xml_element.h"
+#include "xml_text.h"
+
 #include "xml_printer.h"
 #include "rawxml_position.h"
 
@@ -68,9 +74,9 @@ namespace txml {
    namespace {
 
       // http://de.wikipedia.org/wiki/Byte_Order_Mark
-      const char bom_utf8[3]     = {static_cast<char>(0xEF), static_cast<char>(0xBB), static_cast<char>(0xBF)};
-      const char bom_utf16_big_endian[2] = {static_cast<char>(0xFE), static_cast<char>(0xFF) };
-      const char bom_utf16_lower_endian[2] = {static_cast<char>(0xFF), static_cast<char>(0xFE) };
+      const char bom_utf8[3]     = {static_cast<char>( 0xEF ), static_cast<char>( 0xBB ), static_cast<char>( 0xBF )};
+      const char bom_utf16_big_endian[2] = {static_cast<char>( 0xFE ), static_cast<char>( 0xFF ) };
+      const char bom_utf16_lower_endian[2] = {static_cast<char>( 0xFF ), static_cast<char>( 0xFE ) };
 
 
       const string string_bom_utf8 = string( bom_utf8, sizeof( bom_utf8 ) );
@@ -172,16 +178,59 @@ namespace txml {
    }
 
 
-   xml_document::xml_document() : xml_node( xml_node::eType::DOC ) {
+   xml_document::xml_document() : xml_node( xml_node::eType::DOC ), nodes() {
    }
 
    xml_document::~xml_document() {
-      pointers.clear();
+
    }
 
-   tPointers xml_document::pointers;
 
 
+
+   xml_comment*  xml_document::comment_create( t_lfm const& lfmcIn ) {
+      xml_comment* p = xml_comment::create( lfmcIn );
+      nodes.add( p );
+      return p;
+
+   }
+   xml_comment*  xml_document::comment_create( ) {
+      xml_comment* p = comment_create( tlfm_ );
+      return p;
+
+   }
+
+   xml_element* xml_document::element_create( t_lfm const& lfmcIn, const std::string& value_ ) {
+      xml_element* p = xml_element::create( lfmcIn,  value_ );
+      nodes.add( p );
+      return p;
+
+   }
+
+   xml_element* xml_document::element_create( const std::string& value_ ) {
+      xml_element* p = element_create( tlfm_, value_ );
+      return p;
+   }
+
+   xml_text*  xml_document::text_create( t_lfm const& lfmcIn, const string& value_ ) {
+      xml_text* p = xml_text::create( lfmcIn ,  value_ );
+      nodes.add( p );
+      return p;
+   }
+
+   xml_text*  xml_document::text_create( const string& value_ ) {
+      return text_create( tlfm_, value_ );
+   }
+
+   xml_declaration* xml_document::declaration_create( t_lfm const& lfmcIn ) {
+      xml_declaration* p = xml_declaration::create( lfmcIn ) ;
+      nodes.add( p );
+      return p;
+
+   }
+   xml_declaration* xml_document::declaration_create( ) {
+      return declaration_create( tlfm_ );
+   }
 
 
    bool xml_document::parse_begin( string  const& l ) {
@@ -197,7 +246,7 @@ namespace txml {
       clear();
       // add space at end of file content,
       //  to prevent eof in buffer if parser is at end
-      raw_buffer pp( l + " ");
+      raw_buffer pp( l + " " );
 
       string w ;
 
@@ -214,22 +263,18 @@ namespace txml {
 
    void xml_document::clear() {
       xml_node::clear();
-
-      if( usePointerContainer ) {
-         size_t s = pointers.pointers.size();
-         pointers.clear();
-      }
+      nodes.clear_all();
    }
 
    bool xml_document::save( string const& filename ) const {
 
       bool pretty_print = true;
       std::vector<string> text;
-      serialize( text, "   ", pretty_print );
+      text = serialize_to_vector( "   ", pretty_print );
       bool overwrite = true;
 
       try {
-         rlf_txtrw::t_write_ascii()( filename, text, overwrite );
+         rlf_txtrw::t_write_text()( filename, text, overwrite );
       } catch( rlf_txtrw::bad_text_write& ex ) {
          string w =  ex.what();
          LOGT_ERROR( "ex: " + w );
@@ -244,43 +289,64 @@ namespace txml {
       string s ;
 
       xml_printer pr( indent );
-      if(  !pretty_print )
+
+      if( !pretty_print ) {
          pr.pretty_print_off();
+      }
+
       this->accept( &pr );
       s = _bom;
       s += pr.result();
       return move( s );
    }
 
-   void xml_document::serialize( list<string>& l, string indent,     bool pretty_print ) const {
-      string s = serialize(indent, pretty_print);
-      rlf_hstring::string_to_list( s, l, 0 );
+   list<string> xml_document::serialize_to_list( string indent,     bool pretty_print ) const {
+      string s = serialize( indent, pretty_print );
+      return rlf_hstring::string_to_list( s, 0 );
    }
 
-   void xml_document::serialize( vector<string>& v, string indent,     bool pretty_print ) const {
-      string s = serialize(indent,pretty_print);
+   vector<string> xml_document::serialize_to_vector( string indent,     bool pretty_print ) const {
+      string s = serialize( indent, pretty_print );
       char trim_ch = 0;
-      rlf_hstring::string_to_vector( s, v, trim_ch );
+      return rlf_hstring::string_to_vector( s,  trim_ch );
    }
 
 
    v_ret xml_document::accept( visitor_base* visitor ) const {
       v_ret ret = visitor->enter( *this );
 
-      string n;
+      //string n;
 
-      if( ret.recurse()) {
-         const xml_node* node = first_child();
+      if( ret.recurse() ) {
 
-         for( ; node != nullptr; node = node->next() ) {
-            n = node->value();
+         std::vector<xml_node*>  const& childs = getChilds();
 
-            ret = node->accept( visitor );
+         for( xml_node * n : childs ) {
+            //            ns = n->value();
+            //            LOGT_INFO( "typ:    " + typ );
+            //            LOGT_INFO( "parent: " + nname );
+            //            LOGT_INFO( "node:   " + n );
+            //            LOGT_INFO( "ntype:  " + to_string( node->_type ) );
+            //            LOGT_INFO( "path:   " +  static_cast<string>( node->lookuppath() ) );
+            //            LOGT_INFO( "childs: " +  rlf_hstring::toString( childs.size() ) );
+            ret = n->accept( visitor );
 
             if( ret.stop() ) {
                break;
             }
          }
+
+         //         const xml_node* node = first_child();
+
+         //         for( ; node != nullptr; node = node->next() ) {
+         //            n = node->value();
+
+         //            ret = node->accept( visitor );
+
+         //            if( ret.stop() ) {
+         //               break;
+         //            }
+         //         }
       }
 
       return visitor->exit( *this );

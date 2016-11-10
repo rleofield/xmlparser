@@ -56,17 +56,15 @@ namespace txml {
       visitor_base(),
       lookup_path(),
       remainder(),
-      _elementfound( nullptr )
-   {
-      lookup_path.from_string(key);
+      _elementfound( nullptr ) {
+      lookup_path.from_string( key );
    }
    element_locator::element_locator( path const& key ):
       visitor_base(),
       lookup_path(),
       remainder(),
-      _elementfound( nullptr )
-   {
-      lookup_path.from_string(key);
+      _elementfound( nullptr ) {
+      lookup_path.from_string( key );
    }
 
 
@@ -89,8 +87,8 @@ namespace txml {
 
       // search depth reached
       if( element.lookuppath().size() == lookup_path.size() ) {
-         if( keys_to_lookup.compareByElement(  keys_element ) ) {
-           // _value = element.unencoded_text();
+         if( keys_to_lookup.compareByElement( keys_element ) ) {
+            // _value = element.unencoded_text();
             //return v_ret::eType::STOP;;
          }
       }
@@ -102,7 +100,7 @@ namespace txml {
          return v_ret::eRet::STOP;;
       }
 
-      if( keys_to_lookup.points_to_attr()){
+      if( keys_to_lookup.points_to_attr() ) {
          _elementfound = nullptr;
          return v_ret::eRet::STOP;;
       }
@@ -110,12 +108,12 @@ namespace txml {
       //string lookupkey = lookupkeys;
       string a = element.attribute_by_path( lookup_path );
 
-//      if( !a.empty() ) {
-//         this->attr( a );
-//         xml_node const* n = element.lookuppath().last().node();
-//         _elementfound = const_cast<xml_element*>( dynamic_cast<xml_element const*>( n ) );
-//         return false;
-//      }
+      //      if( !a.empty() ) {
+      //         this->attr( a );
+      //         xml_node const* n = element.lookuppath().last().node();
+      //         _elementfound = const_cast<xml_element*>( dynamic_cast<xml_element const*>( n ) );
+      //         return false;
+      //      }
 
 
       return v_ret::eRet::RECURSE;

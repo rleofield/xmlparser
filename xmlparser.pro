@@ -16,9 +16,10 @@ QMAKE_CXXFLAGS_DEBUG += -Wunused-parameter
 
 QMAKE_CXXFLAGS_DEBUG += -Wwrite-strings
 QMAKE_CXXFLAGS_DEBUG += -Wno-unused-variable
+QMAKE_CXXFLAGS_DEBUG += -Wno-unused-function
 QMAKE_CXXFLAGS_DEBUG += -Wpedantic
 QMAKE_CXXFLAGS_DEBUG += -Wno-unused-but-set-variable
-QMAKE_CXXFLAGS_DEBUG += -Werror
+#QMAKE_CXXFLAGS_DEBUG += -Werror
 QMAKE_CXXFLAGS_DEBUG += -Wall
 QMAKE_CXXFLAGS_DEBUG += -Wcast-align
 QMAKE_CXXFLAGS_DEBUG += -Wcast-qual
@@ -59,7 +60,7 @@ QMAKE_CXXFLAGS_RELEASE += -Wno-unused-variable
 
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic
 QMAKE_CXXFLAGS_RELEASE += -Wno-unused-but-set-variable
-QMAKE_CXXFLAGS_RELEASE += -Werror
+#QMAKE_CXXFLAGS_RELEASE += -Werror
 QMAKE_CXXFLAGS_RELEASE += -Wall
 QMAKE_CXXFLAGS_RELEASE += -Wcast-align
 QMAKE_CXXFLAGS_RELEASE += -Wcast-qual
@@ -112,8 +113,7 @@ SOURCES += src/main.cpp \
     src/log/tLog.cpp \
     src/log/alloccheck.cpp \
     src/demo.cpp \
-    src/ubuntu32_create.cpp \
-    src/other_demo.cpp
+    src/ubuntu32_create.cpp
 
 
 HEADERS += \
@@ -153,7 +153,9 @@ HEADERS += \
     src/txtrw/wList.h \
     src/txtrw/rList.h \
     src/log/alloccheck.h \
-    src/examples.h
+    src/examples.h \
+    src/test/test_functions.h \
+    src/log/tLog_Category_A.h
 
 
 LIBS += -lpthread
@@ -170,6 +172,7 @@ INCLUDEPATH += $$PWD/src/parser
 INCLUDEPATH += $$PWD/src/parser/interface
 INCLUDEPATH += $$PWD/src/parser/src
 INCLUDEPATH += $$PWD/src/txtrw
+INCLUDEPATH += $$PWD/src/test
 
 LIBS = -lboost_system -lboost_filesystem
 

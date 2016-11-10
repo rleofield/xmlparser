@@ -60,7 +60,7 @@ namespace txml {
       _elementfound( nullptr ),
       _value(),
       _attr() {
-      _path.from_string(key);
+      _path.from_string( key );
    }
    xml_locator::xml_locator( path const& key ):
       visitor_base(),
@@ -69,7 +69,7 @@ namespace txml {
       _elementfound( nullptr ),
       _value(),
       _attr() {
-      _path.from_string(key);
+      _path.from_string( key );
    }
 
 

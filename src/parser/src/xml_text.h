@@ -44,7 +44,7 @@ www.lug-ottobrunn.de
 
 
 #include "xml_node.h"
-
+#include "tPointers.h"
 
 
 namespace txml {
@@ -79,13 +79,13 @@ namespace txml {
 
          return *this;
       }
+      static xml_text* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() ) ;
+      static xml_text* create( const std::string& value_ ) ;
 
    public:
 
       virtual ~xml_text() {}
 
-      static xml_text* create( t_lfm const& lfmcIn, const std::string& value_ = std::string() ) ;
-      static xml_text* create( const std::string& value_ ) ;
 
       void value( std::string const& v ); // set value
 
@@ -96,6 +96,7 @@ namespace txml {
       void parseText( std::string const& p );
 
       virtual v_ret accept( visitor_base* content ) const;
+      friend class xml_document;
 
    };
 

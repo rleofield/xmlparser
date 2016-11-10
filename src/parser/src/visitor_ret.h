@@ -55,21 +55,25 @@ namespace txml {
    class xml_text;
    class xml_comment;
 
-   class v_ret{
+   class v_ret {
 
-         public:
+   public:
 
-         DEFINE_ENUM_WITH_STRING_CONVERSIONS( eRet, ( RECURSE )( STOP ) );
-
-
+      DEFINE_ENUM_WITH_STRING_CONVERSIONS( eRet, ( RECURSE )( STOP ) );
 
 
-         v_ret(eRet et):r(et){}
-         bool recurse(){ return r == eRet::RECURSE; }
-         bool stop(){ return r == eRet::STOP; }
-      private:
-         eRet r;
-    };
+
+
+      v_ret( eRet et ): r( et ) {}
+      bool recurse() {
+         return r == eRet::RECURSE;
+      }
+      bool stop() {
+         return r == eRet::STOP;
+      }
+   private:
+      eRet r;
+   };
 
 
 

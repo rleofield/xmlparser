@@ -151,22 +151,22 @@ namespace txml {
          switch( length ) {
          case 4:
             --p;
-            *p = static_cast< char >(( ( input | BYTE_MARK ) & BYTE_MASK ));
+            *p = static_cast< char >( ( ( input | BYTE_MARK ) & BYTE_MASK ) );
             input >>= 6;
 
          case 3:
             --p;
-            *p = static_cast< char >(( ( input | BYTE_MARK ) & BYTE_MASK ));
+            *p = static_cast< char >( ( ( input | BYTE_MARK ) & BYTE_MASK ) );
             input >>= 6;
 
          case 2:
             --p;
-            *p = static_cast< char >(( ( input | BYTE_MARK ) & BYTE_MASK ));
+            *p = static_cast< char >( ( ( input | BYTE_MARK ) & BYTE_MASK ) );
             input >>= 6;
 
          case 1:
             --p;
-            *p = static_cast< char >(( input | FIRST_BYTE_MARK[length] ));
+            *p = static_cast< char >( ( input | FIRST_BYTE_MARK[length] ) );
          }
 
          return &buf[0];
@@ -337,7 +337,7 @@ namespace txml {
                return decode_utf( p1, encoding );
             }
 
-            string value( 1, static_cast< char >(  pos.value() ) ) ;
+            string value( 1, static_cast< char >( pos.value() ) ) ;
             pos.advance( 1 );
             return value;
          }
@@ -439,14 +439,13 @@ namespace txml {
       alloccheck::checked_delete( p );
    }
 
-   xml_text* xml_text::create( t_lfm const& lfmcIn, const string& value_ ) {
+   xml_text* xml_text::create( t_lfm const& lfmcIn,  const string& value_ ) {
       xml_text* p = new( lfmcIn ) xml_text( value_ );
-      xml_document::pointers.add( p );
       return p;
    }
 
    xml_text* xml_text::create( const string& value_ ) {
-      return create( tlfm_, value_ );
+      return create( tlfm_,  value_ );
    }
 
 
