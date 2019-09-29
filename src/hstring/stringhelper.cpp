@@ -474,7 +474,8 @@ namespace rlf_hstring {
 
 
    vector<string> split( string const& l, string const& delimiters, char trim_ch ) {
-      return tTokens( l, delimiters, trim_ch )();
+//      return tTokens( l, delimiters, trim_ch )();
+      return tokens( l, delimiters, trim_ch );
    }
    vector<string> split( string const& l, char delim, char trim_ch ) {
       string d( 1, delim );

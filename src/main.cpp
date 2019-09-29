@@ -105,7 +105,7 @@ int main() {
       //demo::write_simple_doc2();
 
       examples::ubuntu32_xml_demo();
-      //examples::ls_xml_demo();
+      examples::ls_xml_demo();
       // demo create xml file, please comment out unwanted tests
 
 

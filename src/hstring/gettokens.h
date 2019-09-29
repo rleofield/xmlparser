@@ -28,22 +28,9 @@
 
 namespace rlf_hstring {
 
-   class tTokens {
-      std::vector<std::string> _buffer;
-      tTokens( tTokens const& );
-      void operator=( tTokens const& );
-   public:
-      tTokens( const std::string& str, std::string const& delims = " ", char trim_ch = ' ' );
-      ~tTokens() {}
-      std::vector<std::string> operator()()const {
-         return std::move(_buffer);
-      }
-
-   };
+       std::vector<std::string>  tokens(const std::string& s, std::string const& delims, char trim_ch);
 
 } // end ns rlf_hstring
-
-
 
 
 #endif // GETTOKENS_H

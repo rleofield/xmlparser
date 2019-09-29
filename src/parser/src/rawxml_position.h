@@ -36,8 +36,6 @@ namespace txml {
 
    class raw_buffer {
 
-   public:
-
    private:
       vector8_t _rawxml;
       std::string next25( int2type<false> )const;

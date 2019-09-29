@@ -113,7 +113,12 @@ SOURCES += src/main.cpp \
     src/log/tLog.cpp \
     src/log/alloccheck.cpp \
     src/demo.cpp \
-    src/ubuntu32_create.cpp
+    src/ubuntu32_create.cpp \
+    src/CC_create.cpp \
+    src/eco_create.cpp \
+    src/ls_create.cpp \
+    src/OGL_create.cpp \
+    src/other_demo.cpp
 
 
 HEADERS += \
@@ -154,8 +159,7 @@ HEADERS += \
     src/txtrw/rList.h \
     src/log/alloccheck.h \
     src/examples.h \
-    src/test/test_functions.h \
-    src/log/tLog_Category_A.h
+    src/test/test_functions.h
 
 
 LIBS += -lpthread

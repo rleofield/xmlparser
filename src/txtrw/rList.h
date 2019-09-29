@@ -18,16 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------
 */
 
-
-#ifndef T_TEXT_READ_H
-#define T_TEXT_READ_H
+#ifndef RLF_T_TEXT_READ_H
+#define RLF_T_TEXT_READ_H
 
 
 /*! \file rList.h
 *  \brief class t_text_read, reads a text file to std::list
 *  \author Richard Albrecht
 */
-
 
 
 #include <fstream>
@@ -40,8 +38,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 namespace rlf_txtrw {
-
-
 
    namespace rhelper {
       const std::string marker = "%s";
@@ -59,25 +55,15 @@ namespace rlf_txtrw {
 
          return ret;
       }
-
       inline std::string replace( std::string const& msg, std::string const& s0 = "" ) {
-
          if( s0.size() > 0 ) {
             return FindAndReplace( msg, rhelper::marker, s0 );
          }
-
          return msg;
-
       }
-
-
-      inline std::string clip( std::string const& s, size_t pos ) {
-         return s.substr( 0, pos ) ;
-      }
-
-
-
-
+//      std::string clip( std::string const& s, size_t pos ) {
+//         return s.substr( 0, pos ) ;
+//      }
    }
 
    namespace err {
@@ -107,14 +93,6 @@ namespace rlf_txtrw {
    } // end of ns err
 
 
-   /*! bad_text_read
-   \param [in] msg  Message
-   */
-   class bad_text_read: public std::runtime_error {
-   public:
-      bad_text_read( const std::string& msg )
-         : std::runtime_error( msg ) { }
-   };
 
 
 
@@ -201,24 +179,24 @@ namespace rlf_txtrw {
       t_text_read_string& operator= ( const t_text_read_string& in ) = delete;
       t_text_read_string( const t_text_read_string& in ) = delete;
       ~t_text_read_string() {}
-
+private:
       void operator()( const std::string& filename, std::string& str )  {
          _filename = filename;
          operator()( str );
       }
-
+private:
       void operator()( std::string& str )  {
 
          if( !err::file_exists_r( _filename ) ) {
             std::string s = err::file_not_exists( _filename );
-            throw bad_text_read( s );
+            throw std::runtime_error( s );
          }
 
          std::ifstream fp( _filename.c_str() );
 
          if( !fp.is_open() ) {
             std::string s = err::read_file( _filename );
-            throw bad_text_read( s );
+            throw std::runtime_error( s );
          }
 
          while( fp.good() ) {
@@ -229,7 +207,7 @@ namespace rlf_txtrw {
                // DOS & Windows: \r\n 0D0A (hex), 13,10 (decimal)
                // Unix & Mac OS X: \n, 0A, 10
                // Macintosh (OS 9): \r, 0D, 13
-               // replace windows /r to ;inux \n
+               // replace windows /r to Linux \n
                if( temp.back() == 0x0d ){
                   temp.back() = 0x0a;
                }
@@ -237,16 +215,16 @@ namespace rlf_txtrw {
             } else {
                if( !fp.eof() ) {
                   std::string s = err::read_file( _filename );
-                  throw bad_text_read( s );
+                  throw std::runtime_error( s );
                }
             }
          }
       }
-
+public:
       operator std::string () {
          std::string lines;
          *this = lines;
-         return std::move(lines);
+         return lines;
       }
    private:
       t_text_read_string& operator=( std::string& lines )  {
@@ -257,33 +235,31 @@ namespace rlf_txtrw {
 
    };
 
+   template< typename T >
+   class text_read_t  {
+      text_read_t& operator= ( const text_read_t& in );
+      text_read_t( const text_read_t& in );
 
-   class t_text_read  {
-
-      std::string _filename = std::string();
 
    public:
 
-      //t_text_read() = default;
-      t_text_read( const std::string& filename ): _filename( filename ) {}
-      t_text_read& operator= ( const t_text_read& in ) = delete;
-      t_text_read( const t_text_read& in ) = delete;
-      ~t_text_read() {}
+      text_read_t() = default;
+      ~text_read_t() {}
 
-      void operator()( const std::string& filename, std::vector<std::string>& lines )  {
-         _filename = filename;
+      T operator()( const std::string& filename )  {
          if( !err::file_exists_r( filename ) ) {
             std::string s = err::file_not_exists( filename );
-            throw bad_text_read( s );
+            throw std::runtime_error( s );
          }
 
          std::ifstream fp( filename.c_str() );
 
          if( !fp.is_open() ) {
             std::string s = err::read_file( filename );
-            throw bad_text_read( s );
+            throw std::runtime_error( s );
          }
 
+         T lines;
          while( !fp.eof() ) {
             std::string temp;
             getline( fp, temp );
@@ -293,56 +269,59 @@ namespace rlf_txtrw {
             } else {
                if( !fp.eof() ) {
                   std::string s = err::read_file( filename );
-                  throw bad_text_read( s );
+                  throw std::runtime_error( s );
                }
             }
          }
+         return lines;
       }
-      operator std::vector<std::string> () {
-         std::vector<std::string> lines ;
-         *this = lines;
-         return std::move(lines);
-      }
-   private:
-      t_text_read& operator=( std::vector<std::string>& lines )  {
-         operator()(_filename,lines);
-         return *this;
-      }
-
 
    };
 
-   // converts the output list to one string, with linebreaks
-   //   inline std::string toString( const std::list<std::string>& lines  ) {
-   //      const std::string sep = "\n";
-   //      std::string s;
+typedef text_read_t< std::vector<std::string>> aaa;
 
-   //      for( auto temp : lines ) {
-   //         if( !s.empty() ) {
-   //            s += sep;
-   //            s += temp;
-   //         } else {
-   //            s += temp;
-   //         }
-   //      }
+   class t_text_read  {
+      t_text_read& operator= ( const t_text_read& in );
+      t_text_read( const t_text_read& in );
 
-   //      return s;
-   //   }
-   //   inline std::string toString( const std::vector<std::string>& lines  ) {
-   //      const std::string sep = "\n";
-   //      std::string s;
 
-   //      for( auto temp : lines ) {
-   //         if( !s.empty() ) {
-   //            s += sep;
-   //            s += temp;
-   //         } else {
-   //            s += temp;
-   //         }
-   //      }
+   public:
 
-   //      return s;
-   //   }
+      t_text_read() = default;
+      ~t_text_read() {}
+
+      std::vector<std::string> operator()( const std::string& filename )  {
+         if( !err::file_exists_r( filename ) ) {
+            std::string s = err::file_not_exists( filename );
+            throw std::runtime_error( s );
+         }
+
+         std::ifstream fp( filename.c_str() );
+
+         if( !fp.is_open() ) {
+            std::string s = err::read_file( filename );
+            throw std::runtime_error( s );
+         }
+
+         std::vector<std::string> lines;
+         while( !fp.eof() ) {
+            std::string temp;
+            getline( fp, temp );
+
+            if( !fp.fail() ) {
+               lines.push_back( temp );
+            } else {
+               if( !fp.eof() ) {
+                  std::string s = err::read_file( filename );
+                  throw std::runtime_error( s );
+               }
+            }
+         }
+         return lines;
+      }
+
+   };
+
 
 
 }// end of namespace

@@ -162,10 +162,9 @@ namespace txml {
       void loadFile( string&  l, string const& name ) {
          try {
             l = rlf_txtrw::t_text_read_string( name );
-         } catch( rlf_txtrw::bad_text_read& ex ) {
+         } catch( std::runtime_error& ex ) {
             string msg = string( "error reading XML file: " ) + ex.what();
-            throw Xml_exception(
-               eEx::read, msg );
+            throw Xml_exception( eEx::read, msg )
          }
       }
    }
@@ -178,7 +177,7 @@ namespace txml {
       text.push_back( "<"  + root + ">" );
       text.push_back( "</" + root + ">" );
       bool overwrite = true;
-      rlf_txtrw::t_write_text()( name, text, overwrite );
+      rlf_txtrw::t_write_text( name, text, overwrite );
    }
 
    void tXmlInterfaceImpl::parse( string const& fn ) {
@@ -734,7 +733,7 @@ namespace txml {
       auto v = Keys();
       std::vector<string> l( v.begin(), v.end() );
       bool overwrite = true;
-      rlf_txtrw::t_write_text()( fn, l, overwrite );
+      rlf_txtrw::t_write_text( fn, l, overwrite );
    }
 
 
@@ -780,7 +779,7 @@ namespace txml {
       }
 
       bool overwrite = true;
-      rlf_txtrw::t_write_text()( fn, l, overwrite );
+      rlf_txtrw::t_write_text( fn, l, overwrite );
    }
 
    namespace {
@@ -890,7 +889,7 @@ namespace txml {
       text.push_back( "" );
 
       bool overwrite = true;
-      rlf_txtrw::t_write_text()( fn_out, text, overwrite );
+      rlf_txtrw::t_write_text( fn_out, text, overwrite );
 
       l.push_back( "xmlinterface::tXmlInterface instance;" );
       l.push_back( "instance.parse( xmlTestOut );" );
@@ -903,7 +902,7 @@ namespace txml {
       }
 
       l.push_back( "instance.save();" );
-      rlf_txtrw::t_write_text()( filename, l, overwrite );
+      rlf_txtrw::t_write_text( filename, l, overwrite );
    }
 
    void tXmlInterfaceImpl::create( path const& key, string const& value ) {

@@ -72,7 +72,7 @@ namespace examples {
          t.parse( xmlTest );
 
          // save to disk with implicit pretty printer
-         t.save( "pretty_print.xml" );
+         t.save( "ef" );
 
          // generate the keylist of all nodes as const string
          t.print_creator( xmlKeysOut, xmlTestOut );
@@ -243,8 +243,8 @@ namespace examples {
          bool overwrite = true;
 
          try {
-            rlf_txtrw::t_write_text()( "ubuntu32_dump.txt", text, overwrite );
-         } catch( rlf_txtrw::bad_text_write& ex ) {
+            rlf_txtrw::t_write_text( "ubuntu32_dump.txt", text, overwrite );
+         } catch( std::runtime_error& ex ) {
             string w =  ex.what();
             LOGT_ERROR( "ex: " + w );
             return ;

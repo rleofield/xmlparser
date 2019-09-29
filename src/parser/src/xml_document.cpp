@@ -41,6 +41,9 @@ www.lug-ottobrunn.de
 
 #include <boost/algorithm/string.hpp>
 
+#include "rList.h"
+#include "wList.h"
+
 #include "stringhelper.h"
 
 #include "xml_declaration.h"
@@ -56,8 +59,6 @@ www.lug-ottobrunn.de
 
 #include "xml_utl.h"
 #include "xml_exception.h"
-#include "rList.h"
-#include "wList.h"
 #include "alloccheck.h"
 #include "tLog_Category_default.h"
 
@@ -172,7 +173,7 @@ namespace txml {
       }
 
       if( first_child() == nullptr ) {
-         throw Xml_exception( eEx::parse, msg_document );
+         throw Xml_exception( eEx::parse, msg_document )
       }
 
    }
@@ -274,8 +275,8 @@ namespace txml {
       bool overwrite = true;
 
       try {
-         rlf_txtrw::t_write_text()( filename, text, overwrite );
-      } catch( rlf_txtrw::bad_text_write& ex ) {
+         rlf_txtrw::t_write_text( filename, text, overwrite );
+      } catch( std::runtime_error& ex ) {
          string w =  ex.what();
          LOGT_ERROR( "ex: " + w );
          return false;

@@ -234,7 +234,7 @@ namespace txml {
    }
 
    uint8_t raw_buffer::value()const {
-      return *_position;
+      return static_cast<uint8_t>(*_position);
    }
 
 }

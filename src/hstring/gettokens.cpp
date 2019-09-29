@@ -32,26 +32,32 @@
 #include "stringhelper.h"
 
 using namespace std;
+using std::vector;
 
 namespace rlf_hstring {
 
-   tTokens::tTokens( const string& s, string const& delims, char trim_ch ): _buffer() {
-      string temp = s;
-      size_t pos = temp.find_first_of( delims );
 
-      while( pos != string::npos ) {
-         string t = trim( temp.substr( 0, pos ), trim_ch );
 
-         if( t.length() > 0 ) {
-            _buffer.push_back( t );
-         }
+        vector<std::string>  tokens(const string& s, string const& delims, char trim_ch){
+            vector<std::string> _buffer;
+            string temp = s;
+            size_t pos = temp.find_first_of( delims );
 
-         temp = trim( temp.substr( pos + 1 ), trim_ch );
-         pos = temp.find_first_of( delims );
-      }
+            while( pos != string::npos ) {
+                string t = trim( temp.substr( 0, pos ), trim_ch );
 
-      _buffer.push_back( trim( temp, trim_ch ) );
-   }
+                if( t.length() > 0 ) {
+                    _buffer.push_back( t );
+                }
+
+                temp = trim( temp.substr( pos + 1 ), trim_ch );
+                pos = temp.find_first_of( delims );
+            }
+
+            _buffer.push_back( trim( temp, trim_ch ) );
+            return _buffer;
+        }
+
 
 } // end ns rlf_hstring
 

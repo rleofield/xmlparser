@@ -139,13 +139,10 @@ namespace txml {
          }
 
          const uint8_t BYTE_MASK = 0xBF;
-
          const uint8_t BYTE_MARK = 0x80;
-
          const uint8_t FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
          vector<char> buf( 32 );
-
          char* p = &buf[0] + length;
 
          switch( length ) {
@@ -153,17 +150,17 @@ namespace txml {
             --p;
             *p = static_cast< char >( ( ( input | BYTE_MARK ) & BYTE_MASK ) );
             input >>= 6;
-
+            BOOST_FALLTHROUGH;
          case 3:
             --p;
             *p = static_cast< char >( ( ( input | BYTE_MARK ) & BYTE_MASK ) );
             input >>= 6;
-
+            BOOST_FALLTHROUGH;
          case 2:
             --p;
             *p = static_cast< char >( ( ( input | BYTE_MARK ) & BYTE_MASK ) );
             input >>= 6;
-
+            BOOST_FALLTHROUGH;
          case 1:
             --p;
             *p = static_cast< char >( ( input | FIRST_BYTE_MARK[length] ) );
@@ -333,7 +330,7 @@ namespace txml {
                   return string();
                }
 
-               pos.advance( p1.size() );
+               pos.advance( static_cast<ptrdiff_t>(p1.size()) );
                return decode_utf( p1, encoding );
             }
 
@@ -372,7 +369,7 @@ namespace txml {
 
          while( buffer.running() < buffer.end() ) {
             if( isspace( buffer.value() ) > 0 ) {
-               text += buffer.value();
+               text += static_cast<char>(buffer.value());
                buffer.advance( 1 );
                continue;
             }
@@ -455,7 +452,7 @@ namespace txml {
    }
 
    void xml_text::parse( raw_buffer& ) {
-      throw Xml_exception( eEx::parse, msg_parse_text );
+      throw Xml_exception( eEx::parse, msg_parse_text )
    }
 
    void xml_text::value( std::string const& v ) { // set value
