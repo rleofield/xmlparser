@@ -6,6 +6,7 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -gdwarf-3
 
 
+
 QMAKE_CXXFLAGS_DEBUG += -O0
 QMAKE_CXXFLAGS_DEBUG += -std=c++0x
 QMAKE_CXXFLAGS_DEBUG += -Wparentheses
