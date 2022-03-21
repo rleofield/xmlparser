@@ -1,7 +1,7 @@
 xmlparser1
 ==========
 
-usage of libxmlparser1
+xmlparser adapted from Tiny-Xml
 
 
 
